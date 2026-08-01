@@ -1,0 +1,51 @@
+/* MiSans Latin — fonte base do Dott (família completa) */
+
+@font-face {
+  font-family: 'MiSans Latin';
+  src: url('./fonts/MiSansLatin-Thin.otf') format('opentype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MiSans Latin';
+  src: url('./fonts/MiSansLatin-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MiSans Latin';
+  src: url('./fonts/MiSansLatin-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MiSans Latin';
+  src: url('./fonts/MiSansLatin-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MiSans Latin';
+  src: url('./fonts/MiSansLatin-Semibold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MiSans Latin';
+  src: url('./fonts/MiSansLatin-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MiSans Latin';
+  src: url('./fonts/MiSansLatin-Heavy.otf') format('opentype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}

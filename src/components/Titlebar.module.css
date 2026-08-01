@@ -1,0 +1,75 @@
+.titlebar {
+  height: 28px;
+  flex-shrink: 0;
+  background: var(--desk);
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 16px;
+  position: relative;
+  z-index: 200;
+}
+
+.drag {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  cursor: default;
+}
+
+.logo {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--fg);
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.btn {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: var(--r-sm);
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--fg2);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background var(--dur-base), color var(--dur-base);
+}
+.btn:hover { background: var(--surface3); color: var(--fg); }
+.btnActive { background: var(--accent-s); color: var(--accent); }
+.btnActive:hover { background: var(--accent-s); color: var(--accent); }
+.btn.accent { color: var(--accent); border: 1px solid var(--accent); }
+.btn.accent:hover { background: var(--accent-s); }
+
+/* Controles de janela — flush no canto, estilo Windows minimalista */
+.winctl {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  margin-left: 8px;
+}
+.wbtn {
+  width: 40px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: var(--fg2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--dur-micro), color var(--dur-micro);
+}
+.wbtn:hover { background: var(--surface3); color: var(--fg); }
+.wclose:hover { background: #e04040; color: #fff; }

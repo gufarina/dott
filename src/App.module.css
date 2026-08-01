@@ -1,0 +1,150 @@
+.app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--desk);
+}
+
+/* "Mesa": fundo escuro com respiro, onde os 3 shells flutuam separados. */
+.body {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  overflow: hidden;
+  background: var(--desk);
+}
+
+/* Shell = container proprio (canto squircle, borda, destacado da mesa). */
+.panelLeft {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-shell);
+  --sq-r: var(--r-shell);
+  -webkit-mask-image: paint(squircle);
+  mask-image: paint(squircle);
+  overflow: hidden;
+  transition: width .2s ease;
+}
+
+.panelRight {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-shell);
+  --sq-r: var(--r-shell);
+  -webkit-mask-image: paint(squircle);
+  mask-image: paint(squircle);
+  overflow: hidden;
+  transition: width .2s ease;
+}
+
+.central {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  position: relative;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-shell);
+  --sq-r: var(--r-shell);
+  -webkit-mask-image: paint(squircle);
+  mask-image: paint(squircle);
+}
+
+.viewArea {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.viewMotion {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Card fantasma seguindo o cursor durante o drag */
+.dragGhost {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 240px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--accent);
+  box-shadow: 0 12px 30px rgba(0,0,0,.5), 0 0 0 4px var(--accent-s);
+  cursor: grabbing;
+  transform: rotate(-1.5deg);
+}
+.dragGhostType {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--accent);
+}
+.dragGhostText {
+  font-size: 13px;
+  color: var(--fg);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.canvasLayout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.categoryBody {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Drop overlay — visible only while a file is dragged over the window */
+.dropOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  border: 2px dashed var(--accent);
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.dropOverlayLabel {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  padding: 16px 32px;
+  background: var(--accent-s);
+  border-radius: 8px;
+  pointer-events: none;
+}

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dott — seu segundo cérebro, offline</title>
+<style>
+/* ── MiSans Latin (fonte real do app) ───────────────────────────────── */
+@font-face{ font-family:'MiSans Latin'; src:url('../src/styles/fonts/MiSansLatin-Light.otf') format('opentype'); font-weight:300; font-display:swap; }
+@font-face{ font-family:'MiSans Latin'; src:url('../src/styles/fonts/MiSansLatin-Regular.otf') format('opentype'); font-weight:400; font-display:swap; }
+@font-face{ font-family:'MiSans Latin'; src:url('../src/styles/fonts/MiSansLatin-Medium.otf') format('opentype'); font-weight:500; font-display:swap; }
+@font-face{ font-family:'MiSans Latin'; src:url('../src/styles/fonts/MiSansLatin-Semibold.otf') format('opentype'); font-weight:600; font-display:swap; }
+@font-face{ font-family:'MiSans Latin'; src:url('../src/styles/fonts/MiSansLatin-Bold.otf') format('opentype'); font-weight:700; font-display:swap; }
+@font-face{ font-family:'MiSans Latin'; src:url('../src/styles/fonts/MiSansLatin-Heavy.otf') format('opentype'); font-weight:800; font-display:swap; }
+
+:root{
+  --bg:#0d0d10; --desk:#060609; --surface:#141417; --surface2:#1a1a1e; --surface3:#222228;
+  --border:#26262c; --border2:#2e2e36;
+  --fg:#e8e8ec; --fg2:#aeaec2; --fg3:#8c8ca6;
+  --accent:#e05a38; --accent-s:rgba(224,90,56,.12);
+  --q-p:#e04040; --q-a:#4a8fd9; --q-r:#3db37a; --q-ar:#8a8aa2;
+  --r-sm:9px; --r-md:12px; --r-lg:16px; --r-xl:20px; --r-2xl:26px; --r-full:9999px;
+  --font:'MiSans Latin',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  --ease-spring:cubic-bezier(0.34,1.4,0.5,1);
+  --maxw:1120px;
+}
+*{ margin:0; padding:0; box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  font-family:var(--font); background:var(--bg); color:var(--fg);
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  line-height:1.5; overflow-x:hidden;
+}
+::selection{ background:var(--accent); color:#fff; }
+a{ color:inherit; text-decoration:none; }
+.wrap{ max-width:var(--maxw); margin:0 auto; padding:0 28px; }
+
+/* ── Grão / textura de fundo sutil ──────────────────────────────────── */
+body::before{
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(224,90,56,.07), transparent 70%),
+    radial-gradient(800px 500px at 90% 110%, rgba(74,143,217,.05), transparent 70%);
+}
+
+/* ── Nav ────────────────────────────────────────────────────────────── */
+nav{
+  position:fixed; top:0; left:0; right:0; z-index:50;
+  backdrop-filter:blur(14px); background:rgba(13,13,16,.55);
+  border-bottom:1px solid transparent; transition:border-color .3s, background .3s;
+}
+nav.scrolled{ border-bottom-color:var(--border); background:rgba(13,13,16,.82); }
+nav .wrap{ display:flex; align-items:center; justify-content:space-between; height:64px; }
+.brand{ display:flex; align-items:flex-end; gap:5px; font-weight:800; font-size:20px; letter-spacing:-.02em; }
+.brand .dot{ width:6px; height:6px; border-radius:var(--r-full); background:var(--accent); margin-bottom:5px; }
+.nav-links{ display:flex; align-items:center; gap:30px; font-size:14px; color:var(--fg2); font-weight:500; }
+.nav-links a{ transition:color .2s; }
+.nav-links a:hover{ color:var(--fg); }
+.btn{
+  display:inline-flex; align-items:center; gap:9px; font-family:var(--font); font-weight:600;
+  font-size:14px; padding:11px 20px; border-radius:var(--r-full); border:1px solid transparent;
+  cursor:pointer; transition:transform .18s var(--ease-spring), background .2s, box-shadow .25s;
+}
+.btn-primary{ background:var(--accent); color:#fff; box-shadow:0 6px 22px rgba(224,90,56,.28); }
+.btn-primary:hover{ transform:translateY(-2px); box-shadow:0 10px 30px rgba(224,90,56,.4); }
+.btn-ghost{ background:transparent; color:var(--fg); border-color:var(--border2); }
+.btn-ghost:hover{ background:var(--surface2); border-color:var(--fg3); }
+.nav-links .btn{ padding:9px 18px; }
+
+/* ── Hero ───────────────────────────────────────────────────────────── */
+header{ position:relative; z-index:1; padding:150px 0 90px; text-align:center; }
+.eyebrow{
+  display:inline-flex; align-items:center; gap:9px; font-size:12.5px; font-weight:600;
+  color:var(--fg2); letter-spacing:.04em; text-transform:uppercase;
+  border:1px solid var(--border2); background:var(--surface); padding:7px 15px;
+  border-radius:var(--r-full); margin-bottom:34px;
+}
+.eyebrow .live{ width:7px; height:7px; border-radius:var(--r-full); background:var(--q-r); box-shadow:0 0 0 0 rgba(61,179,122,.5); animation:pulse 2.4s infinite; }
+@keyframes pulse{ 0%{ box-shadow:0 0 0 0 rgba(61,179,122,.45);} 70%{ box-shadow:0 0 0 8px rgba(61,179,122,0);} 100%{ box-shadow:0 0 0 0 rgba(61,179,122,0);} }
+
+h1{ font-size:clamp(40px,6.4vw,74px); font-weight:800; letter-spacing:-.035em; line-height:1.02; margin-bottom:24px; }
+h1 .grad{ color:var(--accent); }
+.lede{ font-size:clamp(17px,2.1vw,21px); color:var(--fg2); max-width:640px; margin:0 auto 40px; font-weight:400; line-height:1.55; }
+.hero-cta{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+.btn-lg{ padding:15px 28px; font-size:15px; }
+.hero-note{ margin-top:20px; font-size:13px; color:var(--fg3); display:flex; gap:18px; justify-content:center; flex-wrap:wrap; }
+.hero-note span{ display:inline-flex; align-items:center; gap:6px; }
+.hero-note svg{ width:14px; height:14px; stroke:var(--q-r); }
+
+/* ── Logo animado "Convergência PARA" (fiel ao BootLoader do app) ───── */
+.logo-stage{ position:relative; width:132px; height:132px; margin:0 auto 44px; }
+.logo-glow{ position:absolute; inset:-40%; border-radius:50%;
+  background:radial-gradient(circle, rgba(224,90,56,.22), transparent 62%); animation:glowpulse 3.8s ease-in-out infinite; }
+@keyframes glowpulse{ 0%,100%{ transform:scale(.9); opacity:.7;} 50%{ transform:scale(1.15); opacity:1;} }
+.spin{ position:absolute; inset:0; animation:bl-spin 7s linear infinite; }
+.arm{ position:absolute; inset:0; display:flex; justify-content:center; }
+.arm i{ width:19px; height:19px; border-radius:var(--r-full); margin-top:1px; animation:bl-converge 1.9s ease-in-out infinite; }
+.arm:nth-child(1){ transform:rotate(0deg); }   .arm:nth-child(1) i{ background:var(--q-p); }
+.arm:nth-child(2){ transform:rotate(90deg); }  .arm:nth-child(2) i{ background:var(--q-a); animation-delay:.12s; }
+.arm:nth-child(3){ transform:rotate(180deg); } .arm:nth-child(3) i{ background:var(--q-r); animation-delay:.24s; }
+.arm:nth-child(4){ transform:rotate(270deg); } .arm:nth-child(4) i{ background:var(--q-ar); animation-delay:.36s; }
+.core{ position:absolute; top:50%; left:50%; width:21px; height:21px; margin:-10.5px 0 0 -10.5px;
+  border-radius:var(--r-full); background:var(--accent); box-shadow:0 0 26px var(--accent-s); animation:bl-breathe 1.9s ease-in-out infinite; }
+@keyframes bl-spin{ to{ transform:rotate(360deg); } }
+@keyframes bl-converge{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(44px);} }
+@keyframes bl-breathe{ 0%,100%{ transform:scale(.86);} 50%{ transform:scale(1.12);} }
+
+/* ── Reveal on scroll ───────────────────────────────────────────────── */
+.reveal{ opacity:0; transform:translateY(26px); transition:opacity .7s ease, transform .7s var(--ease-spring); }
+.reveal.in{ opacity:1; transform:none; }
+
+/* ── Sections ───────────────────────────────────────────────────────── */
+section{ position:relative; z-index:1; padding:88px 0; }
+.sec-head{ text-align:center; max-width:660px; margin:0 auto 56px; }
+.kicker{ font-size:12.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:14px; }
+h2{ font-size:clamp(28px,4vw,42px); font-weight:800; letter-spacing:-.03em; line-height:1.08; margin-bottom:16px; }
+.sec-head p{ color:var(--fg2); font-size:17px; line-height:1.55; }
+
+/* pilares */
+.pillars{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+.pillar{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r-2xl); padding:30px 26px; transition:transform .3s var(--ease-spring), border-color .3s, background .3s; }
+.pillar:hover{ transform:translateY(-4px); border-color:var(--border2); background:var(--surface2); }
+.pill-ic{ width:48px; height:48px; border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; margin-bottom:20px; border:1px solid var(--border2); }
+.pill-ic svg{ width:24px; height:24px; }
+.pillar h3{ font-size:18px; font-weight:700; margin-bottom:9px; letter-spacing:-.01em; }
+.pillar p{ color:var(--fg2); font-size:14.5px; line-height:1.6; }
+
+/* captura demo */
+.split{ display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center; }
+.split.rev{ direction:rtl; } .split.rev>*{ direction:ltr; }
+.feat-txt h2{ text-align:left; }
+.feat-txt .kicker{ text-align:left; }
+.feat-txt>p{ color:var(--fg2); font-size:16.5px; line-height:1.6; margin-bottom:24px; }
+.feat-list{ list-style:none; display:flex; flex-direction:column; gap:14px; }
+.feat-list li{ display:flex; gap:13px; align-items:flex-start; font-size:15px; color:var(--fg); }
+.feat-list .chk{ flex:none; width:22px; height:22px; border-radius:var(--r-full); background:var(--accent-s); display:flex; align-items:center; justify-content:center; margin-top:1px; }
+.feat-list .chk svg{ width:13px; height:13px; stroke:var(--accent); }
+.feat-list b{ font-weight:600; } .feat-list span{ color:var(--fg2); }
+kbd{ font-family:var(--font); font-size:12.5px; font-weight:600; background:var(--surface3); border:1px solid var(--border2); border-bottom-width:2px; border-radius:7px; padding:3px 8px; color:var(--fg); }
+
+/* mock app frame */
+.mock{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r-2xl); overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.55); }
+.mock-bar{ height:38px; background:var(--surface2); border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 14px; gap:7px; }
+.mock-bar i{ width:11px; height:11px; border-radius:var(--r-full); background:var(--surface3); }
+.mock-bar .title{ margin-left:12px; font-size:12.5px; color:var(--fg3); font-weight:500; display:flex; align-items:center; gap:5px; }
+.mock-bar .title .d{ width:5px; height:5px; border-radius:var(--r-full); background:var(--accent); }
+.mock-body{ padding:22px; }
+
+/* quick capture widget mock */
+.qc{ background:var(--surface2); border:1px solid var(--border2); border-radius:var(--r-lg); padding:16px 18px; box-shadow:var(--shadow); }
+.qc-top{ display:flex; align-items:center; gap:9px; font-size:12.5px; color:var(--fg3); margin-bottom:12px; }
+.qc-top .d{ width:7px; height:7px; border-radius:var(--r-full); background:var(--accent); animation:bl-breathe 1.9s ease-in-out infinite; }
+.qc-input{ font-size:15.5px; color:var(--fg); min-height:24px; }
+.qc-input .cursor{ display:inline-block; width:2px; height:18px; background:var(--accent); margin-left:1px; vertical-align:-3px; animation:blink 1s step-end infinite; }
+@keyframes blink{ 50%{ opacity:0; } }
+.qc-meta{ margin-top:14px; padding-top:13px; border-top:1px solid var(--border); display:flex; justify-content:space-between; font-size:12px; color:var(--fg3); }
+.qc-meta .cap{ color:var(--accent); font-weight:600; }
+
+/* PARA quadrants */
+.para-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; max-width:760px; margin:0 auto; }
+.quad{ background:var(--surface); border:1px solid var(--border); border-left-width:3px; border-radius:var(--r-lg); padding:22px 24px; transition:transform .3s var(--ease-spring), background .3s; cursor:default; }
+.quad:hover{ transform:translateY(-3px); background:var(--surface2); }
+.quad .qh{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.quad .qdot{ width:11px; height:11px; border-radius:var(--r-full); }
+.quad .ql{ font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--fg3); }
+.quad h4{ font-size:17px; font-weight:700; margin-bottom:6px; }
+.quad p{ font-size:14px; color:var(--fg2); line-height:1.55; }
+.quad.p{ border-left-color:var(--q-p); } .quad.p .qdot{ background:var(--q-p); }
+.quad.a{ border-left-color:var(--q-a); } .quad.a .qdot{ background:var(--q-a); }
+.quad.r{ border-left-color:var(--q-r); } .quad.r .qdot{ background:var(--q-r); }
+.quad.ar{ border-left-color:var(--q-ar); } .quad.ar .qdot{ background:var(--q-ar); }
+
+/* constelação canvas */
+.constel{ position:relative; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-2xl); overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.55); }
+#constelCanvas{ display:block; width:100%; height:340px; }
+
+/* privacy band */
+.privacy{ background:linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+.privacy .wrap{ text-align:center; }
+.priv-row{ display:flex; justify-content:center; gap:44px; flex-wrap:wrap; margin-top:36px; }
+.priv-item{ display:flex; flex-direction:column; align-items:center; gap:10px; max-width:180px; }
+.priv-item .pic{ width:52px; height:52px; border-radius:var(--r-full); border:1px solid var(--border2); background:var(--surface2); display:flex; align-items:center; justify-content:center; }
+.priv-item .pic svg{ width:24px; height:24px; stroke:var(--accent); }
+.priv-item b{ font-size:15px; font-weight:600; }
+.priv-item span{ font-size:13px; color:var(--fg3); line-height:1.45; }
+
+/* final CTA */
+.final{ text-align:center; padding:110px 0; }
+.final h2{ margin-bottom:18px; }
+.final p{ color:var(--fg2); font-size:18px; max-width:520px; margin:0 auto 36px; }
+
+/* footer */
+footer{ border-top:1px solid var(--border); padding:44px 0; position:relative; z-index:1; }
+footer .wrap{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:18px; }
+.foot-l{ display:flex; align-items:center; gap:14px; color:var(--fg3); font-size:13px; }
+.foot-r{ font-size:13px; color:var(--fg3); }
+.foot-r b{ color:var(--fg2); font-weight:600; }
+
+/* responsivo */
+@media (max-width:860px){
+  .pillars{ grid-template-columns:1fr; }
+  .split{ grid-template-columns:1fr; gap:34px; }
+  .split.rev{ direction:ltr; }
+  .para-grid{ grid-template-columns:1fr; }
+  .nav-links a:not(.btn){ display:none; }
+  header{ padding:120px 0 70px; }
+}
+@media (prefers-reduced-motion:reduce){
+  .spin,.arm i,.core,.logo-glow,.qc-top .d{ animation:none; }
+  .reveal{ transition:none; opacity:1; transform:none; }
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <div class="brand">Dott<span class="dot"></span></div>
+    <div class="nav-links">
+      <a href="#captura">Captura</a>
+      <a href="#para">PARA</a>
+      <a href="#constelacao">Constelação</a>
+      <a href="#privacidade">Privacidade</a>
+      <a href="#baixar" class="btn btn-primary">Baixar grátis</a>
+    </div>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap">
+    <div class="logo-stage">
+      <div class="logo-glow"></div>
+      <div class="spin">
+        <span class="arm"><i></i></span>
+        <span class="arm"><i></i></span>
+        <span class="arm"><i></i></span>
+        <span class="arm"><i></i></span>
+      </div>
+      <span class="core"></span>
+    </div>
+    <div class="eyebrow"><span class="live"></span>100% offline · sem nuvem · sem IA</div>
+    <h1>Seu segundo cérebro,<br>sem <span class="grad">atrito</span> e sem ruído.</h1>
+    <p class="lede">O Dott captura o que passa pela sua cabeça em um toque, organiza pelo método PARA e guarda tudo no seu computador. Nada de logins, assinaturas ou algoritmo decidindo por você.</p>
+    <div class="hero-cta">
+      <a href="#baixar" class="btn btn-primary btn-lg">Baixar para Windows
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+      </a>
+      <a href="#captura" class="btn btn-ghost btn-lg">Ver como funciona</a>
+    </div>
+    <div class="hero-note">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Instalador 3,4 MB</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Abre em segundos</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Seus dados nunca saem do PC</span>
+    </div>
+  </div>
+</header>
+
+<!-- PILARES -->
+<section>
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="kicker">Por que o Dott</div>
+      <h2>Anotar não pode ser um projeto.</h2>
+      <p>A maioria dos apps de notas te faz trabalhar pra eles: pastas, tags, sync, plugins. O Dott faz o contrário — some da frente e só aparece quando você precisa capturar ou encontrar.</p>
+    </div>
+    <div class="pillars">
+      <div class="pillar reveal">
+        <div class="pill-ic" style="background:var(--accent-s)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg></div>
+        <h3>Rápido de verdade</h3>
+        <p>Um atalho global e a ideia já está salva — mesmo com qualquer outro programa aberto. Fecha em um toque. Sem tirar você do que estava fazendo.</p>
+      </div>
+      <div class="pillar reveal">
+        <div class="pill-ic" style="background:rgba(74,143,217,.12)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--q-a)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></div>
+        <h3>Organização que faz sentido</h3>
+        <p>O método PARA — Projetos, Áreas, Recursos e Arquivo — decide o lugar de cada nota por uma pergunta só: isso é acionável agora?</p>
+      </div>
+      <div class="pillar reveal">
+        <div class="pill-ic" style="background:rgba(61,179,122,.12)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--q-r)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Só seu</h3>
+        <p>Cada nota é um arquivo de texto no seu computador. Sem conta, sem servidor, sem IA lendo o que você escreve. Funciona no avião, funciona pra sempre.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CAPTURA -->
+<section id="captura">
+  <div class="wrap">
+    <div class="split">
+      <div class="feat-txt reveal">
+        <div class="kicker">Captura relâmpago</div>
+        <h2>A ideia não espera você abrir o app.</h2>
+        <p>Aperte <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Espaço</kbd> de qualquer lugar. Uma caixinha aparece, você digita, dá Enter e ela some. A ideia foi pra sua Caixa de Entrada e você volta pro que estava fazendo.</p>
+        <ul class="feat-list">
+          <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Atalho global</b> — funciona mesmo com o Dott fechado.</span></li>
+          <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Zero decisão na hora</b> — captura primeiro, organiza depois.</span></li>
+          <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Caixa limitada a 10</b> — te obriga a processar antes de acumular.</span></li>
+        </ul>
+      </div>
+      <div class="reveal">
+        <div class="mock">
+          <div class="mock-bar"><i></i><i></i><i></i><span class="title"><span class="d"></span>Captura rápida</span></div>
+          <div class="mock-body" style="background:var(--desk)">
+            <div class="qc">
+              <div class="qc-top"><span class="d"></span>Ctrl + Shift + Espaço</div>
+              <div class="qc-input" id="typed"></div>
+              <div class="qc-meta"><span>Enter pra salvar · Esc pra fechar</span><span class="cap">Caixa 3/10</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARA -->
+<section id="para">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="kicker">O método PARA</div>
+      <h2>Quatro gavetas. Uma pergunta.</h2>
+      <p>Toda nota cabe em um de quatro lugares — decididos por <b>quão acionável</b> aquilo é agora. As mesmas quatro cores que você vê o logo do Dott formar toda vez que ele abre.</p>
+    </div>
+    <div class="para-grid">
+      <div class="quad p reveal"><div class="qh"><span class="qdot"></span><span class="ql">Projetos</span></div><h4>Tem prazo e fim</h4><p>Coisas que você quer concluir em breve. Uma viagem, um relatório, uma reforma. Acionável agora.</p></div>
+      <div class="quad a reveal"><div class="qh"><span class="qdot"></span><span class="ql">Áreas</span></div><h4>Não acaba nunca</h4><p>Responsabilidades contínuas: saúde, finanças, trabalho. Você mantém, não conclui.</p></div>
+      <div class="quad r reveal"><div class="qh"><span class="qdot"></span><span class="ql">Recursos</span></div><h4>Pode ser útil um dia</h4><p>Temas de interesse e referências. Receitas, ideias, links que valem guardar.</p></div>
+      <div class="quad ar reveal"><div class="qh"><span class="qdot"></span><span class="ql">Arquivo</span></div><h4>Já foi</h4><p>O que não está mais ativo, mas você não quer apagar. Fora do caminho, à mão se precisar.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONSTELAÇÃO -->
+<section id="constelacao">
+  <div class="wrap">
+    <div class="split rev">
+      <div class="feat-txt reveal">
+        <div class="kicker">Constelação</div>
+        <h2>Suas ideias, conectadas.</h2>
+        <p>Ligue uma nota à outra com um <b>[[colchete]]</b>. O Dott desenha isso como um mapa vivo — e você enxerga os fios que ligam pensamentos que pareciam soltos.</p>
+        <ul class="feat-list">
+          <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Links entre notas</b> viram conexões visíveis.</span></li>
+          <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Editor markdown</b> limpo, com busca instantânea <kbd>Ctrl</kbd>+<kbd>K</kbd>.</span></li>
+          <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>Anexe imagens</b> e anote em cima delas.</span></li>
+        </ul>
+      </div>
+      <div class="reveal">
+        <div class="constel"><canvas id="constelCanvas"></canvas></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRIVACIDADE -->
+<section id="privacidade" class="privacy">
+  <div class="wrap">
+    <div class="sec-head reveal" style="margin-bottom:0">
+      <div class="kicker">Privacidade por arquitetura</div>
+      <h2>Não é uma promessa. É como foi construído.</h2>
+      <p>O Dott não tem servidor pra onde mandar seus dados. Não existe conta pra criar. Não existe IA pra treinar. O que você escreve fica em arquivos de texto na sua máquina — e só.</p>
+    </div>
+    <div class="priv-row reveal">
+      <div class="priv-item"><div class="pic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><b>Sem nuvem</b><span>Tudo em <code>%APPDATA%</code>, no seu PC.</span></div>
+      <div class="priv-item"><div class="pic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64A9 9 0 1 1 5.64 6.64M12 2v10"/></svg></div><b>Sem conta</b><span>Baixou, abriu, usou. Nada de cadastro.</span></div>
+      <div class="priv-item"><div class="pic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m2 2 20 20M9.9 4.24A9 9 0 0 1 20.5 12M6.6 6.6A9 9 0 0 0 12 20.5"/></svg></div><b>Sem IA</b><span>Nenhum algoritmo lê suas notas.</span></div>
+      <div class="priv-item"><div class="pic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><b>Backup local</b><span>Exporte tudo pra uma pasta quando quiser.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section id="baixar" class="final">
+  <div class="wrap reveal">
+    <div class="logo-stage" style="width:96px;height:96px;margin-bottom:32px">
+      <div class="logo-glow"></div>
+      <div class="spin">
+        <span class="arm"><i style="width:14px;height:14px"></i></span>
+        <span class="arm"><i style="width:14px;height:14px"></i></span>
+        <span class="arm"><i style="width:14px;height:14px"></i></span>
+        <span class="arm"><i style="width:14px;height:14px"></i></span>
+      </div>
+      <span class="core" style="width:16px;height:16px;margin:-8px 0 0 -8px"></span>
+    </div>
+    <h2>Comece a esvaziar a cabeça.</h2>
+    <p>Grátis, offline e sem compromisso. Baixe, capture a primeira ideia em menos de um minuto.</p>
+    <div class="hero-cta">
+      <a href="#" class="btn btn-primary btn-lg">Baixar para Windows
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+      </a>
+    </div>
+    <div class="hero-note"><span>Windows 10/11 · instalador de 3,4 MB</span></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-l">
+      <div class="brand" style="font-size:17px">Dott<span class="dot" style="width:5px;height:5px;margin-bottom:4px"></span></div>
+      <span>Segundo cérebro pessoal, offline.</span>
+    </div>
+    <div class="foot-r">um produto <b>Studio Farina</b></div>
+  </div>
+</footer>
+
+<script>
+/* nav sombra ao rolar */
+const nav=document.getElementById('nav');
+addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>12));
+
+/* reveal on scroll */
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+},{threshold:.14});
+document.querySelectorAll('.reveal').forEach((el,i)=>{ el.style.transitionDelay=(i%3)*70+'ms'; io.observe(el); });
+
+/* máquina de escrever na captura */
+(function(){
+  const el=document.getElementById('typed');
+  const phrases=['Ligar pro dentista na segunda','Ideia: newsletter mensal do time','Comprar presente da Ana 🎁','Ler artigo sobre método PARA'];
+  let p=0;
+  function type(txt,cb){ let i=0; el.innerHTML='';
+    (function step(){ if(i<=txt.length){ el.innerHTML=txt.slice(0,i)+'<span class="cursor"></span>'; i++; setTimeout(step,42);} else setTimeout(cb,1400); })();
+  }
+  function erase(cb){ let t=el.textContent; let i=t.length;
+    (function step(){ if(i>=0){ el.innerHTML=t.slice(0,i)+'<span class="cursor"></span>'; i--; setTimeout(step,22);} else cb(); })();
+  }
+  function loop(){ type(phrases[p],()=>erase(()=>{ p=(p+1)%phrases.length; loop(); })); }
+  if(!matchMedia('(prefers-reduced-motion:reduce)').matches) loop();
+  else el.innerHTML='Ligar pro dentista na segunda<span class="cursor"></span>';
+})();
+
+/* constelação — grafo vivo de wiki-links */
+(function(){
+  const cv=document.getElementById('constelCanvas'); if(!cv) return;
+  const ctx=cv.getContext('2d'); let W,H,dpr;
+  const COL={p:'#e04040',a:'#4a8fd9',r:'#3db37a',ar:'#8a8aa2'};
+  const kinds=['p','a','r','ar'];
+  let nodes=[],links=[];
+  function build(){
+    nodes=[]; links=[];
+    const N=14;
+    for(let i=0;i<N;i++){
+      nodes.push({ x:Math.random()*W, y:Math.random()*H,
+        vx:(Math.random()-.5)*.18, vy:(Math.random()-.5)*.18,
+        r: i%5===0?6:3.6, c:COL[kinds[i%4]] });
+    }
+    for(let i=0;i<N;i++){ const t=(i+1+Math.floor(Math.random()*3))%N; links.push([i,t]); }
+  }
+  function size(){ dpr=Math.min(devicePixelRatio||1,2); W=cv.clientWidth; H=cv.clientHeight;
+    cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); if(!nodes.length) build(); }
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    ctx.lineWidth=1;
+    links.forEach(([a,b])=>{ const A=nodes[a],B=nodes[b];
+      const d=Math.hypot(A.x-B.x,A.y-B.y); const o=Math.max(0,1-d/260);
+      ctx.strokeStyle='rgba(224,90,56,'+(o*.5)+')'; ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y); ctx.stroke();
+    });
+    nodes.forEach(n=>{ n.x+=n.vx; n.y+=n.vy;
+      if(n.x<10||n.x>W-10)n.vx*=-1; if(n.y<10||n.y>H-10)n.vy*=-1;
+      ctx.beginPath(); ctx.arc(n.x,n.y,n.r+3,0,7); ctx.fillStyle=n.c+'22'; ctx.fill();
+      ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,7); ctx.fillStyle=n.c; ctx.fill();
+    });
+    requestAnimationFrame(frame);
+  }
+  size(); addEventListener('resize',size);
+  if(!matchMedia('(prefers-reduced-motion:reduce)').matches) frame(); else frame();
+})();
+</script>
+</body>
+</html>

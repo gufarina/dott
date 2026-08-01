@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dott-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 1420
+    },
+    {
+      "name": "dott-lp",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "landing", "-l", "4173"],
+      "port": 4173
+    }
+  ]
+}

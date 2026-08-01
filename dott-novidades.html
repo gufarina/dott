@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dott — Novidades desta versão</title>
+<style>
+:root{
+  --bg:#0d0d10; --desk:#060609; --surface:#141417; --surface2:#1a1a1e; --surface3:#222228;
+  --border:#26262c; --border2:#2e2e36;
+  --fg:#e8e8ec; --fg2:#aeaec2; --fg3:#8c8ca6; --faint:#65656f;
+  --accent:#e05a38; --accent-s:rgba(224,90,56,.12);
+  --blue:#4a8fd9; --green:#3db37a; --purple:#9b6cdb; --amber:#d9a13a;
+  --q-p:#e04040; --q-a:#4a8fd9; --q-r:#3db37a; --q-ar:#666680;
+  --r-sm:9px; --r-md:12px; --r-lg:16px; --r-xl:20px; --r-shell:18px; --r-2xl:26px; --r-3xl:30px; --r-full:9999px;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{ background:var(--desk); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; line-height:1.55; -webkit-font-smoothing:antialiased; padding:48px 20px; }
+.wrap{ max-width:900px; margin:0 auto; }
+.kicker{ font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent); font-weight:700; display:flex; align-items:center; gap:9px; }
+.kicker .orb{ width:9px; height:9px; border-radius:var(--r-full); background:var(--accent); box-shadow:0 0 12px var(--accent-s); animation:breathe 1.9s ease-in-out infinite; }
+@keyframes breathe{ 0%,100%{ transform:scale(.82) } 50%{ transform:scale(1.05) } }
+h1{ font-size:42px; line-height:1.05; letter-spacing:-.02em; margin:10px 0 8px; font-weight:800; }
+.sub{ color:var(--fg2); font-size:15.5px; max-width:620px; }
+.meta{ color:var(--faint); font-size:13px; margin-top:14px; display:flex; gap:14px; flex-wrap:wrap; }
+.meta b{ color:var(--fg2); font-weight:600; }
+
+h2{ font-size:13px; letter-spacing:.16em; text-transform:uppercase; color:var(--faint); font-weight:700; margin:48px 0 18px; display:flex; align-items:center; gap:12px; }
+h2::after{ content:""; flex:1; height:1px; background:var(--border); }
+
+.hero{ margin-top:28px; background:linear-gradient(135deg,#1a1411,#141417); border:1px solid var(--border); border-radius:var(--r-2xl); padding:26px 28px; }
+.hero .v{ font-size:20px; font-weight:600; letter-spacing:-.01em; line-height:1.4; }
+.hero .v b{ color:var(--accent); }
+.hero .vd{ color:var(--fg3); font-size:14px; margin-top:9px; }
+
+.feat{ display:grid; gap:12px; }
+.card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r-shell); padding:18px 20px; display:grid; grid-template-columns:46px 1fr auto; gap:0 16px; align-items:start; }
+.ic{ width:46px; height:46px; border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; font-size:22px; background:var(--surface2); border:1px solid var(--border); }
+.card h3{ font-size:16.5px; font-weight:700; letter-spacing:-.01em; }
+.card p{ font-size:13.5px; color:var(--fg2); margin-top:4px; }
+.card p .k{ font-family:'JetBrains Mono','Cascadia Code',monospace; font-size:12px; background:var(--surface3); border:1px solid var(--border2); border-radius:5px; padding:1px 6px; color:var(--fg); white-space:nowrap; }
+.tag{ font-size:10px; font-weight:800; letter-spacing:.06em; padding:3px 9px; border-radius:var(--r-full); align-self:start; white-space:nowrap; }
+.tag.novo{ color:var(--accent); background:var(--accent-s); border:1px solid rgba(224,90,56,.3); }
+.tag.melhor{ color:var(--blue); background:rgba(74,143,217,.12); border:1px solid rgba(74,143,217,.3); }
+
+.mini{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.mini .m{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md); padding:15px 16px; }
+.mini .m .e{ font-size:18px; }
+.mini .m h4{ font-size:14px; font-weight:700; margin:7px 0 3px; }
+.mini .m p{ font-size:12.5px; color:var(--fg3); line-height:1.4; }
+
+.note{ background:var(--surface2); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:var(--r-md); padding:14px 16px; font-size:13.5px; color:var(--fg2); margin-top:16px; }
+.note b{ color:var(--fg); }
+
+footer{ margin-top:46px; padding-top:18px; border-top:1px solid var(--border); color:var(--faint); font-size:12px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+
+@media(max-width:680px){
+  h1{ font-size:32px; }
+  .card{ grid-template-columns:40px 1fr; }
+  .card .tag{ grid-column:2; margin-top:8px; justify-self:start; }
+  .mini{ grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker"><span class="orb"></span>Dott · Warm Fox · Studio Farina</div>
+  <h1>Novidades desta versão</h1>
+  <p class="sub">O Dott ganhou um visual novo e a primeira experiência de quem acabou de instalar. Aqui está tudo o que mudou.</p>
+  <div class="meta"><span>Versão <b>1.0</b></span><span>Stack <b>Tauri + Rust + React</b></span><span><b>100% offline</b>, sem conta</span><span>23/06/2026</span></div>
+
+  <div class="hero">
+    <div class="v">A grande mudança: a tela virou <b>painéis flutuantes</b> com respiro, e o app agora <b>recebe você</b> na primeira abertura.</div>
+    <div class="vd">Mesma velocidade, mesma privacidade — só que mais bonito, mais legível e mais fácil de entender no primeiro uso.</div>
+  </div>
+
+  <h2>O que mudou</h2>
+  <div class="feat">
+
+    <div class="card">
+      <div class="ic">🪟</div>
+      <div>
+        <h3>Shells flutuantes</h3>
+        <p>Inbox, o board PARA e as Tarefas viraram <b>painéis independentes</b>, cada um com cantos arredondados, flutuando sobre uma “mesa” escura com respiro entre eles. Some a sensação de tudo grudado na borda — fica organizado e leve.</p>
+      </div>
+      <span class="tag novo">NOVO LAYOUT</span>
+    </div>
+
+    <div class="card">
+      <div class="ic">👋</div>
+      <div>
+        <h3>Boas-vindas no primeiro uso</h3>
+        <p>Quem abre o Dott pela primeira vez ganha um tour de <b>5 passos animados</b>: Bem-vindo → Capturar (<span class="k">Ctrl+Shift+Space</span>) → método PARA → Processar a Inbox → Conectar ideias com <span class="k">[[links]]</span>. Aparece uma vez só; dá pra pular a qualquer momento.</p>
+      </div>
+      <span class="tag novo">NOVO</span>
+    </div>
+
+    <div class="card">
+      <div class="ic">⏳</div>
+      <div>
+        <h3>Tela de carregamento da marca</h3>
+        <p>Na abertura, uma animação curta — as 4 cores do PARA convergindo no ponto do Dott — enquanto suas notas carregam. Um respiro de marca, sem atrasar o uso.</p>
+      </div>
+      <span class="tag novo">NOVO</span>
+    </div>
+
+    <div class="card">
+      <div class="ic">📏</div>
+      <div>
+        <h3>Barra do topo enxuta</h3>
+        <p>A barra de título encolheu e se fundiu com o fundo, devolvendo espaço pro que importa: suas notas e tarefas.</p>
+      </div>
+      <span class="tag melhor">MELHORADO</span>
+    </div>
+
+    <div class="card">
+      <div class="ic">🔵</div>
+      <div>
+        <h3>Cantos arredondados em todo o app</h3>
+        <p>Raio ampliado e consistente — board, editor, busca (<span class="k">Ctrl+K</span>), widget, avisos. Visual mais macio e atual, do mesmo jeito em todas as telas.</p>
+      </div>
+      <span class="tag melhor">MELHORADO</span>
+    </div>
+
+    <div class="card">
+      <div class="ic">🔍</div>
+      <div>
+        <h3>Tudo 20% maior</h3>
+        <p>A interface inteira cresceu 20% — pensada pra telas de alta resolução. Mais legível e confortável, sem espremer nada.</p>
+      </div>
+      <span class="tag melhor">MELHORADO</span>
+    </div>
+
+  </div>
+
+  <h2>Como o Dott funciona</h2>
+  <div class="mini">
+    <div class="m"><div class="e">⚡</div><h4>Capture sem atrito</h4><p>Widget global em qualquer app: aperte <b>Ctrl+Shift+Space</b> e jogue a ideia na Inbox.</p></div>
+    <div class="m"><div class="e">🗂️</div><h4>Organize com PARA</h4><p>Projetos, Áreas, Recursos e Arquivo — tudo separado por quão acionável é.</p></div>
+    <div class="m"><div class="e">🕸️</div><h4>Conecte ideias</h4><p>Notas em markdown com <b>[[wiki-links]]</b> que viram um grafo de conexões.</p></div>
+    <div class="m"><div class="e">✅</div><h4>Tarefas do lado</h4><p>Sua lista sempre à vista, no painel direito, junto do board.</p></div>
+    <div class="m"><div class="e">🖼️</div><h4>Imagens e anexos</h4><p>Cole ou arraste imagens; anote por cima direto no Dott.</p></div>
+    <div class="m"><div class="e">🔒</div><h4>Só seu, no seu PC</h4><p>100% offline, sem login, sem nuvem. Seus dados nunca saem da máquina.</p></div>
+  </div>
+
+  <div class="note"><b>Nota técnica (pra registro):</b> o squircle “de verdade” (curva superellipse) foi testado mas o motor do app (WebView2) não renderiza certo via CSS — então os cantos usam <b>round</b>, que fica praticamente idêntico nesse tamanho e renderiza perfeito. O onboarding já está integrado no app (não é mais só protótipo) e a tela de loading usa a animação “Convergência PARA”.</div>
+
+  <footer>
+    <span>Dott · segundo cérebro offline · Tauri + Rust + React</span>
+    <span>Studio Farina — Warm Fox — 23/06/2026</span>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,115 @@
+/* onboarding.css — Estilos do onboarding de primeiro uso.
+ * Global, mas TUDO escopado sob .ob-overlay pra nao vazar no app.
+ * Keyframes prefixados com "ob" pra nao colidir com animacoes existentes.
+ * Port do prototipo dott-experiencia (5 passos), sobre o app real como fundo. */
+
+.ob-overlay{ position:fixed; inset:0; z-index:120; background:rgba(6,6,9,.66);
+  backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px);
+  display:flex; align-items:center; justify-content:center; animation:obOverlayIn var(--dur-medium,200ms) ease both; }
+.ob-overlay.is-closing{ opacity:0; transition:opacity .25s ease; }
+@keyframes obOverlayIn{ from{opacity:0} to{opacity:1} }
+
+.ob-overlay .ob-skip-x{ position:absolute; top:18px; right:20px; width:34px; height:34px; border-radius:var(--r-full);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--fg3);
+  background:transparent; border:1px solid transparent; font-size:18px; line-height:1;
+  transition:background var(--dur-micro,120ms),color var(--dur-micro,120ms); }
+.ob-overlay .ob-skip-x:hover{ background:var(--surface3); color:var(--fg); }
+
+.ob-overlay .ob-card{ width:min(540px,92vw); background:var(--surface); border:1px solid var(--border2);
+  border-radius:var(--r-3xl); box-shadow:var(--shadow); overflow:hidden;
+  animation:obCardIn var(--dur-long,300ms) var(--ease-spring) both; }
+@keyframes obCardIn{ from{opacity:0; transform:scale(.96) translateY(8px)} to{opacity:1; transform:none} }
+
+.ob-overlay .ob-stage{ height:182px; position:relative; overflow:hidden;
+  background:radial-gradient(120% 100% at 50% 0%, var(--surface2), var(--surface));
+  border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:center; }
+.ob-overlay .ob-content{ padding:22px 28px 18px; }
+.ob-overlay .ob-kicker{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:9px; }
+.ob-overlay .ob-title{ font-size:23px; font-weight:800; letter-spacing:-.02em; line-height:1.15; margin-bottom:9px; }
+.ob-overlay .ob-text{ font-size:14.5px; line-height:1.5; color:var(--fg2); }
+.ob-overlay .ob-text b{ color:var(--fg); font-weight:600; }
+.ob-overlay .ob-kbd{ font-family:var(--font-mono); font-size:12.5px; background:var(--surface3); border:1px solid var(--border2); border-radius:6px; padding:1px 7px; color:var(--fg); white-space:nowrap; }
+.ob-overlay .ob-note{ margin-top:13px; display:flex; gap:9px; align-items:flex-start; font-size:12.5px; line-height:1.45; color:var(--fg3);
+  background:var(--accent-s); border:1px solid rgba(224,90,56,.22); border-radius:var(--r-md); padding:9px 11px; }
+.ob-overlay .ob-note.is-tip{ background:var(--surface2); border-color:var(--border2); color:var(--fg2); }
+.ob-overlay .ob-badge{ font-size:9.5px; font-weight:800; letter-spacing:.06em; color:var(--accent); border:1px solid var(--accent); border-radius:var(--r-sm); padding:1px 5px; flex:none; margin-top:1px; }
+.ob-overlay .ob-note.is-tip .ob-badge{ color:var(--fg3); border-color:var(--border2); }
+.ob-overlay .ob-paralist{ margin-top:14px; display:grid; gap:7px; }
+.ob-overlay .ob-pl{ display:flex; gap:10px; align-items:baseline; font-size:13px; }
+.ob-overlay .ob-pl .pd{ width:8px; height:8px; border-radius:var(--r-full); flex:none; transform:translateY(1px); }
+.ob-overlay .ob-pl strong{ font-weight:600; color:var(--fg); min-width:64px; }
+.ob-overlay .ob-pl span{ color:var(--fg3); }
+.ob-overlay .ob-pl span i{ font-style:italic; opacity:.85; }
+
+.ob-overlay .ob-foot{ display:flex; align-items:center; gap:12px; padding:14px 28px 20px; }
+.ob-overlay .ob-dots{ display:flex; gap:6px; flex:1; }
+.ob-overlay .ob-dots i{ width:6px; height:6px; border-radius:var(--r-full); background:var(--border2); transition:all var(--dur-base,150ms); }
+.ob-overlay .ob-dots i.on{ width:20px; background:var(--accent); }
+.ob-overlay .ob-btn{ font-family:inherit; font-size:13.5px; font-weight:600; border-radius:var(--r-md); padding:8px 15px; cursor:pointer; border:1px solid transparent; background:transparent; color:var(--fg3); transition:all var(--dur-micro,120ms); }
+.ob-overlay .ob-btn:hover{ color:var(--fg); background:var(--surface3); }
+.ob-overlay .ob-btn.primary{ background:var(--accent); color:#fff; border-color:var(--accent); box-shadow:0 2px 10px rgba(224,90,56,.3); }
+.ob-overlay .ob-btn.primary:hover{ filter:brightness(1.07); background:var(--accent); }
+.ob-overlay .ob-btn.ghost{ color:var(--fg2); }
+
+.ob-overlay .ob-step{ display:none; }
+.ob-overlay .ob-step.is-active{ display:block; }
+
+/* Passo 1 — orb */
+.ob-overlay .s1-orb{ position:relative; display:flex; flex-direction:column; align-items:center; gap:16px; }
+.ob-overlay .s1-dot{ width:46px; height:46px; border-radius:var(--r-full); background:var(--accent); box-shadow:0 0 30px var(--accent-s); animation:obPopIn .5s var(--ease-spring) both; }
+.ob-overlay .s1-ring{ position:absolute; top:-9px; left:50%; width:64px; height:64px; margin-left:-32px; border-radius:var(--r-full); border:2px solid var(--accent); opacity:.5; animation:obRingPulse 2.2s ease-out infinite; }
+.ob-overlay .s1-word{ font-size:26px; font-weight:800; letter-spacing:-.02em; animation:obFadeUp .55s ease .18s both; }
+@keyframes obRingPulse{ 0%{transform:scale(.7);opacity:.55} 70%{opacity:0} 100%{transform:scale(1.7);opacity:0} }
+@keyframes obPopIn{ from{transform:scale(0)} to{transform:scale(1)} }
+@keyframes obFadeUp{ from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none} }
+
+/* Passo 2 — captura */
+.ob-overlay .s2{ position:relative; width:230px; height:150px; }
+.ob-overlay .s2-keys{ position:absolute; top:6px; left:50%; transform:translateX(-50%); display:flex; gap:6px; animation:obFadeUp .4s ease both; }
+.ob-overlay .s2-keys .k{ font-family:var(--font-mono); font-size:12px; color:var(--fg); background:var(--surface3); border:1px solid var(--border2); border-bottom-width:2px; border-radius:7px; padding:5px 9px; }
+.ob-overlay .s2-card{ position:absolute; top:0; left:50%; width:150px; margin-left:-75px; background:var(--surface2); border:1px solid var(--border2); border-radius:var(--r-md); padding:8px 10px; font-size:11.5px; color:var(--fg2); animation:obDropIn 1s var(--ease-spring) .55s both; }
+.ob-overlay .s2-card .tag{ font-size:9px; font-weight:700; color:var(--warn); background:rgba(217,140,58,.14); padding:1px 5px; border-radius:5px; }
+.ob-overlay .s2-tray{ position:absolute; bottom:0; left:50%; width:190px; margin-left:-95px; height:54px; border:1.5px dashed var(--border2); border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; color:var(--fg3); font-size:11px; font-weight:600; letter-spacing:.04em; }
+@keyframes obDropIn{ 0%{top:42px; opacity:0; transform:scale(.9)} 30%{opacity:1} 100%{top:86px; opacity:1; transform:scale(1)} }
+
+/* Passo 3 — PARA */
+.ob-overlay .s3{ display:grid; grid-template-columns:1fr 1fr; gap:9px; width:250px; }
+.ob-overlay .s3 .q{ border:1px solid var(--border2); border-radius:var(--r-md); padding:9px 11px; background:var(--surface); position:relative; overflow:hidden; opacity:0; transform:translateY(8px) scale(.96); }
+.ob-overlay .s3 .q::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--qc); }
+.ob-overlay .s3 .q h5{ font-size:12.5px; font-weight:700; margin-bottom:1px; }
+.ob-overlay .s3 .q small{ font-size:10px; color:var(--fg3); }
+.ob-overlay .is-active .s3 .q{ animation:obQIn .45s var(--ease-spring) forwards; }
+.ob-overlay .is-active .s3 .q:nth-child(1){ animation-delay:.05s }
+.ob-overlay .is-active .s3 .q:nth-child(2){ animation-delay:.18s }
+.ob-overlay .is-active .s3 .q:nth-child(3){ animation-delay:.31s }
+.ob-overlay .is-active .s3 .q:nth-child(4){ animation-delay:.44s }
+@keyframes obQIn{ to{opacity:1; transform:none} }
+
+/* Passo 4 — processar */
+.ob-overlay .s4{ position:relative; width:250px; height:140px; }
+.ob-overlay .s4-inbox,.ob-overlay .s4-target{ position:absolute; top:24px; width:78px; height:92px; border-radius:var(--r-md); border:1.5px dashed var(--border2); display:flex; align-items:flex-start; justify-content:center; padding-top:8px; font-size:10px; font-weight:600; color:var(--fg3); letter-spacing:.04em; }
+.ob-overlay .s4-inbox{ left:0; }
+.ob-overlay .s4-target{ right:0; border-style:solid; border-color:var(--q-p); }
+.ob-overlay .is-active .s4-target{ animation:obTargetGlow 1.2s ease 1.15s both; }
+@keyframes obTargetGlow{ 0%,100%{box-shadow:none} 40%{box-shadow:0 0 0 4px rgba(224,64,64,.16)} }
+.ob-overlay .s4-card{ position:absolute; top:30px; left:6px; width:66px; height:46px; background:var(--surface2); border:1px solid var(--border2); border-radius:var(--r-sm); padding:6px; overflow:hidden; animation:obDragOver 1.8s var(--ease-spring) .35s both; }
+.ob-overlay .s4-card .ln{ height:4px; border-radius:2px; background:var(--border2); margin-bottom:4px; }
+.ob-overlay .s4-card .ln.a{ width:80%; } .ob-overlay .s4-card .ln.b{ width:55%; }
+.ob-overlay .s4-card .nt{ font-size:8px; font-weight:700; color:var(--q-p); opacity:0; margin-bottom:3px; }
+.ob-overlay .is-active .s4-card .nt{ animation:obNoteShow .4s ease 1.5s both; }
+@keyframes obDragOver{ 0%{left:6px; transform:rotate(0)} 55%{transform:rotate(-4deg)} 100%{left:178px; transform:rotate(0)} }
+@keyframes obNoteShow{ from{opacity:0} to{opacity:1} }
+
+/* Passo 5 — conectar */
+.ob-overlay .s5{ width:230px; height:130px; }
+.ob-overlay .s5 svg{ width:100%; height:100%; overflow:visible; }
+.ob-overlay .s5 .edge{ stroke:var(--accent); stroke-width:1.6; fill:none; stroke-dasharray:130; stroke-dashoffset:130; }
+.ob-overlay .is-active .s5 .e1{ animation:obDraw .7s ease .35s forwards; }
+.ob-overlay .is-active .s5 .e2{ animation:obDraw .7s ease .75s forwards; }
+.ob-overlay .s5 .node{ fill:var(--surface3); stroke:var(--accent); stroke-width:1.5; opacity:0; }
+.ob-overlay .is-active .s5 .node{ animation:obNodeIn .4s var(--ease-spring) forwards; }
+.ob-overlay .is-active .s5 .n1{ animation-delay:.1s } .ob-overlay .is-active .s5 .n2{ animation-delay:.55s } .ob-overlay .is-active .s5 .n3{ animation-delay:.95s }
+@keyframes obDraw{ to{stroke-dashoffset:0} }
+@keyframes obNodeIn{ to{opacity:1} }
+
+@media (prefers-reduced-motion: reduce){ .ob-overlay *{ animation-duration:.001ms !important; } }

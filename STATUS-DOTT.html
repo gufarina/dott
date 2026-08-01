@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dott — Status & Próximos Passos</title>
+<style>
+  :root{
+    --bg:#0d0d0f; --panel:#141417; --panel2:#1b1b20; --line:#27272e;
+    --ink:#f4f3f0; --mut:#9b9aa3; --faint:#6b6a73;
+    --orange:#e05a38; --blue:#4a8fd9; --green:#3db37a; --amber:#d9a13a; --red:#e0483f; --purple:#9b6cdb;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;padding:48px 20px}
+  .wrap{max-width:920px;margin:0 auto}
+  .kicker{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--orange);font-weight:600}
+  h1{font-size:42px;line-height:1.05;letter-spacing:-.02em;margin:8px 0 6px;font-weight:700}
+  h2{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);font-weight:600;margin:46px 0 16px;display:flex;align-items:center;gap:10px}
+  h2::after{content:"";flex:1;height:1px;background:var(--line)}
+  .sub{color:var(--mut);font-size:15px;max-width:640px}
+  .meta{color:var(--faint);font-size:13px;margin-top:14px}
+
+  /* hero verdict */
+  .hero{margin-top:30px;background:linear-gradient(135deg,#1a1411,#141417);border:1px solid var(--line);border-radius:18px;padding:28px 30px}
+  .hero .v{font-size:22px;font-weight:600;letter-spacing:-.01em}
+  .hero .v b{color:var(--orange)}
+  .hero .vd{color:var(--mut);font-size:14px;margin-top:8px}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .kpi .n{font-size:26px;font-weight:700;letter-spacing:-.02em}
+  .kpi .l{font-size:11.5px;color:var(--mut);margin-top:3px;line-height:1.35}
+  .kpi.g .n{color:var(--green)} .kpi.r .n{color:var(--red)} .kpi.a .n{color:var(--amber)} .kpi.b .n{color:var(--blue)}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .card h3{font-size:15px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .card p{font-size:13.5px;color:var(--mut)}
+  .dot{width:8px;height:8px;border-radius:50%;flex:none}
+  .dg{background:var(--green)} .dr{background:var(--red)} .da{background:var(--amber)} .db{background:var(--blue)} .dp{background:var(--purple)}
+
+  ul.feat{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px 22px}
+  ul.feat li{font-size:14px;color:var(--ink);padding-left:24px;position:relative}
+  ul.feat li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:700}
+  ul.feat li span{color:var(--faint);font-size:12.5px;display:block}
+
+  /* problem rows */
+  .prob{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .row{display:grid;grid-template-columns:64px 1fr;gap:0;border-top:1px solid var(--line)}
+  .row:first-child{border-top:none}
+  .sev{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#0d0d0f}
+  .sev.p0{background:var(--red)} .sev.p1{background:var(--amber)} .sev.p2{background:var(--blue)} .sev.p3{background:var(--faint)}
+  .body{padding:14px 18px;background:var(--panel)}
+  .body .t{font-size:15px;font-weight:600}
+  .body .d{font-size:13.5px;color:var(--mut);margin-top:3px}
+  .body .fix{font-size:12.5px;color:var(--green);margin-top:7px}
+  .body .fix b{color:var(--ink);font-weight:600}
+
+  .note{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--orange);border-radius:10px;padding:14px 16px;font-size:13.5px;color:var(--mut)}
+  .note b{color:var(--ink)}
+
+  /* phases */
+  .phase{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:12px}
+  .phase .ph{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:700;margin-bottom:4px}
+  .phase .tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px}
+  .tag.now{background:var(--red);color:#0d0d0f} .tag.next{background:var(--amber);color:#0d0d0f} .tag.later{background:var(--panel2);color:var(--mut);border:1px solid var(--line)}
+  .phase .goal{font-size:13px;color:var(--faint);margin-bottom:12px}
+  .check{list-style:none;display:grid;gap:7px}
+  .check li{font-size:13.5px;color:var(--ink);padding-left:26px;position:relative}
+  .check li::before{content:"";position:absolute;left:0;top:3px;width:15px;height:15px;border:1.5px solid var(--faint);border-radius:4px}
+  .check li b{color:var(--ink)} .check li span{color:var(--mut)}
+
+  footer{margin-top:46px;padding-top:18px;border-top:1px solid var(--line);color:var(--faint);font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  @media(max-width:680px){.kpis,.grid2,ul.feat{grid-template-columns:1fr}h1{font-size:32px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker">Studio Farina · Cliente Dott (Warm Fox)</div>
+  <h1>Dott — onde está e o que falta pra liberar</h1>
+  <p class="sub">Segundo cérebro pessoal, 100% offline, sem IA. Rebuild em Tauri + Rust + React. Este é o raio-x honesto antes de colocar na mão de outras pessoas.</p>
+  <p class="meta">Relatório gerado em 22/06/2026 · App em <code>Projetos/dott-warmfox</code> (fora do studio, de propósito)</p>
+
+  <div class="hero">
+    <div class="v">O app <b>compila, empacota e roda</b>. Está pronto pra <b>testadores próximos</b> — mas <b>ainda não</b> pra liberar em massa.</div>
+    <div class="vd">O motor está bom. O que segura é o entorno de distribuição: assinatura, atualização e backup. Nada disso é reescrever o app — é cercar ele direito.</div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi g"><div class="n">OK</div><div class="l">Build limpo + instalador Windows gerado</div></div>
+    <div class="kpi b"><div class="n">3,4 MB</div><div class="l">Tamanho do instalador (super leve)</div></div>
+    <div class="kpi r"><div class="n">2</div><div class="l">Bloqueadores P0 pra liberar amplo</div></div>
+    <div class="kpi a"><div class="n">7</div><div class="l">Pontos de atenção (dados, storage, UX)</div></div>
+  </div>
+
+  <h2>O que já funciona</h2>
+  <ul class="feat">
+    <li>100% offline, sem login<span>nenhuma chamada de rede, dado só na máquina</span></li>
+    <li>Notas em markdown reais<span>cada nota = um arquivo .md, estilo Obsidian</span></li>
+    <li>Método PARA completo<span>Projetos, Áreas, Recursos, Arquivo</span></li>
+    <li>Grafo de conexões<span>[[wiki-links]] + backlinks automáticos</span></li>
+    <li>Inbox de captura rápida<span>com limite de 10 (força processar)</span></li>
+    <li>Widget global flutuante<span>Ctrl+Shift+Space em qualquer app</span></li>
+    <li>Tarefas + anexo de imagem<span>colar, arrastar e anotar imagens</span></li>
+    <li>Instalador pt-BR + tutorial<span>primeiro uso já vem com notas-guia</span></li>
+  </ul>
+
+  <h2>Bloqueadores pra liberar (por gravidade)</h2>
+  <div class="prob">
+    <div class="row"><div class="sev p0">P0</div><div class="body">
+      <div class="t">Instalador sem assinatura digital</div>
+      <div class="d">O Windows mostra “Editor desconhecido / Windows protegeu o seu PC” e a maioria das pessoas leigas desiste de instalar ali. É o maior obstáculo de adoção, não um detalhe.</div>
+      <div class="fix"><b>Conserto:</b> certificado de assinatura de código (OV ~US$200–400/ano ou Azure Trusted Signing ~US$10/mês). Sem isso, todo download assusta.</div>
+    </div></div>
+    <div class="row"><div class="sev p0">P0</div><div class="body">
+      <div class="t">Não tem atualização automática</div>
+      <div class="d">Soltou a versão 1.0 e achou um bug? Não há como empurrar a correção — cada pessoa teria que baixar e reinstalar na mão. Na prática, você fica preso à primeira versão.</div>
+      <div class="fix"><b>Conserto:</b> plugin de updater do Tauri + um link de hospedagem (ex: GitHub Releases). Configura uma vez, atualiza pra sempre.</div>
+    </div></div>
+    <div class="row"><div class="sev p1">P1</div><div class="body">
+      <div class="t">Dado sem backup e sem como exportar</div>
+      <div class="d">Tudo vive só numa pasta da máquina. Se o PC morre, formata ou desinstala, as notas vão junto. Não há exportar/importar nem cópia de segurança.</div>
+      <div class="fix"><b>Conserto:</b> botão “Exportar tudo” (zip da pasta) + “Importar”. Barato e tira o risco de perda total.</div>
+    </div></div>
+    <div class="row"><div class="sev p1">P1</div><div class="body">
+      <div class="t">Tarefas guardadas num lugar frágil</div>
+      <div class="d">Notas e pastas ficam em arquivos seguros, mas as <b>tarefas e o tema</b> ficam na memória interna do navegador embutido (localStorage). Se essa memória é limpa, as tarefas somem — e elas nem entram no backup.</div>
+      <div class="fix"><b>Conserto:</b> mover tarefas pro mesmo sistema de arquivos das notas. Mudança pequena, dado consistente.</div>
+    </div></div>
+    <div class="row"><div class="sev p1">P1</div><div class="body">
+      <div class="t">Falha ao salvar é silenciosa</div>
+      <div class="d">Se uma gravação falhar (disco cheio, permissão), o app não avisa nada — a pessoa acha que salvou e pode perder o que escreveu ao fechar.</div>
+      <div class="fix"><b>Conserto:</b> mostrar um aviso quando o salvamento falhar (o app já sabe quando falha, só não fala).</div>
+    </div></div>
+    <div class="row"><div class="sev p2">P2</div><div class="body">
+      <div class="t">Instalação precisa de internet (contradiz “offline”)</div>
+      <div class="d">O app roda offline, mas a <b>primeira instalação</b> pode baixar um componente do Windows (WebView2) da internet. Numa máquina sem rede, o instalador pode falhar.</div>
+      <div class="fix"><b>Conserto:</b> uma linha de config pra embutir esse componente no instalador (fica ~100 MB maior, mas instala em qualquer lugar).</div>
+    </div></div>
+    <div class="row"><div class="sev p2">P2</div><div class="body">
+      <div class="t">Imagens apagadas viram lixo acumulado</div>
+      <div class="d">Quando você apaga uma nota com imagem, o arquivo da imagem fica pra trás. Com o tempo, a pasta de anexos só cresce, mesmo com poucas notas.</div>
+      <div class="fix"><b>Conserto:</b> faxina automática de anexos sem dono. Não urgente, mas evita inchaço.</div>
+    </div></div>
+    <div class="row"><div class="sev p2">P2</div><div class="body">
+      <div class="t">Risco raro de duas notas se sobrescreverem</div>
+      <div class="d">O nome interno de cada nota usa o relógio em milissegundos. Se duas notas nascem no mesmo milissegundo (ex: processar vários cards de uma vez), uma pode escrever por cima da outra.</div>
+      <div class="fix"><b>Conserto:</b> trocar por um id realmente único. Mudança de poucas linhas.</div>
+    </div></div>
+    <div class="row"><div class="sev p3">P3</div><div class="body">
+      <div class="t">Só Windows · sem controle de versão (git) · só pt-BR</div>
+      <div class="d">Quem usa Mac fica de fora. O projeto não está num repositório git (sem histórico/rollback). Idioma fixo em português. Nenhum bloqueia o lançamento BR, mas limitam o alcance.</div>
+      <div class="fix"><b>Conserto:</b> decidir depois — começar pelo git local (rede de segurança pro código) é o de melhor custo-benefício.</div>
+    </div></div>
+  </div>
+
+  <h2>Contas & armazenamento — o que o usuário precisa saber</h2>
+  <div class="grid2">
+    <div class="card"><h3><span class="dot dp"></span>Não existem contas</h3><p>O Dott é por máquina: sem login, sem senha, sem servidor. <b>Bom:</b> zero fricção e privacidade total (ótimo argumento de venda). <b>Limite:</b> nota do notebook não aparece no desktop (sem sync), e não há como recuperar dados se a máquina sumir — nem cobrar/licenciar se um dia virar pago.</p></div>
+    <div class="card"><h3><span class="dot db"></span>Onde os dados moram</h3><p>Tudo numa pasta do usuário no Windows (<code>%APPDATA%\com.studiofarina.dott</code>): notas <code>.md</code>, inbox, pastas e imagens. Formato aberto — dá pra abrir as notas em qualquer editor. <b>Mas:</b> uma única cópia, num único lugar, sem backup. É o calcanhar de Aquiles hoje.</p></div>
+  </div>
+  <div class="note" style="margin-top:12px"><b>Tradução prática:</b> a proposta “seus dados são só seus, no seu PC” é forte e verdadeira. Só que “só no seu PC” sem backup é também o maior risco. Resolver <b>exportar/backup</b> antes de liberar transforma o ponto fraco em ponto forte.</div>
+
+  <h2>Próximos passos — em 3 fases</h2>
+
+  <div class="phase">
+    <div class="ph"><span class="tag now">FAÇA AGORA</span> Liberar pra testadores próximos (amigos/beta fechado)</div>
+    <div class="goal">Objetivo: pôr na mão de 5–15 pessoas de confiança sem risco de perder dados nem sustos no install.</div>
+    <ul class="check">
+      <li><b>Exportar / Importar dados</b> <span>— botão de backup em zip. Tira o risco de perda total.</span></li>
+      <li><b>Mover tarefas pro disco</b> <span>— mesmo cofre das notas, entra no backup.</span></li>
+      <li><b>Avisar do salvamento que falha</b> <span>— a pessoa nunca perde texto sem saber.</span></li>
+      <li><b>Embutir o WebView2 no instalador</b> <span>— instala mesmo offline, sem surpresa.</span></li>
+      <li><b>Aviso honesto no download</b> <span>— enquanto não assina, um “clique em Mais informações → Executar” já destrava o beta fechado.</span></li>
+    </ul>
+  </div>
+
+  <div class="phase">
+    <div class="ph"><span class="tag next">DEPOIS</span> Liberar público (qualquer pessoa baixa)</div>
+    <div class="goal">Objetivo: download sem medo, capacidade de corrigir bugs remotamente.</div>
+    <ul class="check">
+      <li><b>Assinatura digital do instalador</b> <span>— acaba com o “editor desconhecido”.</span></li>
+      <li><b>Atualização automática</b> <span>— corrigir bug = todo mundo recebe sozinho.</span></li>
+      <li><b>Página de download</b> <span>— um link bonito pra baixar (pode ser na landing do studio).</span></li>
+      <li><b>Faxina de anexos órfãos + id único</b> <span>— robustez de longo prazo.</span></li>
+      <li><b>Git local do projeto</b> <span>— histórico e rede de segurança pro código.</span></li>
+    </ul>
+  </div>
+
+  <div class="phase">
+    <div class="ph"><span class="tag later">FUTURO</span> Crescer o alcance</div>
+    <div class="goal">Objetivo: além do BR/Windows, e modelo de negócio se quiser.</div>
+    <ul class="check">
+      <li><b>Sync opcional entre dispositivos</b> <span>— exige contas; decisão de produto (mexe na promessa “100% local”).</span></li>
+      <li><b>Versão Mac</b> <span>— Tauri já suporta; falta build + assinatura Apple.</span></li>
+      <li><b>Tela de Configurações</b> <span>— trocar atalho, escolher pasta, idioma.</span></li>
+      <li><b>Atualizar o brief no studio</b> <span>— hoje descreve um produto menor do que o app virou.</span></li>
+    </ul>
+  </div>
+
+  <div class="note" style="margin-top:18px"><b>Recomendação da Alia:</b> não tente assinar e fazer auto-update já. Faça a <b>Fase 1</b> esta semana (é pouca coisa e tira todo o risco de perder dados) e mande pro beta fechado. Use o feedback real pra decidir se vale investir na assinatura paga da Fase 2. Liberar enxuto e seguro &gt; liberar grande e arriscado.</div>
+
+  <footer>
+    <span>Dott · Tauri 2 + Rust + React · instalador 3,4 MB · 100% offline</span>
+    <span>Studio Farina — 22/06/2026</span>
+  </footer>
+
+</div>
+</body>
+</html>

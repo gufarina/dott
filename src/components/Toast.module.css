@@ -1,0 +1,48 @@
+.area {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.toast {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-lg);
+  padding: 12px 16px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  min-width: 280px;
+  max-width: 340px;
+  animation: toastIn .2s ease;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.icon {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: #fff;
+}
+.info { background: var(--success); }
+.warn { background: var(--warn); }
+
+.body { flex: 1; min-width: 0; }
+.title { font-size: 13px; font-weight: 700; color: var(--fg); margin-bottom: 3px; }
+.msg   { font-size: 12px; color: var(--fg2); line-height: 1.45; }
+
+.close {
+  color: var(--fg3); cursor: pointer; font-size: 15px;
+  flex-shrink: 0; transition: color var(--dur-micro); line-height: 1;
+}
+.close:hover { color: var(--fg); }

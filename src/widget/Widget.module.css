@@ -1,0 +1,243 @@
+/* Widget flutuante — orb de captura + painel. Fundo da janela é transparente. */
+
+.stage {
+  width: 104px;
+  height: 104px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orb {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 38% 32%, #f0785a, #d94428);
+  box-shadow: 0 6px 20px rgba(224, 90, 56, .55), 0 2px 6px rgba(0, 0, 0, .45);
+  transition: transform .15s;
+}
+.orb:hover { transform: scale(1.06); }
+.orb:active { transform: scale(.96); }
+
+.plus {
+  color: rgba(255, 255, 255, .95);
+  font-size: 26px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.warn {
+  background: radial-gradient(circle at 38% 32%, #e8b15a, #d98c3a);
+  box-shadow: 0 6px 20px rgba(217, 140, 58, .5), 0 2px 6px rgba(0, 0, 0, .45);
+}
+.full {
+  background: radial-gradient(circle at 38% 32%, #ef6a6a, #e04040);
+  animation: orbPulse 1.6s ease-in-out infinite;
+}
+@keyframes orbPulse {
+  0%, 100% { box-shadow: 0 6px 20px rgba(224, 64, 64, .5), 0 2px 6px rgba(0, 0, 0, .45); }
+  50%       { box-shadow: 0 6px 30px rgba(224, 64, 64, .9), 0 2px 6px rgba(0, 0, 0, .45); }
+}
+
+.badge {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: #0d0d10;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, .18);
+}
+
+/* ─── Painel expandido ─── */
+.panel {
+  width: 100%;
+  height: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-2xl);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .6);
+}
+
+/* Header: chip de tipo + contador + botão fechar */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* Chip de tipo no header (mesmo visual do icard-type do inbox) */
+.typeChip {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  border-radius: var(--r-xs);
+  padding: 3px 7px;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: background var(--dur-micro), color var(--dur-micro);
+}
+
+/* Dot + título neutro (quando sem conteúdo) */
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.titleNeutral { font-size: 13px; font-weight: 700; color: var(--fg); flex: 1; }
+
+/* Contador N/10 */
+.counter {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--fg3);
+  margin-left: auto;
+  letter-spacing: .01em;
+}
+
+.close {
+  width: 22px; height: 22px; border-radius: var(--r-sm);
+  border: none; background: transparent; color: var(--fg3);
+  cursor: pointer; font-size: 16px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--dur-micro), color var(--dur-micro);
+  flex-shrink: 0;
+}
+.close:hover { background: var(--surface3); color: var(--fg); }
+
+/* Textarea */
+.input {
+  flex: 1;
+  margin: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  color: var(--fg);
+  font-size: 14px;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  line-height: 1.45;
+  transition: border-color var(--dur-base);
+}
+.input:focus { border-color: var(--accent); }
+.input:disabled { opacity: .5; cursor: not-allowed; }
+.input::placeholder { color: var(--fg3); }
+
+/* Preview de imagem colada */
+.imgPreviewWrap {
+  flex: 1;
+  margin: 12px;
+  position: relative;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+}
+.imgPreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.imgClear {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.6);
+  border: none;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+  transition: background var(--dur-micro);
+}
+.imgClear:hover { background: rgba(0,0,0,.85); }
+
+/* Footer */
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 12px;
+  flex-shrink: 0;
+}
+.hint { font-size: 11px; color: var(--fg3); flex: 1; }
+
+/* Botão "Abrir Dott" — discreto, ícone */
+.btnOpen {
+  width: 28px; height: 28px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--fg3);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background var(--dur-micro), color var(--dur-micro), border-color var(--dur-micro);
+}
+.btnOpen:hover { background: var(--surface3); color: var(--fg); border-color: var(--fg3); }
+
+/* Botão Salvar principal */
+.btn {
+  height: 30px;
+  padding: 0 14px;
+  border-radius: var(--r-md);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex; align-items: center; gap: 4px;
+  flex-shrink: 0;
+  transition: opacity var(--dur-micro);
+}
+.btn:hover:not(:disabled) { opacity: .88; }
+.btn:disabled { cursor: not-allowed; }
+
+/* Estado cheio */
+.btnFull {
+  background: var(--surface3);
+  border-color: var(--border2);
+  color: var(--fg3);
+  font-size: 12px;
+  padding: 0 10px;
+}
+
+.arrow { font-size: 14px; line-height: 1; }
+
+/* ─── Cores dos chips de tipo (mesmas do InboxPanel) ─── */
+.chip-nota    { background: rgba(74,143,217,.15);  color: #4a8fd9; }
+.chip-url     { background: rgba(155,108,219,.15); color: #9b6cdb; }
+.chip-codigo  { background: rgba(61,179,122,.15);  color: #3db37a; }
+.chip-ideia   { background: rgba(217,140,58,.15);  color: #d98c3a; }
+.chip-shell   { background: rgba(224,64,64,.15);   color: #e04040; }
+.chip-audio   { background: rgba(61,179,170,.15);  color: #3db3aa; }
+.chip-video   { background: rgba(224,90,160,.15);  color: #e05aa0; }
+.chip-imagem  { background: rgba(100,150,240,.15); color: #6496f0; }
+.chip-arquivo { background: rgba(180,150,90,.15);  color: #b4966e; }
+.chip-link    { background: rgba(90,180,180,.15);  color: #5ab4b4; }
+.chip-prompt  { background: rgba(160,90,220,.15);  color: #a05adc; }
+.chip-tarefa  { background: rgba(61,179,122,.15);  color: #3db37a; }
+.chip-contato { background: rgba(61,179,170,.15);  color: #3db3aa; }

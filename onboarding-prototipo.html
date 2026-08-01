@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dott — Onboarding (protótipo)</title>
+<style>
+@font-face { font-family:'MiSans Latin'; src:url('src/styles/fonts/MiSansLatin-Regular.otf') format('opentype'); font-weight:400; font-display:swap; }
+@font-face { font-family:'MiSans Latin'; src:url('src/styles/fonts/MiSansLatin-Medium.otf') format('opentype'); font-weight:500; font-display:swap; }
+@font-face { font-family:'MiSans Latin'; src:url('src/styles/fonts/MiSansLatin-Semibold.otf') format('opentype'); font-weight:600; font-display:swap; }
+@font-face { font-family:'MiSans Latin'; src:url('src/styles/fonts/MiSansLatin-Bold.otf') format('opentype'); font-weight:700; font-display:swap; }
+@font-face { font-family:'MiSans Latin'; src:url('src/styles/fonts/MiSansLatin-Heavy.otf') format('opentype'); font-weight:800; font-display:swap; }
+
+:root[data-theme="dark"]{
+  --bg:#0d0d10; --surface:#141417; --surface2:#1a1a1e; --surface3:#222228;
+  --border:#26262c; --border2:#2e2e36;
+  --fg:#e8e8ec; --fg2:#aeaec2; --fg3:#8c8ca6;
+  --accent:#e05a38; --accent-s:rgba(224,90,56,.12);
+  --blue:#4a8fd9; --green:#3db37a;
+  --q-p:#e04040; --q-a:#4a8fd9; --q-r:#3db37a; --q-ar:#666680;
+  --warn:#d98c3a; --danger:#e04040; --success:#3db37a;
+  --shadow:0 4px 24px rgba(0,0,0,.5);
+}
+:root{
+  --font-body:'MiSans Latin',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono','Cascadia Code','Fira Code',monospace;
+  --r-sm:9px; --r-md:12px; --r-lg:15px; --r-xl:18px; --r-2xl:22px; --r-3xl:26px; --r-full:9999px;
+  --sq:2;
+  --dur-micro:120ms; --dur-base:150ms; --dur-medium:200ms; --dur-long:300ms;
+  --ease-spring:cubic-bezier(0.34,1.4,0.5,1);
+}
+@supports (corner-shape: superellipse(2)){
+  *,*::before,*::after{ corner-shape:superellipse(var(--sq)); }
+  [class*="dot"],[class*="ring"],[class*="orb"]{ corner-shape:round; }
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+html,body{ height:100%; }
+body{ font-family:var(--font-body); background:var(--bg); color:var(--fg); font-size:15px; -webkit-font-smoothing:antialiased; overflow:hidden; }
+
+.app{ position:fixed; inset:0; display:flex; flex-direction:column; }
+.titlebar{ height:38px; flex:none; display:flex; align-items:center; gap:10px; padding:0 14px; background:var(--surface); border-bottom:1px solid var(--border); }
+.brand{ display:flex; align-items:center; gap:7px; font-weight:700; letter-spacing:-.01em; }
+.brand .orb{ width:9px; height:9px; border-radius:var(--r-full); background:var(--accent); box-shadow:0 0 10px var(--accent-s); }
+.tb-dot{ width:13px; height:13px; border-radius:var(--r-full); background:var(--surface3); }
+.body{ flex:1; display:grid; grid-template-columns:240px 1fr 260px; min-height:0; }
+.col{ border-right:1px solid var(--border); padding:14px; overflow:hidden; }
+.col:last-child{ border-right:none; }
+.col-h{ font-size:12px; font-weight:600; color:var(--fg3); text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px; display:flex; justify-content:space-between; }
+.col-h .count{ color:var(--fg3); font-weight:500; }
+.icard{ background:var(--surface2); border:1px solid var(--border); border-radius:var(--r-md); padding:9px 10px; margin-bottom:8px; }
+.icard .tag{ font-size:10px; font-weight:700; letter-spacing:.04em; padding:1px 6px; border-radius:var(--r-sm); display:inline-block; margin-bottom:5px; }
+.icard p{ font-size:12.5px; color:var(--fg2); line-height:1.35; }
+.tag.ideia{ color:var(--warn); background:rgba(217,140,58,.12); }
+.tag.url{ color:var(--blue); background:rgba(74,143,217,.12); }
+.tag.nota{ color:var(--fg3); background:var(--surface3); }
+.tag.tarefa{ color:var(--green); background:rgba(61,179,122,.12); }
+.para{ display:grid; grid-template-columns:1fr 1fr; gap:12px; height:100%; }
+.quad{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:13px; position:relative; overflow:hidden; }
+.quad::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--qc); }
+.quad h4{ font-size:13px; font-weight:600; margin-bottom:3px; }
+.quad span{ font-size:11.5px; color:var(--fg3); }
+.quad .folder{ margin-top:10px; height:30px; border-radius:var(--r-sm); background:var(--surface2); border:1px solid var(--border); }
+.task{ display:flex; gap:8px; align-items:center; padding:7px 0; font-size:12.5px; color:var(--fg2); }
+.task .box{ width:14px; height:14px; border-radius:5px; border:1.5px solid var(--border2); flex:none; }
+
+.ob-overlay{ position:fixed; inset:0; z-index:50; background:rgba(8,8,11,.62); backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px);
+  display:flex; align-items:center; justify-content:center; animation:overlayIn var(--dur-medium) ease both; }
+@keyframes overlayIn{ from{opacity:0} to{opacity:1} }
+.ob-skip-x{ position:absolute; top:18px; right:20px; width:34px; height:34px; border-radius:var(--r-full); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--fg3); background:transparent; border:1px solid transparent; font-size:18px; line-height:1; transition:background var(--dur-micro),color var(--dur-micro); }
+.ob-skip-x:hover{ background:var(--surface3); color:var(--fg); }
+.ob-card{ width:min(540px,92vw); background:var(--surface); border:1px solid var(--border2); border-radius:var(--r-3xl); box-shadow:var(--shadow); overflow:hidden;
+  animation:cardIn var(--dur-long) var(--ease-spring) both; }
+@keyframes cardIn{ from{opacity:0; transform:scale(.96) translateY(8px)} to{opacity:1; transform:none} }
+.ob-stage{ height:182px; position:relative; overflow:hidden; background:radial-gradient(120% 100% at 50% 0%, var(--surface2), var(--surface));
+  border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:center; }
+.ob-content{ padding:22px 28px 18px; }
+.ob-kicker{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:9px; }
+.ob-title{ font-size:23px; font-weight:800; letter-spacing:-.02em; line-height:1.15; margin-bottom:9px; }
+.ob-text{ font-size:14.5px; line-height:1.5; color:var(--fg2); }
+.ob-text b{ color:var(--fg); font-weight:600; }
+.ob-text .kbd{ font-family:var(--font-mono); font-size:12.5px; background:var(--surface3); border:1px solid var(--border2); border-radius:6px; padding:1px 7px; color:var(--fg); white-space:nowrap; }
+.ob-note{ margin-top:13px; display:flex; gap:9px; align-items:flex-start; font-size:12.5px; line-height:1.45; color:var(--fg3);
+  background:var(--accent-s); border:1px solid rgba(224,90,56,.22); border-radius:var(--r-md); padding:9px 11px; }
+.ob-note .badge{ font-size:9.5px; font-weight:800; letter-spacing:.06em; color:var(--accent); border:1px solid var(--accent); border-radius:var(--r-sm); padding:1px 5px; flex:none; margin-top:1px; }
+.para-list{ margin-top:14px; display:grid; gap:7px; }
+.pl-row{ display:flex; gap:10px; align-items:baseline; font-size:13px; }
+.pl-row .pd{ width:8px; height:8px; border-radius:var(--r-full); flex:none; transform:translateY(1px); }
+.pl-row strong{ font-weight:600; color:var(--fg); min-width:64px; }
+.pl-row span{ color:var(--fg3); }
+.pl-row span i{ font-style:italic; opacity:.85; }
+.ob-foot{ display:flex; align-items:center; gap:12px; padding:14px 28px 20px; }
+.dots{ display:flex; gap:6px; flex:1; }
+.dots i{ width:6px; height:6px; border-radius:var(--r-full); background:var(--border2); transition:all var(--dur-base); }
+.dots i.on{ width:20px; background:var(--accent); }
+.btn{ font-family:inherit; font-size:13.5px; font-weight:600; border-radius:var(--r-md); padding:8px 15px; cursor:pointer; border:1px solid transparent; background:transparent; color:var(--fg3); transition:all var(--dur-micro); }
+.btn:hover{ color:var(--fg); background:var(--surface3); }
+.btn.primary{ background:var(--accent); color:#fff; border-color:var(--accent); box-shadow:0 2px 10px rgba(224,90,56,.3); }
+.btn.primary:hover{ filter:brightness(1.07); background:var(--accent); }
+.btn.ghost{ color:var(--fg2); }
+.btn[hidden]{ display:none; }
+
+.step{ display:none; }
+.step.is-active{ display:block; }
+
+.s1-orb{ position:relative; display:flex; flex-direction:column; align-items:center; gap:16px; }
+.s1-dot{ width:46px; height:46px; border-radius:var(--r-full); background:var(--accent); box-shadow:0 0 30px var(--accent-s); animation:popIn .5s var(--ease-spring) both; }
+.s1-ring{ position:absolute; top:-9px; left:50%; width:64px; height:64px; margin-left:-32px; border-radius:var(--r-full); border:2px solid var(--accent); opacity:.5; animation:ringPulse 2.2s ease-out infinite; }
+.s1-word{ font-size:26px; font-weight:800; letter-spacing:-.02em; animation:fadeUp .55s ease .18s both; }
+@keyframes ringPulse{ 0%{transform:scale(.7);opacity:.55} 70%{opacity:0} 100%{transform:scale(1.7);opacity:0} }
+@keyframes popIn{ from{transform:scale(0)} to{transform:scale(1)} }
+@keyframes fadeUp{ from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none} }
+
+.s2{ position:relative; width:230px; height:150px; }
+.s2-keys{ position:absolute; top:6px; left:50%; transform:translateX(-50%); display:flex; gap:6px; animation:fadeUp .4s ease both; }
+.s2-keys .k{ font-family:var(--font-mono); font-size:12px; color:var(--fg); background:var(--surface3); border:1px solid var(--border2); border-bottom-width:2px; border-radius:7px; padding:5px 9px; }
+.s2-card{ position:absolute; top:0; left:50%; width:150px; margin-left:-75px; background:var(--surface2); border:1px solid var(--border2); border-radius:var(--r-md); padding:8px 10px; font-size:11.5px; color:var(--fg2); animation:dropIn 1s var(--ease-spring) .55s both; }
+.s2-card .tag{ font-size:9px; font-weight:700; color:var(--warn); background:rgba(217,140,58,.14); padding:1px 5px; border-radius:5px; }
+.s2-tray{ position:absolute; bottom:0; left:50%; width:190px; margin-left:-95px; height:54px; border:1.5px dashed var(--border2); border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; color:var(--fg3); font-size:11px; font-weight:600; letter-spacing:.04em; }
+@keyframes dropIn{ 0%{top:42px; opacity:0; transform:scale(.9)} 30%{opacity:1} 100%{top:86px; opacity:1; transform:scale(1)} }
+
+.s3{ display:grid; grid-template-columns:1fr 1fr; gap:9px; width:250px; }
+.s3 .q{ border:1px solid var(--border2); border-radius:var(--r-md); padding:9px 11px; background:var(--surface); position:relative; overflow:hidden; opacity:0; transform:translateY(8px) scale(.96); }
+.s3 .q::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--qc); }
+.s3 .q h5{ font-size:12.5px; font-weight:700; margin-bottom:1px; }
+.s3 .q small{ font-size:10px; color:var(--fg3); }
+.is-active .s3 .q{ animation:qIn .45s var(--ease-spring) forwards; }
+.is-active .s3 .q:nth-child(1){ animation-delay:.05s }
+.is-active .s3 .q:nth-child(2){ animation-delay:.18s }
+.is-active .s3 .q:nth-child(3){ animation-delay:.31s }
+.is-active .s3 .q:nth-child(4){ animation-delay:.44s }
+@keyframes qIn{ to{opacity:1; transform:none} }
+
+.s4{ position:relative; width:250px; height:140px; }
+.s4-inbox,.s4-target{ position:absolute; top:24px; width:78px; height:92px; border-radius:var(--r-md); border:1.5px dashed var(--border2); display:flex; align-items:flex-start; justify-content:center; padding-top:8px; font-size:10px; font-weight:600; color:var(--fg3); letter-spacing:.04em; }
+.s4-inbox{ left:0; }
+.s4-target{ right:0; border-style:solid; border-color:var(--q-p); }
+.is-active .s4-target{ animation:targetGlow 1.2s ease 1.15s both; }
+@keyframes targetGlow{ 0%,100%{box-shadow:none} 40%{box-shadow:0 0 0 4px rgba(224,64,64,.16)} }
+.s4-card{ position:absolute; top:30px; left:6px; width:66px; height:46px; background:var(--surface2); border:1px solid var(--border2); border-radius:var(--r-sm); padding:6px; overflow:hidden; animation:dragOver 1.8s var(--ease-spring) .35s both; }
+.s4-card .ln{ height:4px; border-radius:2px; background:var(--border2); margin-bottom:4px; }
+.s4-card .ln.a{ width:80%; } .s4-card .ln.b{ width:55%; }
+.s4-card .nt{ font-size:8px; font-weight:700; color:var(--q-p); opacity:0; margin-bottom:3px; }
+.is-active .s4-card .nt{ animation:noteShow .4s ease 1.5s both; }
+@keyframes dragOver{ 0%{left:6px; transform:rotate(0)} 55%{transform:rotate(-4deg)} 100%{left:178px; transform:rotate(0)} }
+@keyframes noteShow{ from{opacity:0} to{opacity:1} }
+
+.s5{ width:230px; height:130px; }
+.s5 svg{ width:100%; height:100%; overflow:visible; }
+.s5 .edge{ stroke:var(--accent); stroke-width:1.6; fill:none; stroke-dasharray:130; stroke-dashoffset:130; }
+.is-active .s5 .e1{ animation:draw .7s ease .35s forwards; }
+.is-active .s5 .e2{ animation:draw .7s ease .75s forwards; }
+.s5 .node{ fill:var(--surface3); stroke:var(--accent); stroke-width:1.5; opacity:0; }
+.is-active .s5 .node{ animation:nodeIn .4s var(--ease-spring) forwards; }
+.is-active .s5 .n1{ animation-delay:.1s } .is-active .s5 .n2{ animation-delay:.55s } .is-active .s5 .n3{ animation-delay:.95s }
+@keyframes draw{ to{stroke-dashoffset:0} }
+@keyframes nodeIn{ to{opacity:1} }
+
+@media (prefers-reduced-motion: reduce){ *{ animation-duration:.001ms !important; } }
+</style>
+</head>
+<body>
+
+<div class="app" aria-hidden="true">
+  <div class="titlebar">
+    <div class="brand"><span class="orb"></span>Dott</div>
+    <div style="flex:1"></div>
+    <div class="tb-dot"></div><div class="tb-dot"></div><div class="tb-dot"></div>
+  </div>
+  <div class="body">
+    <div class="col">
+      <div class="col-h">Inbox <span class="count">4 / 10</span></div>
+      <div class="icard"><span class="tag ideia">IDEIA</span><p>E se eu capturasse todos os meus pensamentos num só lugar?</p></div>
+      <div class="icard"><span class="tag url">URL</span><p>fortelabs.com/blog/para</p></div>
+      <div class="icard"><span class="tag nota">NOTA</span><p>Ler a nota "Bem-vindo ao Dott"</p></div>
+      <div class="icard"><span class="tag tarefa">TAREFA</span><p>Criar minha primeira pasta em Projetos</p></div>
+    </div>
+    <div class="col">
+      <div class="col-h">Board · PARA</div>
+      <div class="para">
+        <div class="quad" style="--qc:var(--q-p)"><h4>Projetos</h4><span>2 pastas</span><div class="folder"></div></div>
+        <div class="quad" style="--qc:var(--q-a)"><h4>Áreas</h4><span>2 pastas</span><div class="folder"></div></div>
+        <div class="quad" style="--qc:var(--q-r)"><h4>Recursos</h4><span>2 pastas</span><div class="folder"></div></div>
+        <div class="quad" style="--qc:var(--q-ar)"><h4>Arquivo</h4><span>1 pasta</span><div class="folder"></div></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="col-h">Tarefas</div>
+      <div class="task"><span class="box"></span>Ler a nota de boas-vindas</div>
+      <div class="task"><span class="box"></span>Capturar 3 pensamentos</div>
+      <div class="task"><span class="box"></span>Criar sua primeira pasta</div>
+    </div>
+  </div>
+</div>
+
+<div class="ob-overlay" id="ov">
+  <div class="ob-skip-x" id="skipx" title="Pular introdução">✕</div>
+  <div class="ob-card" role="dialog" aria-label="Introdução ao Dott">
+    <div class="ob-stage" id="stage">
+      <div class="step is-active" data-stage="1">
+        <div class="s1-orb"><div class="s1-ring"></div><div class="s1-dot"></div><div class="s1-word">Dott</div></div>
+      </div>
+      <div class="step" data-stage="2">
+        <div class="s2">
+          <div class="s2-keys"><span class="k">Ctrl</span><span class="k">Shift</span><span class="k">Space</span></div>
+          <div class="s2-card"><span class="tag">IDEIA</span> &nbsp;ideia nova…</div>
+          <div class="s2-tray">INBOX</div>
+        </div>
+      </div>
+      <div class="step" data-stage="3">
+        <div class="s3">
+          <div class="q" style="--qc:var(--q-p)"><h5>Projetos</h5><small>tem fim</small></div>
+          <div class="q" style="--qc:var(--q-a)"><h5>Áreas</h5><small>contínuo</small></div>
+          <div class="q" style="--qc:var(--q-r)"><h5>Recursos</h5><small>referência</small></div>
+          <div class="q" style="--qc:var(--q-ar)"><h5>Arquivo</h5><small>inativo</small></div>
+        </div>
+      </div>
+      <div class="step" data-stage="4">
+        <div class="s4">
+          <div class="s4-inbox">INBOX</div>
+          <div class="s4-target">PROJETOS</div>
+          <div class="s4-card"><div class="nt">NOTA</div><div class="ln a"></div><div class="ln b"></div></div>
+        </div>
+      </div>
+      <div class="step" data-stage="5">
+        <div class="s5">
+          <svg viewBox="0 0 230 130">
+            <path class="edge e1" d="M55,40 L165,55" />
+            <path class="edge e2" d="M165,55 L100,100" />
+            <circle class="node n1" cx="55" cy="40" r="11"/>
+            <circle class="node n2" cx="165" cy="55" r="11"/>
+            <circle class="node n3" cx="100" cy="100" r="11"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="ob-content" id="content">
+      <div class="step is-active" data-text="1">
+        <div class="ob-kicker">Boas-vindas</div>
+        <h2 class="ob-title">Bem-vindo ao Dott</h2>
+        <p class="ob-text">Seu segundo cérebro. Tire as ideias da cabeça — o Dott <b>guarda e organiza</b>, tudo offline, só na sua máquina.</p>
+      </div>
+      <div class="step" data-text="2">
+        <div class="ob-kicker">1 · Capturar</div>
+        <h2 class="ob-title">Primeiro, capture. Sem pensar onde.</h2>
+        <p class="ob-text">Teve uma ideia, um link, um trecho? Aperte <span class="kbd">Ctrl+Shift+Space</span> em qualquer app e jogue na <b>Inbox</b>. Onde guardar fica pra depois.</p>
+        <div class="ob-note"><span class="badge">GTD</span><span>Capturar antes de organizar é o hábito que vem do GTD. A Inbox segura até <b>10</b> itens de propósito — quando enche, é hora de organizar.</span></div>
+      </div>
+      <div class="step" data-text="3">
+        <div class="ob-kicker">2 · Organizar · método PARA</div>
+        <h2 class="ob-title">Depois, organize em 4 lugares</h2>
+        <p class="ob-text">O <b>PARA</b> separa tudo por quão acionável é:</p>
+        <div class="para-list">
+          <div class="pl-row"><span class="pd" style="background:var(--q-p)"></span><strong>Projetos</strong><span>o que você quer ver concluído <i>(ex.: lançar o site)</i></span></div>
+          <div class="pl-row"><span class="pd" style="background:var(--q-a)"></span><strong>Áreas</strong><span>o que você cuida sem prazo <i>(ex.: saúde, finanças)</i></span></div>
+          <div class="pl-row"><span class="pd" style="background:var(--q-r)"></span><strong>Recursos</strong><span>o que você guarda pra usar um dia <i>(ex.: leituras)</i></span></div>
+          <div class="pl-row"><span class="pd" style="background:var(--q-ar)"></span><strong>Arquivo</strong><span>o que já serviu, mas não some</span></div>
+        </div>
+        <div class="ob-note" style="background:var(--surface2);border-color:var(--border2);color:var(--fg2)"><span class="badge" style="color:var(--fg3);border-color:var(--border2)">DICA</span><span>Na dúvida? Escolha o lugar <b>mais acionável</b>: Projetos › Áreas › Recursos › Arquivo.</span></div>
+      </div>
+      <div class="step" data-text="4">
+        <div class="ob-kicker">3 · Processar</div>
+        <h2 class="ob-title">Esvazie a Inbox</h2>
+        <p class="ob-text">Arraste cada card pro lugar certo no board. Ele vira uma <b>nota</b>, prontinha pra editar. A Inbox não é um destino — é uma caixa de entrada.</p>
+      </div>
+      <div class="step" data-text="5">
+        <div class="ob-kicker">4 · Conectar</div>
+        <h2 class="ob-title">Ligue as ideias</h2>
+        <p class="ob-text">Escreva <span class="kbd">[[assim]]</span> dentro de uma nota pra conectar com outra. Com o tempo, tudo vira uma <b>constelação</b> sua. Pronto — agora é com você.</p>
+      </div>
+    </div>
+
+    <div class="ob-foot">
+      <div class="dots" id="dots"></div>
+      <button class="btn ghost" id="back" hidden>Voltar</button>
+      <button class="btn ghost" id="skip">Pular</button>
+      <button class="btn primary" id="next">Próximo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var TOTAL = 5, i = 0;
+  var stageSteps = document.querySelectorAll('#stage .step');
+  var textSteps  = document.querySelectorAll('#content .step');
+  var dots = document.getElementById('dots');
+  var back = document.getElementById('back');
+  var skip = document.getElementById('skip');
+  var next = document.getElementById('next');
+  var ov   = document.getElementById('ov');
+  for(var d=0; d<TOTAL; d++){ dots.appendChild(document.createElement('i')); }
+  var dotEls = dots.querySelectorAll('i');
+  function render(){
+    stageSteps.forEach(function(s,idx){ s.classList.toggle('is-active', idx===i); });
+    textSteps.forEach(function(s,idx){ s.classList.toggle('is-active', idx===i); });
+    dotEls.forEach(function(s,idx){ s.classList.toggle('on', idx===i); });
+    back.hidden = (i===0);
+    skip.hidden = (i===TOTAL-1);
+    next.textContent = (i===TOTAL-1) ? 'Começar a usar o Dott' : 'Próximo';
+  }
+  function go(n){ i = Math.max(0, Math.min(TOTAL-1, n)); render(); }
+  function finish(){ ov.style.transition='opacity .25s ease'; ov.style.opacity='0'; setTimeout(function(){ ov.style.display='none'; }, 250); }
+  next.onclick = function(){ if(i===TOTAL-1) finish(); else go(i+1); };
+  back.onclick = function(){ go(i-1); };
+  skip.onclick = finish;
+  document.getElementById('skipx').onclick = finish;
+  document.addEventListener('keydown', function(e){
+    if(ov.style.display==='none') return;
+    if(e.key==='ArrowRight'||e.key==='Enter') next.click();
+    else if(e.key==='ArrowLeft') back.click();
+    else if(e.key==='Escape') finish();
+  });
+  render();
+})();
+</script>
+</body>
+</html>

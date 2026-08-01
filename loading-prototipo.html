@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dott — Loadings (protótipo)</title>
+<style>
+@font-face { font-family:'MiSans Latin'; src:url('src/styles/fonts/MiSansLatin-Regular.otf') format('opentype'); font-weight:400; font-display:swap; }
+@font-face { font-family:'MiSans Latin'; src:url('src/styles/fonts/MiSansLatin-Medium.otf') format('opentype'); font-weight:500; font-display:swap; }
+@font-face { font-family:'MiSans Latin'; src:url('src/styles/fonts/MiSansLatin-Semibold.otf') format('opentype'); font-weight:600; font-display:swap; }
+@font-face { font-family:'MiSans Latin'; src:url('src/styles/fonts/MiSansLatin-Bold.otf') format('opentype'); font-weight:700; font-display:swap; }
+@font-face { font-family:'MiSans Latin'; src:url('src/styles/fonts/MiSansLatin-Heavy.otf') format('opentype'); font-weight:800; font-display:swap; }
+
+:root[data-theme="dark"]{
+  --bg:#0d0d10; --surface:#141417; --surface2:#1a1a1e; --surface3:#222228;
+  --border:#26262c; --border2:#2e2e36;
+  --fg:#e8e8ec; --fg2:#aeaec2; --fg3:#8c8ca6;
+  --accent:#e05a38; --accent-s:rgba(224,90,56,.12);
+  --q-p:#e04040; --q-a:#4a8fd9; --q-r:#3db37a; --q-ar:#666680;
+}
+:root{
+  --font-body:'MiSans Latin',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  --r-md:12px; --r-lg:15px; --r-2xl:22px; --r-3xl:26px; --r-full:9999px; --sq:2;
+  --ease-spring:cubic-bezier(0.34,1.4,0.5,1);
+}
+@supports (corner-shape: superellipse(2)){
+  *,*::before,*::after{ corner-shape:superellipse(var(--sq)); }
+  [class*="dot"],[class*="ring"],[class*="orb"],[class*="round"]{ corner-shape:round; }
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{ font-family:var(--font-body); background:var(--bg); color:var(--fg); -webkit-font-smoothing:antialiased; min-height:100vh; padding:40px 32px 60px; }
+
+.head{ max-width:980px; margin:0 auto 30px; }
+.head h1{ font-size:26px; font-weight:800; letter-spacing:-.02em; }
+.head p{ font-size:14px; color:var(--fg3); margin-top:6px; }
+
+.grid{ max-width:980px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+@media (max-width:760px){ .grid{ grid-template-columns:repeat(2,1fr); } }
+
+.tile{ background:var(--surface); border:1px solid var(--border2); border-radius:var(--r-3xl); overflow:hidden; }
+.stage{ height:190px; display:flex; align-items:center; justify-content:center; background:radial-gradient(120% 100% at 50% 35%, var(--surface2), var(--surface)); border-bottom:1px solid var(--border); }
+.cap{ padding:13px 16px 15px; }
+.cap b{ font-size:13.5px; font-weight:700; }
+.cap b span{ color:var(--accent); font-weight:800; margin-right:6px; }
+.cap p{ font-size:12px; color:var(--fg3); margin-top:3px; line-height:1.4; }
+
+/* V1 Pulso */
+.l1{ position:relative; width:80px; height:80px; display:flex; align-items:center; justify-content:center; }
+.l1 .orb{ width:30px; height:30px; border-radius:var(--r-full); background:var(--accent); box-shadow:0 0 26px var(--accent-s); animation:breathe 1.7s ease-in-out infinite; }
+.l1 .ring{ position:absolute; width:30px; height:30px; border-radius:var(--r-full); border:2px solid var(--accent); animation:pulseRing 1.9s ease-out infinite; }
+.l1 .ring.b{ animation-delay:.65s; }
+.l1 .ring.c{ animation-delay:1.3s; }
+@keyframes breathe{ 0%,100%{ transform:scale(.86) } 50%{ transform:scale(1.06) } }
+@keyframes pulseRing{ 0%{ transform:scale(.7); opacity:.6 } 80%{ opacity:0 } 100%{ transform:scale(2.4); opacity:0 } }
+
+/* V2 Convergencia PARA */
+.l2{ width:78px; height:78px; position:relative; animation:spin 7s linear infinite; }
+.l2 .arm{ position:absolute; inset:0; display:flex; justify-content:center; }
+.l2 .arm i{ width:11px; height:11px; border-radius:var(--r-full); margin-top:1px; animation:converge 1.9s ease-in-out infinite; }
+.l2 .arm:nth-child(1){ transform:rotate(0deg) }   .l2 .arm:nth-child(1) i{ background:var(--q-p); }
+.l2 .arm:nth-child(2){ transform:rotate(90deg) }  .l2 .arm:nth-child(2) i{ background:var(--q-a); animation-delay:.12s; }
+.l2 .arm:nth-child(3){ transform:rotate(180deg) } .l2 .arm:nth-child(3) i{ background:var(--q-r); animation-delay:.24s; }
+.l2 .arm:nth-child(4){ transform:rotate(270deg) } .l2 .arm:nth-child(4) i{ background:var(--q-ar); animation-delay:.36s; }
+.l2 .core{ position:absolute; top:50%; left:50%; width:12px; height:12px; margin:-6px 0 0 -6px; border-radius:var(--r-full); background:var(--accent); box-shadow:0 0 16px var(--accent-s); animation:breathe 1.9s ease-in-out infinite; }
+@keyframes converge{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(26px) } }
+@keyframes spin{ to{ transform:rotate(360deg) } }
+
+/* V3 Constelacao */
+.l3 svg{ width:120px; height:90px; overflow:visible; }
+.l3 .edge{ stroke:var(--accent); stroke-width:1.8; fill:none; stroke-dasharray:64; stroke-dashoffset:64; animation:draw 2.4s ease-in-out infinite; }
+.l3 .e2{ animation-delay:.35s } .l3 .e3{ animation-delay:.7s }
+.l3 .node{ fill:var(--surface3); stroke:var(--accent); stroke-width:1.8; animation:nodePulse 2.4s ease-in-out infinite; }
+.l3 .n2{ animation-delay:.35s } .l3 .n3{ animation-delay:.7s }
+@keyframes draw{ 0%{ stroke-dashoffset:64 } 45%{ stroke-dashoffset:0 } 80%{ stroke-dashoffset:0 } 100%{ stroke-dashoffset:-64 } }
+@keyframes nodePulse{ 0%,100%{ r:5; opacity:.55 } 50%{ r:7; opacity:1 } }
+
+/* V4 Orbita */
+.l4{ position:relative; width:62px; height:62px; }
+.l4 .track{ position:absolute; inset:0; border-radius:var(--r-full); border:2px solid var(--surface3); }
+.l4 .arc{ position:absolute; inset:0; border-radius:var(--r-full); border:2px solid transparent; border-top-color:var(--accent); border-right-color:var(--accent); animation:spin 1.15s linear infinite; }
+.l4 .run{ position:absolute; inset:0; animation:spin 1.15s linear infinite; }
+.l4 .run .dot{ position:absolute; top:-5px; left:50%; margin-left:-6px; width:12px; height:12px; border-radius:var(--r-full); background:var(--accent); box-shadow:0 0 14px var(--accent-s); }
+
+/* V5 Quadrantes */
+.l5{ display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:6px; width:58px; height:58px; }
+.l5 i{ border-radius:7px; animation:cell 1.5s ease-in-out infinite; }
+.l5 i:nth-child(1){ background:var(--q-p); animation-delay:0s }
+.l5 i:nth-child(2){ background:var(--q-a); animation-delay:.18s }
+.l5 i:nth-child(3){ background:var(--q-ar); animation-delay:.54s }
+.l5 i:nth-child(4){ background:var(--q-r); animation-delay:.36s }
+@keyframes cell{ 0%,100%{ opacity:.18; transform:scale(.82) } 50%{ opacity:1; transform:scale(1) } }
+
+/* V6 Marca viva */
+.l6{ display:flex; align-items:flex-end; gap:5px; animation:breathe 2.2s ease-in-out infinite; }
+.l6 .w{ font-size:34px; font-weight:800; letter-spacing:-.03em; color:var(--fg); }
+.l6 .pt{ width:9px; height:9px; border-radius:var(--r-full); background:var(--accent); margin-bottom:7px; box-shadow:0 0 12px var(--accent-s); animation:blink 1.25s ease-in-out infinite; }
+@keyframes blink{ 0%,100%{ opacity:1; transform:scale(1) } 50%{ opacity:.25; transform:scale(.7) } }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>Dott · telas de carregamento</h1>
+  <p>6 versões rodando ao vivo. Escolha a que tem mais a cara do Dott — eu coloco a escolhida no app.</p>
+</div>
+
+<div class="grid">
+
+  <div class="tile">
+    <div class="stage">
+      <div class="l1"><span class="ring"></span><span class="ring b"></span><span class="ring c"></span><span class="orb"></span></div>
+    </div>
+    <div class="cap"><b><span>V1</span>Pulso</b><p>O orb do Dott respirando com ondas — puro, icônico, minimalista.</p></div>
+  </div>
+
+  <div class="tile">
+    <div class="stage">
+      <div class="l2"><span class="arm"><i></i></span><span class="arm"><i></i></span><span class="arm"><i></i></span><span class="arm"><i></i></span><span class="core"></span></div>
+    </div>
+    <div class="cap"><b><span>V2</span>Convergência PARA</b><p>As 4 cores do PARA giram e convergem no centro — ideias virando um cérebro.</p></div>
+  </div>
+
+  <div class="tile">
+    <div class="stage">
+      <div class="l3">
+        <svg viewBox="0 0 120 90">
+          <path class="edge e1" d="M22,30 L70,20"/>
+          <path class="edge e2" d="M70,20 L96,58"/>
+          <path class="edge e3" d="M96,58 L40,70"/>
+          <circle class="node n1" cx="22" cy="30" r="5"/>
+          <circle class="node n2" cx="70" cy="20" r="5"/>
+          <circle class="node n3" cx="96" cy="58" r="5"/>
+          <circle class="node n4" cx="40" cy="70" r="5"/>
+        </svg>
+      </div>
+    </div>
+    <div class="cap"><b><span>V3</span>Constelação</b><p>Notas se conectando com linhas — o grafo de wiki-links do Dott se formando.</p></div>
+  </div>
+
+  <div class="tile">
+    <div class="stage">
+      <div class="l4"><span class="track"></span><span class="arc"></span><span class="run"><span class="dot"></span></span></div>
+    </div>
+    <div class="cap"><b><span>V4</span>Órbita</b><p>Spinner clássico, mas com o ponto laranja do Dott girando numa trilha. Familiar e rápido.</p></div>
+  </div>
+
+  <div class="tile">
+    <div class="stage">
+      <div class="l5"><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="cap"><b><span>V5</span>Quadrantes</b><p>Os 4 blocos do PARA acendendo em sequência — direto ao conceito do app.</p></div>
+  </div>
+
+  <div class="tile">
+    <div class="stage">
+      <div class="l6"><span class="w">Dott</span><span class="pt"></span></div>
+    </div>
+    <div class="cap"><b><span>V6</span>Marca viva</b><p>O nome "Dott" respirando, com o ponto piscando como um cursor. Assinatura limpa.</p></div>
+  </div>
+
+</div>
+</body>
+</html>
