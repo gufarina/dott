@@ -35,15 +35,19 @@ export function DottMark({
       aria-hidden={title ? undefined : true}
       focusable="false"
     >
-      {/* o anel aberto — o cerebro que nunca fecha.
-          Pontas arredondadas: a abertura tem que parecer decisao, nao corte. */}
+      {/* O anel aberto — o cerebro que nunca fecha.
+          CONCENTRICO COM O PONTO, e isso e conta, nao olho: os dois extremos do
+          arco estao a exatamente 8.8 do centro (12,12), nos angulos -15deg e
+          -65deg. Se as pontas nao ficarem na distancia do raio, o navegador
+          reposiciona o centro do circulo pra conseguir encaixar o arco e o anel
+          sai torto em relacao a bola — foi exatamente o que aconteceu antes. */}
       <path
-        d="M18.55 6.9a8.85 8.85 0 1 1-5.6-3.6"
+        d="M20.5 9.722A8.8 8.8 0 1 1 15.719 4.024"
         stroke="currentColor"
         strokeWidth="2.6"
         strokeLinecap="round"
       />
-      {/* o pensamento */}
+      {/* o pensamento — mesmo centro do anel */}
       <circle cx="12" cy="12" r="4.4" fill="currentColor" />
     </svg>
   )

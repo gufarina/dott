@@ -21,7 +21,10 @@
 
   <!-- a marca, centralizada na grade de 24 escalada 40x (viewBox 24 -> 960, offset 32) -->
   <g transform="translate(32,32) scale(40)" fill="none">
-    <path d="M18.55 6.9a8.85 8.85 0 1 1-5.6-3.6"
+    <!-- Anel CONCENTRICO com o ponto: as pontas do arco estao a exatamente 8.8
+         do centro (12,12). Ponta fora do raio = navegador reposiciona o centro
+         e o anel sai torto em relacao a bola. -->
+    <path d="M20.5 9.722A8.8 8.8 0 1 1 15.719 4.024"
           stroke="url(#marca)" stroke-width="2.6" stroke-linecap="round"/>
     <circle cx="12" cy="12" r="4.4" fill="url(#marca)"/>
   </g>
