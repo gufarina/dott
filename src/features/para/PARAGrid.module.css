@@ -261,7 +261,7 @@
 }
 .folderNew:hover { border-color: var(--fg3); color: var(--fg); background: var(--surface); }
 
-.plus { font-size: 24px; font-weight: 200; line-height: 1; }
+.plus { display: flex; align-items: center; justify-content: center; line-height: 1; }
 .folderNew span { font-size: 12px; font-weight: 500; }
 
 /* Modal */
@@ -378,6 +378,7 @@
   color: #fff;
   font-size: 13px; font-weight: 600;
   cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; gap: 7px;
   transition: opacity var(--dur-micro);
 }
 .btnPrimary:hover { opacity: .85; }

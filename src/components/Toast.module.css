@@ -42,7 +42,9 @@
 .msg   { font-size: 12px; color: var(--fg2); line-height: 1.45; }
 
 .close {
-  color: var(--fg3); cursor: pointer; font-size: 15px;
+  color: var(--fg3); cursor: pointer;
+  border: none; background: transparent; padding: 0;
   flex-shrink: 0; transition: color var(--dur-micro); line-height: 1;
+  display: flex; align-items: center; justify-content: center;
 }
 .close:hover { color: var(--fg); }

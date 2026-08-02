@@ -3,6 +3,7 @@ import { useDroppable } from '@dnd-kit/core'
 import { useStore, Folder, Quadrant } from '../../store'
 import { saveImageFile } from '../../lib/attachments'
 import { showToast } from '../../components/Toast'
+import { Icon } from '../../components/Icon'
 import s from './PARAGrid.module.css'
 
 const Q_ORDER = ['projects', 'areas', 'resources', 'archives']
@@ -52,12 +53,8 @@ function FolderCard({ folder, quadrant, categoryId, onNavigate }: { folder: Fold
           : <div className={s.coverInner} style={{ background: folder.bg }} />
         }
         {folder.stagnant && <div className={s.stagnant}>!</div>}
-        <button className={s.coverBtn} onClick={pickCover} title="Definir capa">
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="1" y="3" width="12" height="9" rx="1.5"/>
-            <circle cx="4.5" cy="6" r="1"/>
-            <path d="M1 10l3-3 2 2 3-3 4 4"/>
-          </svg>
+        <button className={s.coverBtn} onClick={pickCover} title="Definir capa da pasta">
+          <Icon name="imagem" size={13} />
         </button>
       </div>
       <div className={s.info}>
@@ -104,7 +101,9 @@ function CreateFolderModal({ categoryId, onClose }: { categoryId: string; onClos
       <div className={s.modal}>
         <div className={s.modalHeader}>
           <h3>Nova pasta em {q.label}</h3>
-          <button className={s.modalClose} onClick={onClose}>✕</button>
+          <button className={s.modalClose} onClick={onClose} title="Fechar">
+            <Icon name="fechar" size={13} />
+          </button>
         </div>
         <div className={s.modalBody}>
           <input
@@ -123,7 +122,9 @@ function CreateFolderModal({ categoryId, onClose }: { categoryId: string; onClos
         </div>
         <div className={s.modalFooter}>
           <button className={s.btnCancel} onClick={onClose}>Cancelar</button>
-          <button className={s.btnPrimary} onClick={submit}>Criar pasta</button>
+          <button className={s.btnPrimary} onClick={submit}>
+            <Icon name="pasta" size={13} /> Criar pasta
+          </button>
         </div>
       </div>
     </div>
@@ -143,7 +144,17 @@ export function PARAGrid() {
             <div key={qid} className={`${s.quadrant} ${s['q-' + qid]}`}>
               <div className={s.qHeader}>
                 <div className={s.qIcon}>{Q_ICONS[qid]}</div>
-                <div className={s.qInfo}>
+                {/* O cabecalho tinha cursor de mao e nenhum clique — agora abre a
+                    primeira pasta do quadrante, que era o que a mao prometia. */}
+                <div
+                  className={s.qInfo}
+                  role={q.folders.length ? 'button' : undefined}
+                  title={q.folders.length ? `Abrir ${q.folders[0].name}` : undefined}
+                  onClick={() => {
+                    const first = q.folders[0]
+                    if (first) setView('canvas', { category: qid, folder: first.id })
+                  }}
+                >
                   <div className={s.qTitle}>{q.label}</div>
                   <div className={s.qSubtitle}>
                     {qid === 'projects' && 'O que você quer ver concluído.'}
@@ -152,7 +163,9 @@ export function PARAGrid() {
                     {qid === 'archives' && 'O que já serviu, mas não some.'}
                   </div>
                 </div>
-                <button className={s.qAdd} onClick={() => setCreateIn(qid)}>+</button>
+                <button className={s.qAdd} onClick={() => setCreateIn(qid)} title={`Nova pasta em ${q.label}`} aria-label={`Nova pasta em ${q.label}`}>
+                  <Icon name="pasta" size={14} />
+                </button>
               </div>
               <div className={s.qCards}>
                 {q.folders.map(f => (
@@ -165,7 +178,7 @@ export function PARAGrid() {
                   />
                 ))}
                 <div className={s.folderNew} onClick={() => setCreateIn(qid)}>
-                  <span className={s.plus}>+</span>
+                  <span className={s.plus}><Icon name="pasta" size={16} /></span>
                   <span>Nova pasta</span>
                 </div>
               </div>

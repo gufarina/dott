@@ -39,8 +39,18 @@ const isWidget = currentLabel() === "widget";
 
 // Escala global +20% (conforto em alto DPI) — so na janela principal.
 // O widget tem janela propria de 104px e nao deve escalar.
+//
+// Usa o zoom NATIVO do webview, nunca `zoom` de CSS: o zoom de CSS desalinha as
+// coordenadas de ponteiro das medidas de layout no WebView2 e quebra o arrasto
+// (o card e arrastado mas nunca aterrissa na pasta). O zoom nativo e resolvido
+// pelo proprio navegador, entao ponteiro e layout continuam no mesmo sistema.
 if (!isWidget) {
   document.documentElement.dataset.scale = "on";
+  import("@tauri-apps/api/webview")
+    .then(({ getCurrentWebview }) => getCurrentWebview().setZoom(1.2))
+    .catch(() => {
+      // Fora do Tauri (navegador, dev): segue em 100%, sem quebrar nada.
+    });
 }
 
 if (isWidget) {

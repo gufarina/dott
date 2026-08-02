@@ -2,9 +2,12 @@
 
 html { height: 100%; overflow: hidden; }
 
-/* Escala global +20% no app principal (alto DPI). zoom na raiz escala fonte,
-   espacamento e tamanhos juntos, sem transbordar a janela. Knob unico: 1.2. */
-html[data-scale="on"] { zoom: 1.2; }
+/* Escala global +20% no app principal (alto DPI).
+   NAO usar `zoom` aqui: no WebView2 o zoom de CSS desalinha as coordenadas de
+   ponteiro das medidas de layout, e o arrasto (dnd-kit) para de acertar o alvo —
+   o card e arrastado mas nunca "aterrissa". Mesma familia do bug do corner-shape.
+   A escala agora e aplicada pelo zoom NATIVO do webview em main.tsx (setZoom),
+   que o navegador resolve internamente e mantem todo mundo no mesmo sistema. */
 
 /* Mascara squircle (worklet Houdini). Aplica em qualquer elemento que ja tenha
    border-radius — o worklet le o raio real e desenha a curva superellipse.

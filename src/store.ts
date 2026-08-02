@@ -6,6 +6,7 @@ import { loadFolders, saveFolders } from './lib/foldersService'
 import { loadTasks as loadTasksFile, saveTasks as saveTasksFile } from './lib/tasksService'
 import { removeAttachment } from './lib/attachments'
 import { detectType } from './lib/detectType'
+import type { GlyphId } from './components/NoteGlyphs'
 import { showToast } from './components/Toast'
 
 /** ID unico — evita a colisao do Date.now() em milissegundos. */
@@ -86,6 +87,10 @@ export interface Note {
   img: boolean
   body: string
   tags: string[]
+  /** Simbolo do pacote proprio (NoteGlyphs). Vive no frontmatter do .md. */
+  glyph?: GlyphId
+  /** Capa da nota: url de imagem em attachments. Vive no frontmatter do .md. */
+  cover?: string
   /** Títulos normalizados das notas que ESTA nota aponta via [[link]] */
   links: string[]
   /** IDs das notas que apontam PARA esta nota (backlinks) — computado */
@@ -139,6 +144,10 @@ interface AppState {
   saveNote: (id: string, title: string, body: string, tags?: string[]) => void
   /** Cria nova nota numa pasta */
   createNote: (folderId: string, title: string) => string
+  /** Define o simbolo do pacote proprio da nota (undefined limpa) */
+  setNoteGlyph: (id: string, glyph?: GlyphId) => void
+  /** Define a capa da nota (string vazia limpa) */
+  setNoteCover: (id: string, cover: string) => void
   /** Retorna lista de notas que combinam com o query de wiki-link */
   searchNoteTitles: (query: string) => Note[]
   /** Deleta uma nota do vault e do estado */
@@ -196,6 +205,39 @@ const INITIAL_INBOX: InboxCard[] = [
 
 function initBacklinks(notes: Note[]): Record<string, string[]> {
   return buildBacklinks(notes.map(n => ({ id: n.id, title: n.title, links: n.links })))
+}
+
+/** Paleta fixa das tags — a cor sai do nome, entao nao dança entre sessoes. */
+const TAG_COLORS = ['#e05a38', '#4a8fd9', '#9b6cdb', '#3db37a', '#d98c3a', '#3db3b3', '#e05aa0', '#b4966e']
+function tagColor(name: string): string {
+  let h = 0
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0
+  return TAG_COLORS[h % TAG_COLORS.length]
+}
+
+/** Tags reais derivadas das notas (a lista fixa do seed mentia depois do 1o uso). */
+function deriveTags(notes: Note[]): Tag[] {
+  const count = new Map<string, number>()
+  for (const n of notes) for (const t of n.tags) count.set(t, (count.get(t) ?? 0) + 1)
+  return [...count.entries()]
+    .map(([name, c]) => ({ name, color: tagColor(name), count: c }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+}
+
+/** Contagem de notas por pasta, derivada das notas reais.
+ *  Sem isso a pasta guardava o numero do seed pra sempre — e o card que voce
+ *  acabou de soltar nela nao aparecia em lugar nenhum, parecendo que o drop falhou. */
+function recountFolders(
+  para: Record<string, Quadrant>,
+  notes: Note[],
+): Record<string, Quadrant> {
+  const perFolder = new Map<string, number>()
+  for (const n of notes) if (n.folderId) perFolder.set(n.folderId, (perFolder.get(n.folderId) ?? 0) + 1)
+  const next: Record<string, Quadrant> = {}
+  for (const [qid, q] of Object.entries(para)) {
+    next[qid] = { ...q, folders: q.folders.map(f => ({ ...f, notes: perFolder.get(f.id) ?? 0 })) }
+  }
+  return next
 }
 
 const SEED_NOTES: Note[] = [
@@ -478,7 +520,7 @@ export const useStore = create<AppState>((set, get) => ({
         backlinks: index[normalizeTitle(n.title)] ?? [],
       }))
       saved = notesWithBl.find(n => n.id === id)
-      return { notes: notesWithBl, backlinkIndex: index }
+      return { notes: notesWithBl, backlinkIndex: index, tags: deriveTags(notesWithBl) }
     })
     // Persiste só o arquivo .md alterado (backlinks são derivados, não gravados).
     if (saved) saveNoteToVault(saved)
@@ -491,9 +533,38 @@ export const useStore = create<AppState>((set, get) => ({
       id, title, date: now, updatedAt: now,
       folderId, img: false, body: '', tags: [], links: [], backlinks: [],
     }
-    set(s => ({ notes: [...s.notes, note] }))
+    set(s => {
+      const notes = [...s.notes, note]
+      const para = recountFolders(s.para, notes)
+      saveFolders(para)
+      return { notes, para }
+    })
     saveNoteToVault(note)
     return id
+  },
+
+  setNoteGlyph: (id, glyph) => {
+    let saved: Note | undefined
+    set(s => {
+      const notes = s.notes.map(n => (n.id === id ? { ...n, glyph } : n))
+      saved = notes.find(n => n.id === id)
+      return { notes }
+    })
+    if (saved) saveNoteToVault(saved)
+  },
+
+  setNoteCover: (id, cover) => {
+    let saved: Note | undefined
+    let anterior: string | undefined
+    set(s => {
+      anterior = s.notes.find(n => n.id === id)?.cover
+      const notes = s.notes.map(n => (n.id === id ? { ...n, cover: cover || undefined } : n))
+      saved = notes.find(n => n.id === id)
+      return { notes }
+    })
+    // Trocar/limpar a capa apaga a imagem antiga: senao vira lixo orfao no disco.
+    if (anterior && anterior !== cover) removeAttachment(anterior)
+    if (saved) saveNoteToVault(saved)
   },
 
   searchNoteTitles: (query) => {
@@ -507,8 +578,14 @@ export const useStore = create<AppState>((set, get) => ({
     if (note) {
       const imgs = [...note.body.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map(m => m[1])
       for (const url of imgs) removeAttachment(url)
+      if (note.cover) removeAttachment(note.cover)
     }
-    set(s => ({ notes: s.notes.filter(n => n.id !== id) }))
+    set(s => {
+      const notes = s.notes.filter(n => n.id !== id)
+      const para = recountFolders(s.para, notes)
+      saveFolders(para)
+      return { notes, para, tags: deriveTags(notes) }
+    })
     deleteNoteFromVault(id)
   },
 
@@ -535,6 +612,9 @@ export const useStore = create<AppState>((set, get) => ({
     if (!loaded || loaded.length === 0) {
       // Primeiro uso: grava os exemplos no vault nativo.
       for (const n of get().notes) await saveNoteToVault(n)
+      const seeded = recountFolders(get().para, get().notes)
+      set({ para: seeded, tags: deriveTags(get().notes) })
+      saveFolders(seeded)
       return
     }
     // Deriva links e backlinks do conteúdo carregado (graphify-style).
@@ -548,6 +628,10 @@ export const useStore = create<AppState>((set, get) => ({
       ...n,
       backlinks: index[normalizeTitle(n.title)] ?? [],
     }))
-    set({ notes: withBl, backlinkIndex: index })
+    // Pastas e tags sao DERIVADAS das notas reais — nunca do que estava salvo,
+    // senao o numero da pasta e a lista de tags envelhecem e mentem.
+    const para = recountFolders(get().para, withBl)
+    set({ notes: withBl, backlinkIndex: index, para, tags: deriveTags(withBl) })
+    saveFolders(para)
   },
 }))

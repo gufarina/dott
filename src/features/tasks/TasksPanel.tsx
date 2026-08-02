@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '../../store'
+import { Icon } from '../../components/Icon'
 import s from './TasksPanel.module.css'
 
 export function TasksPanel() {
@@ -47,14 +48,18 @@ export function TasksPanel() {
       </div>
 
       <div className={s.filter}>
-        <button className={`${s.filterToggle} ${filterPrazo ? s.active : ''}`} onClick={() => !filterPrazo && toggleFilter('prazo')}>PRAZO</button>
-        <button className={`${s.filterToggle} ${!filterPrazo ? s.active : ''}`} onClick={() => filterPrazo && toggleFilter('prazo')}>TODOS</button>
+        <button className={`${s.filterToggle} ${filterPrazo ? s.active : ''}`} onClick={() => !filterPrazo && toggleFilter('prazo')} title="Só as tarefas com prazo">
+          <Icon name="prazo" size={12} /> PRAZO
+        </button>
+        <button className={`${s.filterToggle} ${!filterPrazo ? s.active : ''}`} onClick={() => filterPrazo && toggleFilter('prazo')} title="Todas as tarefas">
+          <Icon name="grupo" size={12} /> TODOS
+        </button>
       </div>
 
       <div className={s.list}>
         {tasks.length === 0 ? (
           <div className={s.empty}>
-            <div className={s.checkIcon}>✓</div>
+            <div className={s.checkIcon}><Icon name="tarefa" size={22} /></div>
             <p>Nenhuma tarefa ainda</p>
           </div>
         ) : (
@@ -70,7 +75,9 @@ export function TasksPanel() {
                     <span className={s.dot} style={{ background: group.color }} />
                     <span className={s.groupName}>{group.name}</span>
                     <span className={s.groupProg}>{done}/{total}</span>
-                    <button className={s.groupDel} title="Excluir grupo" onClick={() => deleteGroup(group.id)}>×</button>
+                    <button className={s.groupDel} title="Excluir grupo" onClick={() => deleteGroup(group.id)}>
+                      <Icon name="lixo" size={12} />
+                    </button>
                   </div>
 
                   {items.map(task => (
@@ -96,7 +103,7 @@ export function TasksPanel() {
                         </span>
                       )}
                       <label className={s.dateBtn} title="Definir prazo">
-                        📅
+                        <Icon name="prazo" size={13} />
                         <input
                           type="date"
                           className={s.dateInput}
@@ -104,7 +111,9 @@ export function TasksPanel() {
                           onChange={e => setTaskDeadline(task.id, e.target.value || null)}
                         />
                       </label>
-                      <button className={s.taskDel} title="Excluir" onClick={() => deleteTask(task.id)}>×</button>
+                      <button className={s.taskDel} title="Excluir tarefa" onClick={() => deleteTask(task.id)}>
+                        <Icon name="lixo" size={12} />
+                      </button>
                     </div>
                   ))}
 
@@ -122,7 +131,9 @@ export function TasksPanel() {
                       }}
                     />
                   ) : (
-                    <button className={s.addTask} onClick={() => { setDraft(''); setDraftFor(group.id) }}>+ tarefa</button>
+                    <button className={s.addTask} onClick={() => { setDraft(''); setDraftFor(group.id) }}>
+                      <Icon name="tarefa" size={12} /> tarefa
+                    </button>
                   )}
                 </div>
               )
@@ -139,7 +150,9 @@ export function TasksPanel() {
                 onKeyDown={e => { if (e.key === 'Enter') submitGroup(); if (e.key === 'Escape') { setGroupDraft(''); setAddingGroup(false) } }}
               />
             ) : (
-              <button className={s.addGroup} onClick={() => { setGroupDraft(''); setAddingGroup(true) }}>+ Novo grupo</button>
+              <button className={s.addGroup} onClick={() => { setGroupDraft(''); setAddingGroup(true) }}>
+                <Icon name="grupo" size={13} /> Novo grupo
+              </button>
             )}
 
             <div className={s.completedToggle} onClick={() => toggleFilter('completed')}>

@@ -3,6 +3,7 @@ import { appDataDir } from '@tauri-apps/api/path'
 import { useStore } from '../store'
 import { showToast } from './Toast'
 import { backupNow, backupsList, restoreBackup, openBackupsFolder } from '../lib/backupService'
+import { Icon } from './Icon'
 import s from './Settings.module.css'
 
 export function Settings({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -48,7 +49,9 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
       <div className={s.modal}>
         <div className={s.header}>
           <span className={s.title}>Configurações</span>
-          <button className={s.close} onClick={onClose} aria-label="Fechar">×</button>
+          <button className={s.close} onClick={onClose} aria-label="Fechar" title="Fechar">
+            <Icon name="fechar" size={13} />
+          </button>
         </div>
 
         <div className={s.body}>
@@ -56,7 +59,9 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
             <div className={s.sectionTitle}>Aparência</div>
             <div className={s.row}>
               <div><div className={s.label}>Tema</div><div className={s.hint}>Claro ou escuro</div></div>
-              <button className={s.btn} onClick={toggleTheme}>{theme === 'dark' ? '☾ Escuro' : '☀ Claro'}</button>
+              <button className={s.btn} onClick={toggleTheme}>
+                <Icon name="tema" size={13} /> {theme === 'dark' ? 'Escuro' : 'Claro'}
+              </button>
             </div>
           </section>
 
@@ -64,11 +69,15 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
             <div className={s.sectionTitle}>Seus dados</div>
             <div className={s.row}>
               <div><div className={s.label}>Backup completo</div><div className={s.hint}>Cópia de tudo (notas, pastas, tarefas, imagens) em Documentos.</div></div>
-              <button className={`${s.btn} ${s.primary}`} onClick={doBackup} disabled={busy}>Fazer backup agora</button>
+              <button className={`${s.btn} ${s.primary}`} onClick={doBackup} disabled={busy}>
+                <Icon name="backup" size={13} /> Fazer backup agora
+              </button>
             </div>
             <div className={s.row}>
               <div><div className={s.label}>Pasta de backups</div><div className={s.hint}>Abrir no explorador de arquivos.</div></div>
-              <button className={s.btn} onClick={openBackupsFolder}>Abrir pasta</button>
+              <button className={s.btn} onClick={openBackupsFolder}>
+                <Icon name="pasta" size={13} /> Abrir pasta
+              </button>
             </div>
             {backups.length > 0 && (
               <div className={s.restoreBox}>
@@ -90,7 +99,9 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
             </div>
             <div className={s.row}>
               <div><div className={s.label}>Rever introdução</div><div className={s.hint}>Mostrar o tour de boas-vindas de novo</div></div>
-              <button className={s.btn} onClick={replayOnboarding}>Rever</button>
+              <button className={s.btn} onClick={replayOnboarding}>
+                <Icon name="rever" size={13} /> Rever
+              </button>
             </div>
             <div className={s.pathRow}>
               <div className={s.label}>Onde seus dados ficam</div>

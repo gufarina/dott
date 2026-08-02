@@ -6,6 +6,7 @@
 
 import { invoke } from '@tauri-apps/api/core'
 import type { Note } from '../store'
+import { isGlyphId } from '../components/NoteGlyphs'
 import { showToast } from '../components/Toast'
 
 interface VaultNote {
@@ -15,6 +16,10 @@ interface VaultNote {
   updated: string
   folder: string
   tags: string[]
+  /** Simbolo do pacote proprio (GlyphId) — '' quando nao tem. */
+  glyph: string
+  /** Capa da nota (url de attachment) — '' quando nao tem. */
+  cover: string
   body: string
 }
 
@@ -28,6 +33,8 @@ function toNote(v: VaultNote): Note {
     img: false,
     body: v.body,
     tags: v.tags ?? [],
+    glyph: isGlyphId(v.glyph) ? v.glyph : undefined,
+    cover: v.cover || undefined,
     links: [],
     backlinks: [],
   }
@@ -41,6 +48,8 @@ function fromNote(n: Note): VaultNote {
     updated: n.updatedAt,
     folder: n.folderId ?? '',
     tags: n.tags,
+    glyph: n.glyph ?? '',
+    cover: n.cover ?? '',
     body: n.body,
   }
 }

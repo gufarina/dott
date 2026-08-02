@@ -117,8 +117,13 @@ export default function App() {
       const cardId = activeId.slice(5)
       const [, categoryId, folderId] = overId.split(':')
       const noteId = useStore.getState().processCard(cardId, folderId)
-      showToast('info', 'Processado', 'Card virou nota na pasta.')
-      if (noteId) useStore.getState().setView('editor', { category: categoryId, folder: folderId, note: noteId })
+      // So avisa sucesso se de fato virou nota — antes o aviso saia sempre.
+      if (noteId) {
+        showToast('info', 'Processado', 'Card virou nota na pasta.')
+        useStore.getState().setView('editor', { category: categoryId, folder: folderId, note: noteId })
+      } else {
+        showToast('warn', 'Nao consegui processar', 'O card nao foi encontrado no inbox.')
+      }
     }
   }
 

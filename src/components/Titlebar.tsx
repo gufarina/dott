@@ -1,5 +1,6 @@
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { useStore } from '../store'
+import { Icon } from './Icon'
 import s from './Titlebar.module.css'
 
 export function Titlebar({ onSearch, onSettings }: { onSearch?: () => void; onSettings?: () => void }) {
@@ -20,16 +21,16 @@ export function Titlebar({ onSearch, onSettings }: { onSearch?: () => void; onSe
       </div>
       <div className={s.right}>
         <button className={s.btn} onClick={onSearch} aria-label="Buscar (Ctrl+K)" title="Buscar (Ctrl+K)">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.2" stroke="currentColor" strokeWidth="1.4"/><line x1="9.2" y1="9.2" x2="12.5" y2="12.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+          <Icon name="busca" size={14} />
         </button>
         <button className={`${s.btn} ${view === 'graph' ? s.btnActive : ''}`} onClick={toggleGraph} aria-label="Constelação" title="Constelação (grafo de conexões)">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="3" y1="4" x2="10" y2="3.5" stroke="currentColor" strokeWidth="1.2"/><line x1="10" y1="3.5" x2="7" y2="10.5" stroke="currentColor" strokeWidth="1.2"/><circle cx="3" cy="4" r="2" fill="currentColor"/><circle cx="10.5" cy="3.5" r="2" fill="currentColor"/><circle cx="7" cy="10.5" r="2" fill="currentColor"/></svg>
+          <Icon name="grafo" size={14} />
         </button>
         <button className={s.btn} onClick={onSettings} aria-label="Configurações" title="Configurações">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.3" stroke="currentColor" strokeWidth="1.3"/><path d="M7 .8v1.8M7 11.4v1.8M1.2 7h1.8M11 7h1.8M2.9 2.9l1.3 1.3M9.8 9.8l1.3 1.3M11.1 2.9 9.8 4.2M4.2 9.8 2.9 11.1" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/></svg>
+          <Icon name="ajustes" size={14} />
         </button>
-        <button className={s.btn} onClick={toggleTheme} aria-label="Trocar tema" title="Tema claro/escuro">
-          {theme === 'dark' ? '☾' : '☀'}
+        <button className={s.btn} onClick={toggleTheme} aria-label="Trocar tema" title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}>
+          <Icon name="tema" size={14} />
         </button>
 
         {/* Controles reais de janela (Windows), minimalistas */}

@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
+import { Icon } from './Icon'
 import s from './Toast.module.css'
+
+/** Contador monotonico: dois avisos no mesmo milissegundo tinham o MESMO id, o
+ *  React reclamava de chave repetida e o timer de um matava o outro na tela. */
+let seq = 0
 
 interface ToastItem {
   id: string
@@ -19,7 +24,7 @@ export function ToastArea() {
 
   useEffect(() => {
     addToast = (item) => {
-      const id = 't' + Date.now()
+      const id = 't' + (++seq)
       setToasts(ts => [...ts, { ...item, id }])
       setTimeout(() => setToasts(ts => ts.filter(t => t.id !== id)), 4000)
     }
@@ -36,7 +41,9 @@ export function ToastArea() {
             <div className={s.title}>{t.title}</div>
             <div className={s.msg}>{t.msg}</div>
           </div>
-          <span className={s.close} onClick={() => setToasts(ts => ts.filter(x => x.id !== t.id))}>✕</span>
+          <button className={s.close} title="Fechar aviso" onClick={() => setToasts(ts => ts.filter(x => x.id !== t.id))}>
+            <Icon name="fechar" size={12} />
+          </button>
         </div>
       ))}
     </div>

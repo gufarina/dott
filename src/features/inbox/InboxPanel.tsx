@@ -4,6 +4,8 @@ import { useStore, CardType } from '../../store'
 import { showToast } from '../../components/Toast'
 import { imageFromEvent, saveImageFile } from '../../lib/attachments'
 import { detectType } from '../../lib/detectType'
+import { suggestTask, suggestFolder } from '../../lib/interpret'
+import { Icon } from '../../components/Icon'
 import s from './InboxPanel.module.css'
 
 function DraggableCard({ id, onClick, children }: { id: string; onClick: () => void; children: React.ReactNode }) {
@@ -67,9 +69,15 @@ export function InboxPanel() {
   const removeCard = useStore(st => st.removeCard)
   const setView = useStore(st => st.setView)
 
+  const notes = useStore(st => st.notes)
+  const tasks = useStore(st => st.tasks)
+  const addTask = useStore(st => st.addTask)
+
   const [text, setText] = useState('')
   const [processing, setProcessing] = useState<string | null>(null)
   const [tagFilter, setTagFilter] = useState('')
+  /** Card que esta virando tarefa + o texto sugerido (editavel antes de criar). */
+  const [virandoTarefa, setVirandoTarefa] = useState<{ cardId: string; texto: string } | null>(null)
   const taRef = useRef<HTMLTextAreaElement>(null)
 
   const isFull = inbox.length >= 10
@@ -87,18 +95,48 @@ export function InboxPanel() {
   const doProcess = (cardId: string, categoryId: string, folderId: string) => {
     const noteId = processCard(cardId, folderId)
     setProcessing(null)
-    showToast('info', 'Processado', 'Card virou nota na pasta.')
-    if (noteId) setView('editor', { category: categoryId, folder: folderId, note: noteId })
+    if (noteId) {
+      showToast('info', 'Processado', 'Card virou nota na pasta.')
+      setView('editor', { category: categoryId, folder: folderId, note: noteId })
+    } else {
+      showToast('warn', 'Nao consegui processar', 'O card nao foi encontrado no inbox.')
+    }
   }
 
   const filteredTags = tags.filter(t => t.name.toLowerCase().includes(tagFilter.toLowerCase()))
 
+  /** Abre a sugestao de tarefa (verbo + objeto + contexto) pro card. */
+  const abrirTarefa = (cardId: string) => {
+    const card = inbox.find(c => c.id === cardId)
+    if (!card) return
+    setVirandoTarefa({ cardId, texto: suggestTask(card.content, card.type).text })
+  }
+
+  /** Cria a tarefa no primeiro grupo (ou num grupo novo se nao houver nenhum). */
+  const confirmarTarefa = () => {
+    if (!virandoTarefa) return
+    const texto = virandoTarefa.texto.trim()
+    if (!texto) return
+    let grupoId = tasks[0]?.id
+    if (!grupoId) {
+      useStore.getState().addGroup('Do inbox')
+      grupoId = useStore.getState().tasks[0]?.id
+    }
+    if (!grupoId) return
+    addTask(grupoId, texto)
+    removeCard(virandoTarefa.cardId)
+    setVirandoTarefa(null)
+    showToast('info', 'Virou tarefa', 'Card saiu do inbox e entrou na lista.')
+  }
+
   return (
     <>
       <div className={s.tabs}>
-        <button className={`${s.tab} ${leftTab === 'inbox' ? s.active : ''}`} onClick={() => setLeftTab('inbox')}>INBOX</button>
+        <button className={`${s.tab} ${leftTab === 'inbox' ? s.active : ''}`} onClick={() => setLeftTab('inbox')}>
+          <Icon name="inbox" size={13} /> INBOX <span className={s.badge}>{inbox.length}</span>
+        </button>
         <button className={`${s.tab} ${leftTab === 'tags' ? s.active : ''}`} onClick={() => setLeftTab('tags')}>
-          TAGS <span className={s.badge}>{inbox.length}</span>
+          <Icon name="tag" size={13} /> TAGS <span className={s.badge}>{tags.length}</span>
         </button>
       </div>
 
@@ -142,7 +180,7 @@ export function InboxPanel() {
                 disabled={isFull}
                 title={isFull ? 'Inbox cheio — processe alguns cards primeiro' : undefined}
               >
-                {isFull ? 'Cheio' : '→'}
+                {isFull ? 'Cheio' : <Icon name="enviar" size={15} />}
               </button>
             </div>
           </div>
@@ -161,11 +199,19 @@ export function InboxPanel() {
                   />
                   <span className={s.cardTime}>{relTime(c.ts, c.time)}</span>
                   <button
+                    className={s.cardAction}
+                    onPointerDown={e => e.stopPropagation()}
+                    onClick={e => { e.stopPropagation(); abrirTarefa(c.id) }}
+                    title="Virar tarefa"
+                    aria-label="Virar tarefa"
+                  ><Icon name="tarefa" size={12} /></button>
+                  <button
                     className={s.cardRemove}
                     onPointerDown={e => e.stopPropagation()}
                     onClick={e => { e.stopPropagation(); removeCard(c.id, true) }}
+                    title="Descartar"
                     aria-label="Descartar"
-                  >×</button>
+                  ><Icon name="fechar" size={12} /></button>
                 </div>
                 {c.type === 'IMAGEM'
                   ? <img className={s.cardImage} src={c.content} alt="imagem capturada" draggable={false} />
@@ -195,28 +241,86 @@ export function InboxPanel() {
         </div>
       )}
 
-      {processing && (
-        <div className={s.overlay} onClick={e => e.target === e.currentTarget && setProcessing(null)}>
-          <div className={s.processModal}>
-            <div className={s.processHeader}>
-              <span>Processar para…</span>
-              <button className={s.processClose} onClick={() => setProcessing(null)}>×</button>
+      {processing && (() => {
+        const card = inbox.find(c => c.id === processing)
+        const sugestao = card ? suggestFolder(card.content, card.type, para, notes) : null
+        return (
+          <div className={s.overlay} onClick={e => e.target === e.currentTarget && setProcessing(null)}>
+            <div className={s.processModal}>
+              <div className={s.processHeader}>
+                <span>Processar para…</span>
+                <button className={s.processClose} onClick={() => setProcessing(null)} title="Fechar">
+                  <Icon name="fechar" size={13} />
+                </button>
+              </div>
+
+              {/* Palpite do motor local — destacado, mas so um palpite. */}
+              {sugestao && (
+                <button
+                  className={s.sugestaoPasta}
+                  onClick={() => doProcess(processing, sugestao.categoryId, sugestao.folderId)}
+                >
+                  <span className={s.sugestaoIcone}><Icon name="sugestao" size={14} /></span>
+                  <span className={s.sugestaoTexto}>
+                    <span className={s.sugestaoTitulo}>{sugestao.folderName}</span>
+                    <span className={s.sugestaoMotivo}>{sugestao.categoryLabel} · {sugestao.reason}</span>
+                  </span>
+                  <span className={s.sugestaoTag}>sugerida</span>
+                </button>
+              )}
+
+              <div className={s.processBody}>
+                {Object.keys(para).map(qid => (
+                  <div key={qid} className={s.processGroup}>
+                    <div className={s.processGroupLabel}>{para[qid].label}</div>
+                    {para[qid].folders.map(f => (
+                      <button
+                        key={f.id}
+                        className={s.processFolder}
+                        onClick={() => doProcess(processing, qid, f.id)}
+                      >
+                        <Icon name="pasta" size={13} />
+                        {f.name}
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className={s.processBody}>
-              {Object.keys(para).map(qid => (
-                <div key={qid} className={s.processGroup}>
-                  <div className={s.processGroupLabel}>{para[qid].label}</div>
-                  {para[qid].folders.map(f => (
-                    <button
-                      key={f.id}
-                      className={s.processFolder}
-                      onClick={() => doProcess(processing, qid, f.id)}
-                    >
-                      {f.name}
-                    </button>
-                  ))}
-                </div>
-              ))}
+          </div>
+        )
+      })()}
+
+      {virandoTarefa && (
+        <div className={s.overlay} onClick={e => e.target === e.currentTarget && setVirandoTarefa(null)}>
+          <div className={s.taskModal}>
+            <div className={s.processHeader}>
+              <span>Virar tarefa</span>
+              <button className={s.processClose} onClick={() => setVirandoTarefa(null)} title="Fechar">
+                <Icon name="fechar" size={13} />
+              </button>
+            </div>
+            <p className={s.taskHint}>
+              Li o card e montei a tarefa. Ajuste como quiser antes de criar.
+            </p>
+            <div className={s.taskField}>
+              <Icon name="tarefa" size={14} className={s.taskFieldIcon} />
+              <input
+                className={s.taskInput}
+                value={virandoTarefa.texto}
+                autoFocus
+                onChange={e => setVirandoTarefa({ ...virandoTarefa, texto: e.target.value })}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') confirmarTarefa()
+                  if (e.key === 'Escape') setVirandoTarefa(null)
+                }}
+              />
+            </div>
+            <div className={s.taskFooter}>
+              <button className={s.taskCancel} onClick={() => setVirandoTarefa(null)}>Cancelar</button>
+              <button className={s.taskOk} onClick={confirmarTarefa}>
+                <Icon name="tarefa" size={13} /> Criar tarefa
+              </button>
             </div>
           </div>
         </div>

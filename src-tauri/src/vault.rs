@@ -19,6 +19,12 @@ pub struct VaultNote {
     pub updated: String,
     pub folder: String,
     pub tags: Vec<String>,
+    /// Simbolo do pacote proprio (ex.: "orbita"). Vazio = sem simbolo.
+    #[serde(default)]
+    pub glyph: String,
+    /// Capa da nota: url de imagem salva em attachments. Vazio = sem capa.
+    #[serde(default)]
+    pub cover: String,
     pub body: String,
 }
 
@@ -29,6 +35,11 @@ struct FrontMatter {
     updated: String,
     folder: String,
     tags: Vec<String>,
+    // `default` mantem compativel com as notas gravadas antes deste campo existir.
+    #[serde(default)]
+    glyph: String,
+    #[serde(default)]
+    cover: String,
 }
 
 /// Diretório do vault — criado automaticamente se não existir.
@@ -62,6 +73,8 @@ fn parse_note(id: String, raw: &str) -> VaultNote {
                     updated: fm.updated,
                     folder: fm.folder,
                     tags: fm.tags,
+                    glyph: fm.glyph,
+                    cover: fm.cover,
                     body,
                 };
             }
@@ -75,6 +88,8 @@ fn parse_note(id: String, raw: &str) -> VaultNote {
         updated: String::new(),
         folder: String::new(),
         tags: vec![],
+        glyph: String::new(),
+        cover: String::new(),
         body: raw.to_string(),
     }
 }
@@ -86,6 +101,8 @@ fn serialize_note(n: &VaultNote) -> String {
         updated: n.updated.clone(),
         folder: n.folder.clone(),
         tags: n.tags.clone(),
+        glyph: n.glyph.clone(),
+        cover: n.cover.clone(),
     };
     let yaml = serde_yaml::to_string(&fm).unwrap_or_default();
     format!("---\n{}---\n\n{}\n", yaml, n.body)

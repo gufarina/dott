@@ -1,4 +1,5 @@
 import { useStore } from '../store'
+import { Icon } from './Icon'
 import s from './Breadcrumb.module.css'
 
 export function Breadcrumb() {
@@ -16,7 +17,9 @@ export function Breadcrumb() {
 
   return (
     <div className={s.breadcrumb}>
-      <button className={s.back} onClick={navigateBack}>‹</button>
+      <button className={s.back} onClick={navigateBack} title="Voltar" aria-label="Voltar">
+        <Icon name="voltar" size={14} />
+      </button>
       <span className={s.item} onClick={() => setView('board', {})}>PARA</span>
       {quad && (
         <>
