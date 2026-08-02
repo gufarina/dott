@@ -14,6 +14,7 @@ export type IconName =
   | 'tarefa' | 'grupo' | 'prazo' | 'imagem' | 'simbolo' | 'busca'
   | 'ajustes' | 'tema' | 'grafo' | 'lixo' | 'inbox' | 'tag'
   | 'sugestao' | 'lapis' | 'backup' | 'rever'
+  | 'minimizar' | 'maximizar' | 'acervo'
 
 const P: Record<IconName, React.ReactElement> = {
   // Folha com o canto dobrado + o ponto
@@ -54,6 +55,11 @@ const P: Record<IconName, React.ReactElement> = {
   backup: <><path d="M8 1.8l6 3-6 3-6-3z"/><path d="M2 8l6 3 6-3"/><path d="M2 11.4l6 3 6-3"/></>,
   // Seta em volta (rever/repetir)
   rever: <><path d="M13.4 8a5.4 5.4 0 1 1-1.95-4.15"/><path d="M13.8 2.4v3.3h-3.3"/></>,
+  // Controles de janela — no pacote tambem, pra nao sobrar SVG solto no codigo
+  minimizar: <><path d="M3.2 8h9.6"/></>,
+  maximizar: <><rect x="3.2" y="3.2" width="9.6" height="9.6" rx="1.4"/></>,
+  // Folha com linhas: o acervo de notas da pasta
+  acervo: <><path d="M4 2.6h5l3 3V13a.6.6 0 0 1-.6.6H4a.6.6 0 0 1-.6-.6V3.2a.6.6 0 0 1 .6-.6z"/><path d="M5.8 8.4h4M5.8 10.6h2.8"/></>,
 }
 
 export function Icon({ name, size = 15, className }: { name: IconName; size?: number; className?: string }) {

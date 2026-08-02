@@ -1,6 +1,7 @@
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { useStore } from '../store'
 import { Icon } from './Icon'
+import { DottMark } from './DottMark'
 import s from './Titlebar.module.css'
 
 export function Titlebar({ onSearch, onSettings }: { onSearch?: () => void; onSettings?: () => void }) {
@@ -17,6 +18,7 @@ export function Titlebar({ onSearch, onSettings }: { onSearch?: () => void; onSe
   return (
     <div className={s.titlebar}>
       <div className={s.drag} data-tauri-drag-region>
+        <DottMark size={15} className={s.mark} />
         <span className={s.logo}>Dott</span>
       </div>
       <div className={s.right}>
@@ -36,13 +38,13 @@ export function Titlebar({ onSearch, onSettings }: { onSearch?: () => void; onSe
         {/* Controles reais de janela (Windows), minimalistas */}
         <div className={s.winctl}>
           <button className={s.wbtn} onClick={minimize} aria-label="Minimizar">
-            <svg width="10" height="10" viewBox="0 0 10 10"><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" strokeWidth="1.1"/></svg>
+            <Icon name="minimizar" size={11} />
           </button>
           <button className={s.wbtn} onClick={maximize} aria-label="Maximizar">
-            <svg width="10" height="10" viewBox="0 0 10 10"><rect x="1.5" y="1.5" width="7" height="7" fill="none" stroke="currentColor" strokeWidth="1.1"/></svg>
+            <Icon name="maximizar" size={11} />
           </button>
           <button className={`${s.wbtn} ${s.wclose}`} onClick={close} aria-label="Fechar">
-            <svg width="10" height="10" viewBox="0 0 10 10"><line x1="1.3" y1="1.3" x2="8.7" y2="8.7" stroke="currentColor" strokeWidth="1.1"/><line x1="8.7" y1="1.3" x2="1.3" y2="8.7" stroke="currentColor" strokeWidth="1.1"/></svg>
+            <Icon name="fechar" size={11} />
           </button>
         </div>
       </div>

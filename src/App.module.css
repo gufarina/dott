@@ -88,11 +88,29 @@
   padding: 10px 12px;
   border-radius: 10px;
   background: var(--surface2);
-  border: 1px solid var(--accent);
-  box-shadow: 0 12px 30px rgba(0,0,0,.5), 0 0 0 4px var(--accent-s);
+  border: 1px solid var(--border2);
+  box-shadow: 0 12px 30px rgba(0,0,0,.5);
   cursor: grabbing;
   transform: rotate(-1.5deg);
+  transition: border-color .12s, box-shadow .12s, transform .12s;
 }
+/* Armado = tem pasta ao alcance; soltar agora funciona. */
+.dragGhostArmado {
+  border-color: var(--accent);
+  box-shadow: 0 12px 30px rgba(0,0,0,.5), 0 0 0 4px var(--accent-s);
+  transform: rotate(0deg) scale(1.02);
+}
+.dragGhostAlvo {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--fg3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dragGhostArmado .dragGhostAlvo { color: var(--accent); }
 .dragGhostType {
   font-size: 10px;
   font-weight: 700;

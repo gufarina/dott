@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from 'react'
+import { Icon } from '../../components/Icon'
 import './onboarding.css'
 
 /** Onboarding de primeiro uso — 5 passos animados sobre o app real.
@@ -52,7 +53,7 @@ export function Onboarding() {
 
   return (
     <div className={`ob-overlay${closing ? ' is-closing' : ''}`}>
-      <div className="ob-skip-x" title="Pular introdução" onClick={finish}>✕</div>
+      <div className="ob-skip-x" title="Pular introdução" onClick={finish}><Icon name="fechar" size={14} /></div>
       <div className="ob-card" role="dialog" aria-label="Introdução ao Dott">
 
         <div className="ob-stage">

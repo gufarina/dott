@@ -6,6 +6,7 @@
 
 import { GLYPH_ORDER, GLYPH_LABEL, NoteGlyph, type GlyphId } from './NoteGlyphs'
 import { Icon } from './Icon'
+import { ModalPortal } from './ModalPortal'
 import s from './GlyphPicker.module.css'
 
 export function GlyphPicker({
@@ -18,6 +19,7 @@ export function GlyphPicker({
   onFechar: () => void
 }) {
   return (
+    <ModalPortal>
     <div className={s.overlay} onClick={e => e.target === e.currentTarget && onFechar()}>
       <div className={s.modal} role="dialog" aria-label="Escolher símbolo">
         <div className={s.header}>
@@ -50,5 +52,6 @@ export function GlyphPicker({
         )}
       </div>
     </div>
+    </ModalPortal>
   )
 }

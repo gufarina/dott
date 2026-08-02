@@ -6,6 +6,8 @@ import { LogicalSize, LogicalPosition } from '@tauri-apps/api/dpi'
 import { detectType } from '../lib/detectType'
 import { saveImageFile } from '../lib/attachments'
 import { showToast } from '../components/Toast'
+import { DottMark } from '../components/DottMark'
+import { Icon } from '../components/Icon'
 import s from './Widget.module.css'
 
 const WIN   = 104   // janela colapsada (orb 56 + folga pro brilho)
@@ -189,7 +191,7 @@ export function Widget() {
           onMouseUp={onUp}
           aria-label="Capturar (clique) ou arraste para mover"
         >
-          <span className={s.plus}>+</span>
+          <DottMark size={26} className={s.mark} />
         </button>
         {count > 0 && <span className={s.badge}>{count}</span>}
       </div>
@@ -247,10 +249,7 @@ export function Widget() {
           title="Abrir Dott"
           aria-label="Abrir janela principal"
         >
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-            <rect x="1" y="3" width="12" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
-            <path d="M1 6h12" stroke="currentColor" strokeWidth="1.5"/>
-          </svg>
+          <Icon name="imagem" size={13} />
         </button>
         <button
           className={`${s.btn} ${isFull ? s.btnFull : ''}`}

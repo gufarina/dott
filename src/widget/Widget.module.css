@@ -18,18 +18,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at 38% 32%, #f0785a, #d94428);
-  box-shadow: 0 6px 20px rgba(224, 90, 56, .55), 0 2px 6px rgba(0, 0, 0, .45);
+  /* Gradiente com profundidade real: luz em cima a esquerda, sombra na borda
+     inferior e um aro interno claro. O radial chapado de antes dava aquele ar
+     de adesivo — cor sem volume. */
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255, 255, 255, .38), rgba(255, 255, 255, 0) 46%),
+    radial-gradient(circle at 50% 118%, #a8301c, rgba(168, 48, 28, 0) 62%),
+    linear-gradient(160deg, #f4855f 0%, #e35c37 46%, #c4402a 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, .45),
+    inset 0 -2px 5px rgba(120, 26, 14, .55),
+    0 8px 22px rgba(210, 74, 44, .45),
+    0 2px 6px rgba(0, 0, 0, .5);
   transition: transform .15s;
 }
 .orb:hover { transform: scale(1.06); }
 .orb:active { transform: scale(.96); }
 
-.plus {
-  color: rgba(255, 255, 255, .95);
-  font-size: 26px;
-  font-weight: 300;
-  line-height: 1;
+.mark {
+  color: #fff;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .35));
 }
 
 .warn {

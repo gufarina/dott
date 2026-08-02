@@ -73,3 +73,6 @@
 }
 .wbtn:hover { background: var(--surface3); color: var(--fg); }
 .wclose:hover { background: #e04040; color: #fff; }
+
+/* Marca do Dott na barra de titulo */
+.mark { color: var(--accent); flex-shrink: 0; margin-right: 7px; }

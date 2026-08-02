@@ -132,10 +132,29 @@
   animation: appearUp .26s ease both;
 }
 .folderCard:hover { border-color: var(--border2); transform: translateY(-1px); }
+/* Pasta "armada": e nela que o card cai se voce soltar agora.
+   Tem que ser OBVIO — antes o destaque era sutil demais e o usuario nao sabia
+   se ia acertar, entao soltava no lugar errado e achava que estava quebrado. */
 .folderOver {
   border-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px var(--accent-s), 0 10px 28px rgba(0,0,0,.45);
-  transform: translateY(-2px) scale(1.025);
+  box-shadow: 0 0 0 3px var(--accent), 0 0 0 9px var(--accent-s), 0 14px 34px rgba(0,0,0,.5);
+  transform: translateY(-3px) scale(1.045);
+  z-index: 3;
+}
+/* Faixa "Soltar aqui" cobrindo a capa: leitura instantanea do destino. */
+.folderOver .cover::after {
+  content: 'Soltar aqui';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in oklab, var(--accent) 82%, transparent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  animation: overlayIn .12s ease both;
 }
 
 .cover {

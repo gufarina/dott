@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   DndContext, DragOverlay, PointerSensor, useSensor, useSensors,
-  type DragStartEvent, type DragEndEvent,
+  pointerWithin, rectIntersection, closestCenter,
+  type DragStartEvent, type DragEndEvent, type DragOverEvent,
+  type CollisionDetection,
 } from '@dnd-kit/core'
 import { useStore, type InboxCard } from './store'
 import { showToast } from './components/Toast'
@@ -29,10 +31,48 @@ export default function App() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [dragging, setDragging] = useState<InboxCard | null>(null)
+  /** Nome da pasta que vai receber o card se voce soltar agora (feedback do ima). */
+  const [alvo, setAlvo] = useState<string | null>(null)
   const [dropActive, setDropActive] = useState(false)
   const dragDepth = useRef(0)
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
+
+  /**
+   * Deteccao de alvo em 3 camadas — "ima" estilo Apple.
+   *
+   * Por que nao so a padrao: a padrao exige que os retangulos se cruzem de fato.
+   * Se as coordenadas do ponteiro e as medidas de layout discordarem um pouco
+   * (acontece no WebView2 dependendo da escala de tela), NADA e detectado e o
+   * card simplesmente nunca cai — foi o que travou o app.
+   *
+   * Agora: 1) ponteiro dentro da pasta (preciso) → 2) retangulos se cruzando →
+   * 3) pasta MAIS PROXIMA dentro de um raio de alcance. Com a camada 3 o card
+   * gruda na pasta vizinha em vez de cair no vazio; longe de tudo, nao gruda em
+   * nada (soltar longe = cancelar, de proposito).
+   */
+  const ALCANCE_IMA = 260
+  const detectarAlvo: CollisionDetection = args => {
+    const precisos = pointerWithin(args)
+    if (precisos.length) return precisos
+
+    const cruzando = rectIntersection(args)
+    if (cruzando.length) return cruzando
+
+    const proximos = closestCenter(args)
+    if (!proximos.length) return proximos
+
+    // So aceita o mais proximo se estiver ao alcance — senao, soltar longe cancela.
+    const ponteiro = args.pointerCoordinates
+    const alvoMaisProximo = proximos[0]
+    const rect = args.droppableRects.get(alvoMaisProximo.id)
+    if (!ponteiro || !rect) return proximos
+
+    const cx = rect.left + rect.width / 2
+    const cy = rect.top + rect.height / 2
+    const dist = Math.hypot(ponteiro.x - cx, ponteiro.y - cy)
+    return dist <= ALCANCE_IMA ? [alvoMaisProximo] : []
+  }
 
   const onWindowDragEnter = (e: React.DragEvent) => {
     if (e.dataTransfer.types.includes('Files')) {
@@ -109,8 +149,18 @@ export default function App() {
     }
   }
 
+  /** Mantem o nome da pasta-alvo na ponta do cursor enquanto arrasta. */
+  const onDragOver = (e: DragOverEvent) => {
+    const overId = e.over ? String(e.over.id) : ''
+    if (!overId.startsWith('folder:')) { setAlvo(null); return }
+    const [, categoryId, folderId] = overId.split(':')
+    const nome = useStore.getState().para[categoryId]?.folders.find(f => f.id === folderId)?.name
+    setAlvo(nome ?? null)
+  }
+
   const onDragEnd = (e: DragEndEvent) => {
     setDragging(null)
+    setAlvo(null)
     const activeId = String(e.active.id)
     const overId = e.over ? String(e.over.id) : ''
     if (activeId.startsWith('card:') && overId.startsWith('folder:')) {
@@ -138,7 +188,14 @@ export default function App() {
       {dropActive && <div className={s.dropOverlay}><span className={s.dropOverlayLabel}>Solte a imagem aqui</span></div>}
       <Titlebar onSearch={() => setSearchOpen(true)} onSettings={() => setSettingsOpen(true)} />
 
-      <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={detectarAlvo}
+        onDragStart={onDragStart}
+        onDragOver={onDragOver}
+        onDragEnd={onDragEnd}
+        onDragCancel={() => { setDragging(null); setAlvo(null) }}
+      >
         <div className={s.body}>
           <div className={s.panelLeft}>
             <InboxPanel />
@@ -173,9 +230,13 @@ export default function App() {
 
         <DragOverlay dropAnimation={{ duration: 200, easing: 'cubic-bezier(0.2,0,0,1)' }}>
           {dragging && (
-            <div className={s.dragGhost}>
+            <div className={`${s.dragGhost} ${alvo ? s.dragGhostArmado : ''}`}>
               <span className={s.dragGhostType}>{dragging.type}</span>
               <span className={s.dragGhostText}>{dragging.content}</span>
+              {/* Diz o destino ANTES de soltar — sem adivinhacao. */}
+              <span className={s.dragGhostAlvo}>
+                {alvo ? `Soltar em ${alvo}` : 'Arraste ate uma pasta'}
+              </span>
             </div>
           )}
         </DragOverlay>

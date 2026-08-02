@@ -252,10 +252,58 @@
 .processFolder:hover { background: var(--surface3); }
 .processFolder svg { color: var(--fg3); flex-shrink: 0; }
 
+/* ─── Previa do card sendo processado ─── */
+.previewCard {
+  display: flex; align-items: flex-start; gap: 9px;
+  margin: 12px 12px 0;
+  padding: 10px 11px;
+  border-radius: var(--r-md);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+.previewTipo {
+  font-size: 10px; font-weight: 700; letter-spacing: .04em;
+  padding: 3px 6px; border-radius: var(--r-xs); flex-shrink: 0; line-height: 1;
+}
+.previewTexto {
+  font-size: 12.5px; line-height: 1.4; color: var(--fg2);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* ─── Linha de acao (virar tarefa / descartar) ─── */
+.acaoLinha {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; text-align: left;
+  padding: 9px 10px; margin-bottom: 2px;
+  border-radius: var(--r-sm);
+  border: none; background: transparent;
+  color: var(--fg); cursor: pointer; font-family: inherit;
+  transition: background var(--dur-micro);
+}
+.acaoLinha:hover { background: var(--surface3); }
+.acaoLinha svg { color: var(--fg3); flex-shrink: 0; }
+.acaoTexto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.acaoTitulo { font-size: 13px; font-weight: 600; }
+.acaoSub {
+  font-size: 11px; color: var(--fg3); line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.acaoPerigo:hover { background: rgba(224,64,64,.13); }
+.acaoPerigo:hover svg,
+.acaoPerigo:hover .acaoTitulo { color: var(--danger); }
+
+/* Rotulo do quadrante dentro da lista completa */
+.processQuad {
+  font-size: 10px; font-weight: 700; color: var(--fg3);
+  letter-spacing: .05em; text-transform: uppercase;
+  padding: 6px 8px 3px;
+}
+
 /* ─── Pasta sugerida pelo motor local ─── */
 .sugestaoPasta {
   display: flex; align-items: center; gap: 10px;
-  margin: 12px 12px 2px;
+  margin: 0 0 6px;
+  width: 100%;
   padding: 11px 12px;
   border-radius: var(--r-md);
   border: 1px solid var(--accent);

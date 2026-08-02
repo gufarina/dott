@@ -4,6 +4,7 @@ import { useStore, Folder, Quadrant } from '../../store'
 import { saveImageFile } from '../../lib/attachments'
 import { showToast } from '../../components/Toast'
 import { Icon } from '../../components/Icon'
+import { ModalPortal } from '../../components/ModalPortal'
 import s from './PARAGrid.module.css'
 
 const Q_ORDER = ['projects', 'areas', 'resources', 'archives']
@@ -70,9 +71,7 @@ function FolderCard({ folder, quadrant, categoryId, onNavigate }: { folder: Fold
             <>
               <div className={s.densityBar}><div className={s.densityFill} style={{ width: `${densityPct}%`, background: quadrant.color }} /></div>
               <div className={s.densityLabel}>
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--fg3)" strokeWidth="1.2">
-                  <path d="M2 2h4.5l1.5 1.5V8H2z"/><line x1="3.5" y1="5" x2="6.5" y2="5"/><line x1="3.5" y1="6.5" x2="5.5" y2="6.5"/>
-                </svg>
+                <Icon name="acervo" size={11} />
                 acervo
               </div>
             </>
@@ -97,6 +96,7 @@ function CreateFolderModal({ categoryId, onClose }: { categoryId: string; onClos
   }
 
   return (
+    <ModalPortal>
     <div className={s.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
       <div className={s.modal}>
         <div className={s.modalHeader}>
@@ -128,6 +128,7 @@ function CreateFolderModal({ categoryId, onClose }: { categoryId: string; onClos
         </div>
       </div>
     </div>
+    </ModalPortal>
   )
 }
 

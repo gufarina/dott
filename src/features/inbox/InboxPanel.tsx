@@ -6,6 +6,8 @@ import { imageFromEvent, saveImageFile } from '../../lib/attachments'
 import { detectType } from '../../lib/detectType'
 import { suggestTask, suggestFolder } from '../../lib/interpret'
 import { Icon } from '../../components/Icon'
+import { ModalPortal } from '../../components/ModalPortal'
+import { CardTypeIcon } from '../../components/CardTypeIcon'
 import s from './InboxPanel.module.css'
 
 function DraggableCard({ id, onClick, children }: { id: string; onClick: () => void; children: React.ReactNode }) {
@@ -40,22 +42,6 @@ const TYPE_CLASS: Record<CardType, string> = {
   NOTA: 'nota', CODIGO: 'codigo', SHELL: 'shell', URL: 'url', IDEIA: 'ideia',
   AUDIO: 'audio', VIDEO: 'video', IMAGEM: 'imagem', ARQUIVO: 'arquivo', LINK: 'link',
   PROMPT: 'prompt', TAREFA: 'tarefa', CONTATO: 'contato',
-}
-
-const TYPE_ICONS: Record<CardType, string> = {
-  NOTA:    '<svg width="11" height="11" viewBox="0 0 12 12"><path d="M0 0h9l3 12H3z" fill="currentColor"/></svg>',
-  CODIGO:  '<svg width="11" height="11" viewBox="0 0 12 12"><path d="M6 0l5.2 3v6L6 12 .8 9V3z" fill="currentColor"/></svg>',
-  SHELL:   '<svg width="11" height="11" viewBox="0 0 12 12"><path d="M1 0l10 6-10 6z" fill="currentColor"/></svg>',
-  URL:     '<svg width="11" height="11" viewBox="0 0 12 12"><circle cx="4" cy="6" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="6" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
-  IDEIA:   '<svg width="11" height="11" viewBox="0 0 12 12"><path d="M6 0l1.5 4.5H12L8.3 7.3l1.5 4.5L6 9.2 2.2 11.8l1.5-4.5L0 4.5h4.5z" fill="currentColor"/></svg>',
-  AUDIO:   '<svg width="11" height="11" viewBox="0 0 12 12"><rect x="1" y="5" width="2.5" height="6" rx=".5" fill="currentColor"/><rect x="4.8" y="1" width="2.5" height="10" rx=".5" fill="currentColor"/><rect x="8.5" y="3" width="2.5" height="8" rx=".5" fill="currentColor"/></svg>',
-  VIDEO:   '<svg width="11" height="11" viewBox="0 0 12 12"><rect x=".5" y=".5" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 3.5l5 2.5-5 2.5z" fill="currentColor"/></svg>',
-  IMAGEM:  '<svg width="11" height="11" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="6" cy="6" r="2" fill="currentColor"/></svg>',
-  ARQUIVO: '<svg width="11" height="11" viewBox="0 0 12 12"><rect x="2" y="4.5" width="10" height="7" rx="1" fill="currentColor" opacity=".38"/><rect x="1" y="3" width="10" height="7" rx="1" fill="currentColor" opacity=".65"/><rect x="0" y="1.5" width="10" height="7" rx="1" fill="currentColor"/></svg>',
-  LINK:    '<svg width="11" height="11" viewBox="0 0 12 12"><ellipse cx="6" cy="6" rx="5" ry="4" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>',
-  PROMPT:  '<svg width="11" height="11" viewBox="0 0 12 12"><path d="M6 0l1.3 4.7 4.7 1.3-4.7 1.3L6 12l-1.3-4.7L0 6l4.7-1.3z" fill="currentColor"/></svg>',
-  TAREFA:  '<svg width="11" height="11" viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 6l2 2 3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  CONTATO: '<svg width="11" height="11" viewBox="0 0 12 12"><circle cx="6" cy="4" r="2.5" fill="currentColor"/><path d="M1 10c0-2.5 2.2-4 5-4s5 1.5 5 4" fill="currentColor"/></svg>',
 }
 
 export function InboxPanel() {
@@ -193,10 +179,9 @@ export function InboxPanel() {
             ) : inbox.map(c => (
               <DraggableCard key={c.id} id={c.id} onClick={() => setProcessing(c.id)}>
                 <div className={s.cardHeader}>
-                  <span
-                    className={`${s.cardType} ${s['type-' + TYPE_CLASS[c.type]]}`}
-                    dangerouslySetInnerHTML={{ __html: (TYPE_ICONS[c.type] || '') + c.type }}
-                  />
+                  <span className={`${s.cardType} ${s['type-' + TYPE_CLASS[c.type]]}`}>
+                    <CardTypeIcon type={c.type} />{c.type}
+                  </span>
                   <span className={s.cardTime}>{relTime(c.ts, c.time)}</span>
                   <button
                     className={s.cardAction}
@@ -245,34 +230,74 @@ export function InboxPanel() {
         const card = inbox.find(c => c.id === processing)
         const sugestao = card ? suggestFolder(card.content, card.type, para, notes) : null
         return (
+          <ModalPortal>
           <div className={s.overlay} onClick={e => e.target === e.currentTarget && setProcessing(null)}>
             <div className={s.processModal}>
               <div className={s.processHeader}>
-                <span>Processar para…</span>
+                <span>O que fazer com este card</span>
                 <button className={s.processClose} onClick={() => setProcessing(null)} title="Fechar">
                   <Icon name="fechar" size={13} />
                 </button>
               </div>
 
-              {/* Palpite do motor local — destacado, mas so um palpite. */}
-              {sugestao && (
-                <button
-                  className={s.sugestaoPasta}
-                  onClick={() => doProcess(processing, sugestao.categoryId, sugestao.folderId)}
-                >
-                  <span className={s.sugestaoIcone}><Icon name="sugestao" size={14} /></span>
-                  <span className={s.sugestaoTexto}>
-                    <span className={s.sugestaoTitulo}>{sugestao.folderName}</span>
-                    <span className={s.sugestaoMotivo}>{sugestao.categoryLabel} · {sugestao.reason}</span>
+              {/* Mostra O QUE voce esta processando — antes o modal abria sem contexto. */}
+              {card && (
+                <div className={s.previewCard}>
+                  <span className={`${s.previewTipo} ${s['type-' + TYPE_CLASS[card.type]]}`}>{card.type}</span>
+                  <span className={s.previewTexto}>
+                    {card.type === 'IMAGEM' ? 'Imagem capturada' : card.content}
                   </span>
-                  <span className={s.sugestaoTag}>sugerida</span>
-                </button>
+                </div>
               )}
 
               <div className={s.processBody}>
+                {/* 1. O palpite do motor: um clique resolve o caso comum. */}
+                {sugestao && (
+                  <>
+                    <div className={s.processGroupLabel}>Sugestão</div>
+                    <button
+                      className={s.sugestaoPasta}
+                      onClick={() => doProcess(processing, sugestao.categoryId, sugestao.folderId)}
+                    >
+                      <span className={s.sugestaoIcone}><Icon name="sugestao" size={14} /></span>
+                      <span className={s.sugestaoTexto}>
+                        <span className={s.sugestaoTitulo}>Virar nota em {sugestao.folderName}</span>
+                        <span className={s.sugestaoMotivo}>{sugestao.categoryLabel} · {sugestao.reason}</span>
+                      </span>
+                    </button>
+                  </>
+                )}
+
+                {/* 2. O outro destino possivel: a lista de tarefas. */}
+                <div className={s.processGroupLabel}>Outras ações</div>
+                {card && (
+                  <button
+                    className={s.acaoLinha}
+                    onClick={() => { setProcessing(null); abrirTarefa(card.id) }}
+                  >
+                    <Icon name="tarefa" size={14} />
+                    <span className={s.acaoTexto}>
+                      <span className={s.acaoTitulo}>Virar tarefa</span>
+                      <span className={s.acaoSub}>{suggestTask(card.content, card.type).text}</span>
+                    </span>
+                  </button>
+                )}
+                <button
+                  className={`${s.acaoLinha} ${s.acaoPerigo}`}
+                  onClick={() => { removeCard(processing, true); setProcessing(null); showToast('info', 'Descartado', 'Card removido do inbox.') }}
+                >
+                  <Icon name="lixo" size={14} />
+                  <span className={s.acaoTexto}>
+                    <span className={s.acaoTitulo}>Descartar</span>
+                    <span className={s.acaoSub}>Sai do inbox sem virar nada</span>
+                  </span>
+                </button>
+
+                {/* 3. Todas as pastas, pra quando o palpite nao serve. */}
+                <div className={s.processGroupLabel}>Virar nota em outra pasta</div>
                 {Object.keys(para).map(qid => (
                   <div key={qid} className={s.processGroup}>
-                    <div className={s.processGroupLabel}>{para[qid].label}</div>
+                    <div className={s.processQuad}>{para[qid].label}</div>
                     {para[qid].folders.map(f => (
                       <button
                         key={f.id}
@@ -288,10 +313,12 @@ export function InboxPanel() {
               </div>
             </div>
           </div>
+          </ModalPortal>
         )
       })()}
 
       {virandoTarefa && (
+        <ModalPortal>
         <div className={s.overlay} onClick={e => e.target === e.currentTarget && setVirandoTarefa(null)}>
           <div className={s.taskModal}>
             <div className={s.processHeader}>
@@ -324,6 +351,7 @@ export function InboxPanel() {
             </div>
           </div>
         </div>
+        </ModalPortal>
       )}
     </>
   )
