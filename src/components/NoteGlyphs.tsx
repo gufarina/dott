@@ -22,11 +22,11 @@ export type GlyphId =
 
 /** Ordem do seletor: do mais usado no dia a dia para o mais raro. */
 export const GLYPH_ORDER: GlyphId[] = [
-  'projeto', 'ideia', 'tarefa' as GlyphId, 'leitura', 'reuniao', 'decisao',
+  'projeto', 'ideia', 'checklist', 'leitura', 'reuniao', 'decisao',
   'pesquisa', 'referencia', 'rascunho', 'processo', 'contato', 'financeiro',
   'saude', 'viagem', 'estudo', 'codigo', 'design', 'escrita',
   'meta', 'revisao', 'pergunta', 'arquivo',
-].filter(g => g !== 'tarefa') as GlyphId[]
+]
 
 /** O rotulo E a definicao: e o que a nota E. */
 export const GLYPH_LABEL: Record<GlyphId, string> = {

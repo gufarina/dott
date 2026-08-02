@@ -1,9 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <!--
     Icone do Dott. Mesma marca do app (DottMark.tsx), sem inventar nada novo:
-    ponto = o pensamento capturado; anel aberto = o segundo cerebro que nunca fecha;
-    ponto menor na falha = a ligacao pra outra nota.
-    O "+" antigo saiu: era generico e ja tinha sido reprovado.
+    ponto = o pensamento capturado; anel aberto = o segundo cerebro que nunca fecha.
+    Descartados: o "+" (generico) e o ponto solto na abertura (lia como rabinho).
   -->
   <defs>
     <linearGradient id="fundo" x1="0" y1="0" x2="0" y2="1">
@@ -22,9 +21,8 @@
 
   <!-- a marca, centralizada na grade de 24 escalada 40x (viewBox 24 -> 960, offset 32) -->
   <g transform="translate(32,32) scale(40)" fill="none">
-    <path d="M17.9 6.4a8.4 8.4 0 1 1-4.6-2.7"
-          stroke="url(#marca)" stroke-width="2.1" stroke-linecap="round"/>
-    <circle cx="12" cy="12" r="4.15" fill="url(#marca)"/>
-    <circle cx="19.15" cy="4.85" r="2.25" fill="url(#marca)"/>
+    <path d="M18.55 6.9a8.85 8.85 0 1 1-5.6-3.6"
+          stroke="url(#marca)" stroke-width="2.6" stroke-linecap="round"/>
+    <circle cx="12" cy="12" r="4.4" fill="url(#marca)"/>
   </g>
 </svg>

@@ -3,12 +3,15 @@
  * O QUE SIGNIFICA (nenhum traco e enfeite):
  *   - o PONTO cheio no centro  = o pensamento que voce capturou. E o nome do app.
  *   - o ANEL em volta          = o segundo cerebro que guarda esse pensamento.
- *   - a FALHA no anel          = ele nunca fecha; sempre cabe mais.
- *   - o PONTO menor na falha   = a ligacao ([[wiki-link]]) saindo pra outra nota.
+ *   - a ABERTURA no anel       = ele nunca fecha; sempre cabe mais.
  *
  * Le em 16px (barra de tarefas) porque a silhueta e uma so: ponto dentro de anel.
- * O "+" antigo foi descartado: nao dizia nada sobre o produto e podia ser
- * qualquer app de adicionar coisa.
+ *
+ * HISTORICO DE DESCARTES (pra ninguem tentar de novo):
+ *   - o "+" original nao dizia nada e podia ser qualquer app de adicionar coisa;
+ *   - a versao com um ponto SOLTO na abertura (a "ligacao saindo") foi reprovada:
+ *     desgrudado do anel ele lia como rabinho/sujeira, nao como significado.
+ *     Simbolo que precisa de legenda pra funcionar nao esta funcionando.
  */
 
 export function DottMark({
@@ -32,17 +35,16 @@ export function DottMark({
       aria-hidden={title ? undefined : true}
       focusable="false"
     >
-      {/* o anel aberto — o cerebro que nunca fecha */}
+      {/* o anel aberto — o cerebro que nunca fecha.
+          Pontas arredondadas: a abertura tem que parecer decisao, nao corte. */}
       <path
-        d="M17.9 6.4a8.4 8.4 0 1 1-4.6-2.7"
+        d="M18.55 6.9a8.85 8.85 0 1 1-5.6-3.6"
         stroke="currentColor"
-        strokeWidth="2.1"
+        strokeWidth="2.6"
         strokeLinecap="round"
       />
       {/* o pensamento */}
-      <circle cx="12" cy="12" r="4.15" fill="currentColor" />
-      {/* a ligacao saindo */}
-      <circle cx="19.15" cy="4.85" r="2.25" fill="currentColor" />
+      <circle cx="12" cy="12" r="4.4" fill="currentColor" />
     </svg>
   )
 }
