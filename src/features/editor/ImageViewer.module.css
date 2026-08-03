@@ -46,9 +46,7 @@
   cursor: pointer;
   font-family: inherit;
   letter-spacing: 0.01em;
-  transition:
-    background var(--dur-micro),
-    color var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 .btnEdit:hover {
   background: var(--accent);

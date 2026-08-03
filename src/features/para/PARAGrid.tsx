@@ -71,12 +71,12 @@ function FolderCard({ folder, quadrant, categoryId, onNavigate }: { folder: Fold
         <div className={s.bottom}>
           {hasTasks ? (
             <>
-              <div className={s.progressBar}><div className={s.progressFill} style={{ width: `${pct}%`, background: quadrant.color }} /></div>
+              <div className={s.progressBar}><div className={s.progressFill} style={{ transform: `scaleX(${pct / 100})`, background: quadrant.color }} /></div>
               <div className={s.progressLabel}>{pct}% concluído · {folder.total - folder.tasks} pendentes</div>
             </>
           ) : (
             <>
-              <div className={s.densityBar}><div className={s.densityFill} style={{ width: `${densityPct}%`, background: quadrant.color }} /></div>
+              <div className={s.densityBar}><div className={s.densityFill} style={{ transform: `scaleX(${densityPct / 100})`, background: quadrant.color }} /></div>
               <div className={s.densityLabel}>
                 <Icon name="acervo" size={11} />
                 acervo

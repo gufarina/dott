@@ -90,7 +90,7 @@
   font-size: 18px;
   font-weight: 300;
   flex-shrink: 0;
-  transition: background var(--dur-base), color var(--dur-base);
+  transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
 }
 
 .q-projects .qAdd { color: var(--q-p); background: rgba(224,64,64,.12); }
@@ -128,7 +128,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   cursor: pointer;
-  transition: border-color var(--dur-base), transform var(--dur-base), box-shadow var(--dur-base);
+  transition: border-color var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -202,7 +202,7 @@
   justify-content: center;
   cursor: pointer;
   opacity: 0;
-  transition: opacity var(--dur-base), background var(--dur-micro);
+  transition: opacity var(--dur-base) var(--ease-out), background var(--dur-micro) var(--ease-out);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
@@ -257,7 +257,15 @@
   overflow: hidden;
   margin-bottom: 4px;
 }
-.progressFill { height: 100%; border-radius: 2px; transition: width .3s; }
+/* Preenche por transform, nao por width: animar width forca recalculo de
+   layout a cada quadro. O trilho tem overflow:hidden, entao o canto ja vem
+   dele — o preenchimento nao precisa de raio proprio. */
+.progressFill {
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
 .progressLabel { font-size: 11px; color: var(--fg3); }
 
 .densityBar {
@@ -267,7 +275,13 @@
   overflow: hidden;
   margin-bottom: 4px;
 }
-.densityFill { height: 100%; border-radius: 2px; opacity: .5; transition: width .3s; }
+.densityFill {
+  height: 100%;
+  width: 100%;
+  opacity: .5;
+  transform-origin: left center;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
 .densityLabel {
   font-size: 11px;
   color: var(--fg3);
@@ -287,7 +301,7 @@
   justify-content: center;
   gap: 7px;
   color: var(--fg3);
-  transition: border-color var(--dur-base), color var(--dur-base), background var(--dur-base);
+  transition: border-color var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out);
   /* Mesma altura do card real, pra grade nao ficar desalinhada. */
   min-height: 188px;
 }
@@ -340,7 +354,7 @@
   color: var(--fg3); cursor: pointer;
   font-size: 17px;
   display: flex; align-items: center; justify-content: center;
-  transition: background var(--dur-micro), color var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 .modalClose:hover { background: var(--surface3); color: var(--fg); }
 
@@ -349,14 +363,14 @@
 .modalInput {
   width: 100%;
   background: var(--surface2);
-  border: 1px solid var(--border2);
+  border: 1px solid var(--border-control);
   border-radius: var(--r-md);
   padding: 11px 14px;
   color: var(--fg);
   font-size: 15px;
   outline: none;
   font-family: inherit;
-  transition: border-color var(--dur-base);
+  transition: border-color var(--dur-base) var(--ease-out);
 }
 .modalInput:focus { border-color: var(--accent); }
 .modalInput::placeholder { color: var(--fg3); }
@@ -378,7 +392,7 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background var(--dur-micro), color var(--dur-micro), border-color var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
 }
 .suggestionChip:hover { background: var(--accent-s); color: var(--accent); border-color: var(--accent); }
 
@@ -398,7 +412,7 @@
   color: var(--fg2);
   font-size: 13px; font-weight: 500;
   cursor: pointer; font-family: inherit;
-  transition: background var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out);
 }
 .btnCancel:hover { background: var(--surface3); }
 
@@ -411,7 +425,7 @@
   font-size: 13px; font-weight: 600;
   cursor: pointer; font-family: inherit;
   display: flex; align-items: center; gap: 7px;
-  transition: opacity var(--dur-micro);
+  transition: opacity var(--dur-micro) var(--ease-out);
 }
 .btnPrimary:hover { opacity: .85; }
 
@@ -462,7 +476,7 @@
   align-items: center;
   gap: 7px;
   flex-shrink: 0;
-  transition: background var(--dur-micro), color var(--dur-micro), border-color var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
 }
 .catAdd:hover { background: var(--surface3); color: var(--fg); border-color: var(--fg3); }
 

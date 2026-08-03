@@ -4,7 +4,9 @@
   z-index: 300;
   display: flex; align-items: flex-start; justify-content: center;
   padding-top: 12vh;
-  animation: overlayIn .15s ease both;
+  /* SEM animacao: a busca abre por Ctrl+K, e acao de teclado nao se anima —
+     o usuario faz isso dezenas de vezes por dia e qualquer atraso vira imposto.
+     (regra de emilkowalski/skills: "never animate keyboard-initiated actions") */
 }
 
 .modal {
@@ -17,7 +19,7 @@
   overflow: hidden;
   width: 600px;
   max-width: calc(100vw - 32px);
-  animation: modalIn .17s ease both;
+  /* idem: sem entrada animada */
 }
 
 .inputRow {
@@ -52,7 +54,7 @@
 
 .result {
   display: flex; align-items: center; gap: 11px;
-  padding: 9px 16px; cursor: pointer; transition: background var(--dur-micro);
+  padding: 9px 16px; cursor: pointer; transition: background var(--dur-micro) var(--ease-out);
 }
 .result:hover { background: var(--surface2); }
 

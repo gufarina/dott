@@ -22,6 +22,13 @@
   --shadow: 0 4px 24px rgba(0, 0, 0, .5);
   /* "Mesa" — fundo escuro atras dos shells flutuantes */
   --desk: #060609;
+  /* Borda de CONTROLE (input, botao, caixa de marcar): tem que ser vista.
+     --border2 medido em 1.37:1 sobre o card — abaixo do piso de 3:1 pra
+     elemento nao-textual. Este token fica em 3.1:1. --border2 continua servindo
+     pra divisoria decorativa, onde o piso nao se aplica. */
+  --border-control: #63636b;
+  /* Anel de foco de teclado */
+  --focus: #ff8a63;
 }
 
 :root[data-theme="light"] {
@@ -46,6 +53,8 @@
   --danger: #c83030;
   --success: #29945e;
   --shadow: 0 4px 24px rgba(0, 0, 0, .12);
+  --border-control: #8b8b99;
+  --focus: #b8341a;
 }
 
 /* Typography */
@@ -53,10 +62,11 @@
   --font-body: 'MiSans Latin', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
 
-  /* Scale */
+  /* Escala. O corpo estava em 15px, abaixo do piso de 16px/1rem — texto de
+     leitura nao desce disso. */
   --text-xl:   22px;
   --text-lg:   17px;
-  --text-base: 15px;
+  --text-base: 16px;
   --text-sm:   14px;
   --text-xs:   13px;
   --text-2xs:  12px;
@@ -81,13 +91,59 @@
      2.5 = squircle sutil (escolha do CEO). */
   --sq: 2.5;
 
-  /* Motion */
-  --dur-micro:  120ms;
-  --dur-base:   150ms;
-  --dur-medium: 200ms;
-  --dur-long:   300ms;
-  --ease:       ease;
-  --ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1);
+  /* ── Movimento ────────────────────────────────────────────────────────────
+     Duracao pela DISTANCIA que a coisa percorre e pelo tamanho dela, nao pelo
+     gosto: quanto maior o elemento e maior o percurso, mais tempo.
+
+     Regra dura do projeto: so se anima transform, opacity, filter, box-shadow e
+     stroke-dashoffset. Nunca width/height/padding/margin/top/left — essas forcam
+     recalculo de layout a cada quadro. E nunca a palavra-chave "all", que anima
+     ate o que voce nao sabe que existe. */
+  /* Duracao por TIPO DE ELEMENTO (faixas de emilkowalski/skills):
+     press de botao 100-160 · tooltip 125-200 · dropdown 150-250 · modal 200-500.
+     Teto de 300ms pra UI: "um dropdown de 180ms parece mais responsivo que um
+     de 400ms". Acima disso so pra percurso longo. */
+  --dur-instant: 90ms;   /* realce sob o cursor, troca de cor */
+  --dur-micro:  120ms;   /* botao, chip, item de lista */
+  --dur-base:   170ms;   /* painel, card, revelar no hover */
+  --dur-medium: 240ms;   /* modal, troca de tela */
+  --dur-slow:   320ms;   /* barra de progresso, percurso longo */
+
+  /* SAIDA e mais rapida que a ENTRADA: entrando o usuario esta decidindo,
+     saindo o sistema so responde. Regra citada nas tres fontes. */
+  --dur-exit:    120ms;
+
+  /* Curva unica da casa: ease-out exponencial.
+     `cubic-bezier(0.16, 1, 0.3, 1)` e o valor de DUAS das tres fontes
+     (taste-skill e impeccable); o Emil usa 0.23,1,0.32,1 — mesma familia.
+     Escolhida a de maior concordancia e travada como token.
+     `ease` puro (o padrao do navegador) e simetrico: comeca e termina no mesmo
+     ritmo, e por isso tudo parecia molenga. */
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-inout: cubic-bezier(0.77, 0, 0.175, 1);  /* move/transforma de A pra B */
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1); /* passa do ponto e volta */
+
+  /* NAO existe --ease-in de proposito: "never use ease-in for UI animations"
+     (emilkowalski). Saida rapida se resolve com duracao menor, nao com curva
+     que engasga no comeco. */
+
+  /* Compatibilidade com o que ainda referencia os nomes antigos. */
+  --ease:       cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-long:   320ms;
+}
+
+/* Menos movimento NAO e movimento zero: "keep opacity and color transitions
+   that aid comprehension, remove movement and position animations"
+   (emilkowalski). Zerar tudo tira a pista de que algo mudou. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    /* o que MOVE, para */
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    /* o que so muda de cor/opacidade continua, curto */
+    transition-duration: 80ms !important;
+  }
 }
 
 /* ── Squircle global (estilo Apple) ─────────────────────────────────────────

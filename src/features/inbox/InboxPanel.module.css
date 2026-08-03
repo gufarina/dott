@@ -11,7 +11,7 @@
   display: flex; align-items: center; gap: 6px;
   border-bottom: 2px solid transparent;
   margin-right: 16px;
-  transition: color var(--dur-base);
+  transition: color var(--dur-base) var(--ease-out);
   letter-spacing: .01em;
 }
 .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
@@ -29,7 +29,7 @@
   color: var(--fg3); cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   font-size: 15px;
-  transition: background var(--dur-base), color var(--dur-base);
+  transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
 }
 .collapse:hover { background: var(--surface3); color: var(--fg); }
 
@@ -46,7 +46,7 @@
   font-size: 11px; font-weight: 700; letter-spacing: .03em;
   border-radius: var(--r-xs); padding: 3px 7px;
   line-height: 1;
-  transition: background var(--dur-micro), color var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 .captureChipNeutral {
   font-size: 11px; font-weight: 700; letter-spacing: .03em;
@@ -63,10 +63,10 @@
 .captureRow { display: flex; gap: 8px; align-items: flex-end; }
 .captureInput {
   flex: 1; background: var(--surface2);
-  border: 1px solid var(--border2); border-radius: var(--r-md);
+  border: 1px solid var(--border-control); border-radius: var(--r-md);
   padding: 9px 12px; color: var(--fg); font-size: 14px;
   resize: none; outline: none;
-  transition: border-color var(--dur-base);
+  transition: border-color var(--dur-base) var(--ease-out);
   line-height: 1.4; height: 38px;
 }
 .captureInput:focus { border-color: var(--accent); }
@@ -79,7 +79,7 @@
   font-size: 13px; font-weight: 600; cursor: pointer;
   white-space: nowrap;
   display: flex; align-items: center; justify-content: center;
-  transition: opacity var(--dur-base);
+  transition: opacity var(--dur-base) var(--ease-out);
 }
 .btnCapture:hover:not(:disabled) { opacity: .88; }
 .btnCapture:disabled { cursor: not-allowed; }
@@ -97,7 +97,7 @@
   --sq-r: var(--r-lg);
   -webkit-mask-image: paint(squircle); mask-image: paint(squircle);
   cursor: pointer; border: 1px solid var(--border); background: var(--surface2);
-  transition: border-color var(--dur-base), background var(--dur-base);
+  transition: border-color var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out);
 }
 .card:hover { border-color: var(--border2); background: var(--surface3); }
 .cardDragging { opacity: .35; }
@@ -116,7 +116,7 @@
   border-radius: var(--r-xs); margin-left: 6px;
   display: flex; align-items: center; justify-content: center;
   opacity: 0;
-  transition: opacity var(--dur-micro), background var(--dur-micro), color var(--dur-micro);
+  transition: opacity var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 .card:hover .cardRemove { opacity: 1; }
 .cardRemove:hover { background: var(--surface3); color: var(--danger); }
@@ -129,7 +129,7 @@
   border-radius: var(--r-xs); margin-left: 6px;
   display: flex; align-items: center; justify-content: center;
   opacity: 0;
-  transition: opacity var(--dur-micro), background var(--dur-micro), color var(--dur-micro);
+  transition: opacity var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 .card:hover .cardAction { opacity: 1; }
 .cardAction:hover { background: var(--accent-s); color: var(--accent); }
@@ -190,7 +190,7 @@
 .tagItem {
   display: flex; align-items: center; gap: 9px;
   padding: 7px 9px; border-radius: var(--r-sm); cursor: pointer;
-  transition: background var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out);
 }
 .tagItem:hover { background: var(--surface3); }
 .tagDot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
@@ -230,7 +230,7 @@
   border: none; background: transparent; color: var(--fg3);
   cursor: pointer; font-size: 16px;
   display: flex; align-items: center; justify-content: center;
-  transition: background var(--dur-micro), color var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 .processClose:hover { background: var(--surface3); color: var(--fg); }
 .processBody { padding: 10px; overflow-y: auto; }
@@ -247,7 +247,7 @@
   border: none; background: transparent;
   color: var(--fg); font-size: 13px; font-weight: 500;
   cursor: pointer; font-family: inherit;
-  transition: background var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out);
 }
 .processFolder:hover { background: var(--surface3); }
 .processFolder svg { color: var(--fg3); flex-shrink: 0; }
@@ -278,7 +278,7 @@
   border-radius: var(--r-sm);
   border: none; background: transparent;
   color: var(--fg); cursor: pointer; font-family: inherit;
-  transition: background var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out);
 }
 .acaoLinha:hover { background: var(--surface3); }
 .acaoLinha svg { color: var(--fg3); flex-shrink: 0; }
@@ -309,7 +309,7 @@
   border: 1px solid var(--accent);
   background: var(--accent-s);
   cursor: pointer; font-family: inherit; text-align: left;
-  transition: background var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out);
   animation: appearUp .2s ease both;
 }
 .sugestaoPasta:hover { background: color-mix(in oklab, var(--accent) 22%, transparent); }
@@ -351,9 +351,9 @@
   padding: 0 11px;
   height: 38px;
   border-radius: var(--r-md);
-  border: 1px solid var(--border2);
+  border: 1px solid var(--border-control);
   background: var(--surface2);
-  transition: border-color var(--dur-base);
+  transition: border-color var(--dur-base) var(--ease-out);
 }
 .taskField:focus-within { border-color: var(--accent); }
 .taskFieldIcon { color: var(--fg3); flex-shrink: 0; }
@@ -372,7 +372,7 @@
   border: 1px solid var(--border2); background: transparent;
   color: var(--fg2); font-size: 13px; font-weight: 600;
   cursor: pointer; font-family: inherit;
-  transition: background var(--dur-micro), color var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 .taskCancel:hover { background: var(--surface3); color: var(--fg); }
 .taskOk {
@@ -382,6 +382,6 @@
   border: 1px solid var(--accent); background: var(--accent);
   color: #fff; font-size: 13px; font-weight: 600;
   cursor: pointer; font-family: inherit;
-  transition: opacity var(--dur-micro);
+  transition: opacity var(--dur-micro) var(--ease-out);
 }
 .taskOk:hover { opacity: .88; }

@@ -46,6 +46,22 @@ html[data-theme="light"] body {
 button { font-family: inherit; }
 textarea, input { font-family: inherit; }
 
+/* ── Foco de teclado ────────────────────────────────────────────────────────
+   O app nao tinha NENHUMA regra de foco: quem navegava por Tab ficava perdido,
+   sem saber onde estava. `:focus-visible` (e nao `:focus`) mostra o anel so pra
+   quem esta usando teclado — quem clica com o mouse nao ve nada, que e o
+   comportamento certo.
+
+   O anel fica FORA do elemento (outline-offset) pra nao brigar com o canto
+   squircle nem ser cortado por overflow:hidden. */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+/* O navegador ja tira o outline no clique; isto so garante o caso do mouse. */
+:focus:not(:focus-visible) { outline: none; }
+
 /* Microanimações globais */
 @keyframes appearUp {
   from { opacity: 0; transform: translateY(7px); }

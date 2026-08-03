@@ -35,7 +35,7 @@
 
 .node { cursor: pointer; }
 .node circle {
-  transition: r .2s, opacity .2s;
+  transition: r .2s var(--ease-out), opacity .2s var(--ease-out);
 }
 .node:hover circle { opacity: .75; }
 

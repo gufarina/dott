@@ -155,8 +155,12 @@ export function TasksPanel() {
               </button>
             )}
 
-            <div className={s.completedToggle} onClick={() => toggleFilter('completed')}>
-              {showCompleted ? '▾ Ocultar concluídas' : '▸ Ver concluídas'}
+            <div
+              className={`${s.completedToggle} ${showCompleted ? s.completedAberto : ''}`}
+              onClick={() => toggleFilter('completed')}
+            >
+              <span className={s.completedSeta} />
+              {showCompleted ? 'Ocultar concluídas' : 'Ver concluídas'}
             </div>
           </>
         )}

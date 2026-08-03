@@ -44,7 +44,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  transition: background var(--dur-base), color var(--dur-base);
+  transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
 }
 .btn:hover { background: var(--surface3); color: var(--fg); }
 .btnActive { background: var(--accent-s); color: var(--accent); }
@@ -69,7 +69,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background var(--dur-micro), color var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 .wbtn:hover { background: var(--surface3); color: var(--fg); }
 .wclose:hover { background: #e04040; color: #fff; }

@@ -23,7 +23,7 @@
   border-radius: var(--r-sm);
   width: 30px;
   height: 30px;
-  transition: background var(--dur-micro), color var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 .editor-toolbar button:hover,
 .editor-toolbar button.active {

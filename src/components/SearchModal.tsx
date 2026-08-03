@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Fuse from 'fuse.js'
 import { useStore } from '../store'
+import { Icon } from './Icon'
 import s from './SearchModal.module.css'
 
 interface Props { open: boolean; onClose: () => void }
@@ -108,7 +109,7 @@ export function SearchModal({ open, onClose }: Props) {
     <div className={s.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
       <div className={s.modal}>
         <div className={s.inputRow}>
-          <span className={s.searchIcon}>⌕</span>
+          <span className={s.searchIcon}><Icon name="busca" size={15} /></span>
           <input
             ref={inputRef}
             className={s.input}

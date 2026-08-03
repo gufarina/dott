@@ -9,6 +9,7 @@ import { showToast } from '../../components/Toast'
 import { imageFromEvent, saveImageFile } from '../../lib/attachments'
 import { ImageViewer } from './ImageViewer'
 import { MarkdownView } from './MarkdownView'
+import { Icon } from '../../components/Icon'
 import s from './NoteEditor.module.css'
 
 /** Returns the image URL if the body is image-only markdown, otherwise null. */
@@ -180,7 +181,7 @@ export function NoteEditor() {
           <div className={s.backlinksList}>
             {backlinkNotes.map(n => (
               <div key={n.id} className={s.backlinkItem}>
-                <span className={s.backlinkIcon}>←</span>{n.title}
+                <span className={s.backlinkIcon}><Icon name="voltar" size={12} /></span>{n.title}
               </div>
             ))}
           </div>

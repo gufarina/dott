@@ -36,7 +36,7 @@
 .md-view em{ font-style:italic; }
 
 /* Links */
-.md-view a{ color:var(--accent); text-decoration:none; border-bottom:1px solid rgba(224,90,56,.32); transition:border-color var(--dur-micro,120ms); }
+.md-view a{ color:var(--accent); text-decoration:none; border-bottom:1px solid rgba(224,90,56,.32); transition: border-color var(--dur-micro) var(--ease-out); }
 .md-view a:hover{ border-bottom-color:var(--accent); }
 .md-view a.wl{ color:var(--accent); background:var(--accent-s); border:1px solid rgba(224,90,56,.22); border-radius:6px; padding:.5px 6px; font-weight:600; cursor:pointer; }
 .md-view a.wl::before{ content:""; }

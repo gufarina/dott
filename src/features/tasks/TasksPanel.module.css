@@ -49,7 +49,7 @@
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
-  transition: background var(--dur-micro), border-color var(--dur-micro), color var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
   letter-spacing: .03em;
   display: flex;
   align-items: center;
@@ -104,22 +104,30 @@
   gap: 8px;
   padding: 7px 8px;
   border-radius: var(--r-sm);
-  transition: background var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out);
 }
 .item:hover { background: var(--surface2); }
 
 .check {
   width: 16px; height: 16px;
   border-radius: 6px;
-  border: 1.5px solid var(--border2);
+  border: 1.5px solid var(--border-control);
   flex-shrink: 0;
   margin-top: 1px;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  transition: background var(--dur-base), border-color var(--dur-base);
+  transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
 }
 .check.done { background: var(--success); border-color: var(--success); }
-.check.done::after { content: '✓'; color: #fff; font-size: 10px; font-weight: 700; }
+/* Marca desenhada, nao glifo de texto: glifo muda de forma por fonte e nao
+   tem peso de traco consistente com o resto dos icones. */
+.check.done::after {
+  content: '';
+  width: 9px; height: 5px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
 
 .text { flex: 1; font-size: 13px; color: var(--fg); line-height: 1.45; }
 .text.done { text-decoration: line-through; color: var(--fg3); }
@@ -135,6 +143,17 @@
 .urgent { background: rgba(217,140,58,.15); color: var(--warn); }
 .over   { background: rgba(224,64,64,.15);  color: var(--danger); }
 
+/* O triangulo ▾/▸ era glifo de texto; agora e uma seta desenhada que gira. */
+.completedSeta {
+  width: 0; height: 0;
+  border-left: 4px solid currentColor;
+  border-top: 3.5px solid transparent;
+  border-bottom: 3.5px solid transparent;
+  flex-shrink: 0;
+  transition: transform var(--dur-micro) var(--ease-out);
+}
+.completedAberto .completedSeta { transform: rotate(90deg); }
+
 .completedToggle {
   padding: 6px 9px;
   font-size: 12px;
@@ -144,7 +163,7 @@
   align-items: center;
   gap: 5px;
   border-radius: var(--r-sm);
-  transition: color var(--dur-micro), background var(--dur-micro);
+  transition: color var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out);
   font-weight: 500;
 }
 .completedToggle:hover { color: var(--fg2); background: var(--surface2); }
@@ -155,7 +174,7 @@
   color: var(--fg3); cursor: pointer; border-radius: var(--r-xs);
   line-height: 1; opacity: 0; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  transition: opacity var(--dur-micro), background var(--dur-micro), color var(--dur-micro);
+  transition: opacity var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 .groupHeader:hover .groupDel { opacity: 1; }
 .groupDel:hover { background: rgba(224,64,64,.15); color: var(--danger); }
@@ -166,7 +185,7 @@
   opacity: 0; margin-top: 1px; line-height: 1;
   color: var(--fg3);
   display: flex; align-items: center; justify-content: center;
-  transition: opacity var(--dur-micro);
+  transition: opacity var(--dur-micro) var(--ease-out);
 }
 .item:hover .dateBtn { opacity: .6; }
 .dateBtn:hover { opacity: 1; }
@@ -181,7 +200,7 @@
   color: var(--fg3); cursor: pointer; border-radius: var(--r-xs);
   line-height: 1; opacity: 0; flex-shrink: 0; margin-top: 1px;
   display: flex; align-items: center; justify-content: center;
-  transition: opacity var(--dur-micro), background var(--dur-micro), color var(--dur-micro);
+  transition: opacity var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 .item:hover .taskDel { opacity: 1; }
 .taskDel:hover { background: rgba(224,64,64,.15); color: var(--danger); }
@@ -199,12 +218,12 @@
   color: var(--fg3); background: transparent; border: none; cursor: pointer;
   padding: 6px 9px; border-radius: var(--r-sm); margin-top: 2px;
   display: flex; align-items: center; gap: 7px;
-  transition: background var(--dur-micro), color var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 .addTask:hover { background: var(--surface2); color: var(--fg2); }
 .addInput {
   width: 100%; font-family: inherit; font-size: 13px; color: var(--fg);
-  background: var(--surface2); border: 1px solid var(--border2);
+  background: var(--surface2); border: 1px solid var(--border-control);
   border-radius: var(--r-sm); padding: 7px 9px; margin-top: 2px; outline: none;
 }
 .addInput:focus { border-color: var(--accent); }
@@ -214,7 +233,7 @@
   color: var(--fg3); background: transparent; border: 1px dashed var(--border2);
   border-radius: var(--r-sm); cursor: pointer; padding: 9px; margin-top: 4px;
   display: flex; align-items: center; justify-content: center; gap: 7px;
-  transition: background var(--dur-micro), color var(--dur-micro), border-color var(--dur-micro);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
 }
 .addGroup:hover { background: var(--surface2); color: var(--fg); border-color: var(--fg3); }
 .addGroupInput {

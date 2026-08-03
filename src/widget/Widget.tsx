@@ -257,7 +257,7 @@ export function Widget() {
           disabled={isFull}
           title={isFull ? 'Inbox cheio — processe alguns cards' : undefined}
         >
-          {isFull ? '10/10 cheio' : <>Salvar <span className={s.arrow}>→</span></>}
+          {isFull ? '10/10 cheio' : <>Salvar <Icon name="enviar" size={13} /></>}
         </button>
       </div>
     </div>
