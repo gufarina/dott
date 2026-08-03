@@ -1,7 +1,8 @@
-/* Tela de carregamento do boot — "Convergência PARA" (V2 aprovada pelo CEO).
-   As 4 cores do PARA giram e convergem no orb central enquanto o vault carrega. */
+/* Abertura do app — a marca se formando.
+   Mesmo ponto e mesmo anel do icone (DottMark) e do widget. Nada exclusivo
+   desta tela: se a marca mudar, a abertura muda junto. */
 
-.overlay{
+.overlay {
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -9,50 +10,59 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 24px;
+  gap: 22px;
   background: var(--bg);
 }
 
-.stage{ position: relative; width: 84px; height: 84px; }
-
-.spin{ position: absolute; inset: 0; animation: bl-spin 7s linear infinite; }
-
-.arm{ position: absolute; inset: 0; display: flex; justify-content: center; }
-.arm i{
-  width: 12px; height: 12px;
-  border-radius: var(--r-full, 9999px);
-  margin-top: 1px;
-  animation: bl-converge 1.9s ease-in-out infinite;
-}
-.arm:nth-child(1){ transform: rotate(0deg); }   .arm:nth-child(1) i{ background: var(--q-p); }
-.arm:nth-child(2){ transform: rotate(90deg); }  .arm:nth-child(2) i{ background: var(--q-a); animation-delay: .12s; }
-.arm:nth-child(3){ transform: rotate(180deg); } .arm:nth-child(3) i{ background: var(--q-r); animation-delay: .24s; }
-.arm:nth-child(4){ transform: rotate(270deg); } .arm:nth-child(4) i{ background: var(--q-ar); animation-delay: .36s; }
-
-.core{
-  position: absolute; top: 50%; left: 50%;
-  width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px;
-  border-radius: var(--r-full, 9999px);
-  background: var(--accent);
-  box-shadow: 0 0 18px var(--accent-s);
-  animation: bl-breathe 1.9s ease-in-out infinite;
+.marca {
+  width: 76px;
+  height: 76px;
+  /* -90deg: o anel comeca a se desenhar do topo, nao da direita. */
+  transform: rotate(-90deg);
 }
 
-.word{ display: flex; align-items: flex-end; gap: 5px; }
-.word span{ font-size: 25px; font-weight: 800; letter-spacing: -.02em; color: var(--fg); }
-.word i{
-  width: 7px; height: 7px;
-  border-radius: var(--r-full, 9999px);
-  background: var(--accent);
-  margin-bottom: 5px;
-  animation: bl-blink 1.25s ease-in-out infinite;
+.trilho {
+  stroke: var(--surface3);
 }
 
-@keyframes bl-spin{ to{ transform: rotate(360deg); } }
-@keyframes bl-converge{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(28px); } }
-@keyframes bl-breathe{ 0%,100%{ transform: scale(.86); } 50%{ transform: scale(1.08); } }
-@keyframes bl-blink{ 0%,100%{ opacity: 1; transform: scale(1); } 50%{ opacity: .25; transform: scale(.7); } }
+/* Circunferencia de r=8.8 -> 2*PI*8.8 = 55.29. O dash e o traco visivel;
+   animar dashoffset move o traco pela borda sem tocar em layout. */
+.anel {
+  stroke: var(--accent);
+  stroke-dasharray: 14 41.29;
+  animation: bl-percorrer 1.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
 
-@media (prefers-reduced-motion: reduce){
-  .spin, .arm i, .core, .word i{ animation-duration: .001ms; animation-iteration-count: 1; }
+.ponto {
+  fill: var(--accent);
+  transform-origin: 12px 12px;
+  animation: bl-pulsar 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.nome {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  color: var(--fg3);
+}
+
+/* O traco da uma volta completa: so dashoffset, so a GPU. */
+@keyframes bl-percorrer {
+  from { stroke-dashoffset: 55.29; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* O ponto respira no mesmo compasso do anel — um so ritmo na tela. */
+@keyframes bl-pulsar {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(.86); opacity: .78; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anel {
+    animation: none;
+    /* Sem movimento, o anel fica inteiro: estado final, nao meia-volta. */
+    stroke-dasharray: none;
+  }
+  .ponto { animation: none; }
 }

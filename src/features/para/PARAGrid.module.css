@@ -102,9 +102,13 @@
 .q-archives .qAdd { color: var(--q-ar); background: rgba(102,102,128,.12); }
 .q-archives .qAdd:hover { background: rgba(102,102,128,.22); }
 
+/* Coluna com TETO de largura: ao estreitar a janela caem colunas, o card NAO
+   estica. Era o que deformava a proporcao do card (e junto com a capa
+   proporcional, cortava o texto). */
 .qCards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 196px));
+  justify-content: start;
   gap: 13px;
   padding: 8px 16px 16px;
   overflow-y: auto;
@@ -128,7 +132,11 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 128px;
+  /* Altura firme: capa 88 + info ate 98 + borda 2 = 188.
+     Precisa ser explicita porque `overflow: hidden` (a mascara squircle) zera o
+     tamanho minimo automatico do item de grade — sem isso o card encolhe abaixo
+     do proprio conteudo e corta a ultima linha, mesmo com a info no tamanho certo. */
+  min-height: 188px;
   animation: appearUp .26s ease both;
 }
 .folderCard:hover { border-color: var(--border2); transform: translateY(-1px); }
@@ -157,14 +165,16 @@
   animation: overlayIn .12s ease both;
 }
 
+/* Capa com ALTURA FIXA, nao proporcao.
+   Com `aspect-ratio` a capa crescia junto com a largura do card e empurrava o
+   texto pra fora — dai "100% concluido" e "acervo" apareciam cortados quando a
+   janela estreitava (menos colunas = cards mais largos = capa mais alta). */
 .cover {
   width: 100%;
-  aspect-ratio: 16/9;
-  max-height: 90px;
-  min-height: 40px;
+  height: 88px;
+  flex: 0 0 88px;
   position: relative;
   overflow: hidden;
-  flex-shrink: 1;
 }
 
 .coverInner { width: 100%; height: 100%; }
@@ -211,12 +221,14 @@
   padding: 2px 6px;
 }
 
+/* `flex: 1` aqui era o bug: com flex-basis 0 o card IGNORAVA a altura real do
+   texto e so dava a sobra (80px medidos contra 102px necessarios = 22px cortados).
+   Agora a info ocupa a altura que precisa e o card cresce junto. */
 .info {
   padding: 12px 14px 13px;
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 80px;
+  flex: 0 0 auto;
 }
 
 .name {
@@ -276,7 +288,8 @@
   gap: 7px;
   color: var(--fg3);
   transition: border-color var(--dur-base), color var(--dur-base), background var(--dur-base);
-  min-height: 128px;
+  /* Mesma altura do card real, pra grade nao ficar desalinhada. */
+  min-height: 188px;
 }
 .folderNew:hover { border-color: var(--fg3); color: var(--fg); background: var(--surface); }
 
@@ -460,7 +473,8 @@
 /* Cards maiores que no board: aqui a categoria tem a tela inteira. */
 .catCards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 196px));
+  justify-content: start;
   gap: 14px;
   align-content: start;
 }
