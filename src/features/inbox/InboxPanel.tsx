@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { useStore, CardType } from '../../store'
 import { showToast } from '../../components/Toast'
@@ -38,6 +38,10 @@ function relTime(ts: number | undefined, fallback: string): string {
   return `${Math.floor(h / 24)}d`
 }
 
+/** Tipos que sao "maquina": endereco, comando, codigo. Nao quebram como prosa
+ *  e ficam mais legiveis em monoespacada. */
+const TECNICO = new Set<CardType>(['URL', 'LINK', 'CODIGO', 'SHELL'])
+
 const TYPE_CLASS: Record<CardType, string> = {
   NOTA: 'nota', CODIGO: 'codigo', SHELL: 'shell', URL: 'url', IDEIA: 'ideia',
   AUDIO: 'audio', VIDEO: 'video', IMAGEM: 'imagem', ARQUIVO: 'arquivo', LINK: 'link',
@@ -64,10 +68,46 @@ export function InboxPanel() {
   const [tagFilter, setTagFilter] = useState('')
   /** Card que esta virando tarefa + o texto sugerido (editavel antes de criar). */
   const [virandoTarefa, setVirandoTarefa] = useState<{ cardId: string; texto: string } | null>(null)
+  const [capturaAtiva, setCapturaAtiva] = useState(false)
+  const [arrastandoArquivo, setArrastandoArquivo] = useState(false)
   const taRef = useRef<HTMLTextAreaElement>(null)
+  const imgRef = useRef<HTMLInputElement>(null)
 
   const isFull = inbox.length >= 10
   const detection = text.trim() ? detectType(text) : null
+
+  /** Onde isso costuma morar — palpite do motor local, ANTES de capturar.
+   *  So aparece com texto que da pra ler (abaixo disso o palpite e chute). */
+  const palpiteDestino = text.trim().length >= 12 && detection
+    ? suggestFolder(text, detection.type as CardType, para, notes)
+    : null
+
+  /** A caixa cresce com o texto — o `height: 38px` fixo cortava ate o
+   *  placeholder (medido: precisava de 77px e tinha 38). Teto de 7 linhas
+   *  pra captura nao virar editor. */
+  useEffect(() => {
+    const el = taRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = Math.min(el.scrollHeight, 150) + 'px'
+  }, [text])
+
+  /** Todo caminho de imagem (botao, arrastar, colar) cai aqui. */
+  const capturarImagem = async (file: File) => {
+    if (isFull) { showToast('warn', 'Inbox cheio (10/10)', 'Processe alguns cards antes.'); return }
+    const url = await saveImageFile(file)
+    if (!url) { showToast('warn', 'Erro', 'Nao consegui salvar a imagem.'); return }
+    captureCard(url)
+    showToast('info', 'Imagem capturada', 'No inbox como acervo visual.')
+  }
+
+  const aoSoltarArquivo = async (e: React.DragEvent) => {
+    setArrastandoArquivo(false)
+    const file = [...(e.dataTransfer?.files ?? [])].find(f => f.type.startsWith('image/'))
+    if (!file) return
+    e.preventDefault()
+    await capturarImagem(file)
+  }
 
   const capture = () => {
     if (isFull) return
@@ -128,11 +168,20 @@ export function InboxPanel() {
 
       {leftTab === 'inbox' && (
         <div className={s.inboxContent}>
-          <div className={s.capture}>
-            {/* Linha meta: chip de tipo em tempo real + contador */}
+          {/* ── Area de captura ──────────────────────────────────────────
+              A caixa CRESCE com o texto (antes tinha 38px fixos e cortava ate
+              o placeholder). Aceita texto, imagem do disco, arquivo arrastado
+              e imagem colada — os quatro caminhos entram no mesmo lugar. */}
+          <div
+            className={`${s.capture} ${arrastandoArquivo ? s.captureSoltando : ''}`}
+            onDragOver={e => { e.preventDefault(); if (!isFull) setArrastandoArquivo(true) }}
+            onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setArrastandoArquivo(false) }}
+            onDrop={aoSoltarArquivo}
+          >
             <div className={s.captureMeta}>
               {detection ? (
                 <span className={`${s.captureChip} ${s['type-' + TYPE_CLASS[detection.type as CardType]]}`}>
+                  <CardTypeIcon type={detection.type as CardType} size={10} />
                   {detection.label}
                 </span>
               ) : (
@@ -142,15 +191,18 @@ export function InboxPanel() {
                 {inbox.length}/10
               </span>
             </div>
-            <div className={s.captureRow}>
+
+            <div className={s.captureCaixa}>
               <textarea
                 ref={taRef}
                 className={s.captureInput}
-                placeholder="Pensamento, link, código… (cole imagem também)"
+                placeholder={isFull ? 'Inbox cheio — processe alguns cards' : 'O que está na sua mente?'}
                 rows={1}
                 value={text}
                 disabled={isFull}
                 onChange={e => setText(e.target.value)}
+                onFocus={() => setCapturaAtiva(true)}
+                onBlur={() => setCapturaAtiva(false)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); capture() } }}
                 onPaste={async e => {
                   const file = imageFromEvent(e.nativeEvent)
@@ -160,15 +212,64 @@ export function InboxPanel() {
                   if (url) { captureCard(url); showToast('info', 'Imagem capturada', 'No inbox como acervo visual.') }
                 }}
               />
-              <button
-                className={`${s.btnCapture} ${isFull ? s.btnCaptureFull : ''}`}
-                onClick={capture}
-                disabled={isFull}
-                title={isFull ? 'Inbox cheio — processe alguns cards primeiro' : undefined}
-              >
-                {isFull ? 'Cheio' : <Icon name="enviar" size={15} />}
-              </button>
+
+              {/* Rodape da caixa: acoes a esquerda, enviar a direita */}
+              <div className={s.captureAcoes}>
+                <button
+                  className={s.captureIconBtn}
+                  onClick={() => imgRef.current?.click()}
+                  disabled={isFull}
+                  title="Imagem do computador"
+                  aria-label="Inserir imagem do computador"
+                >
+                  <Icon name="imagem" size={14} />
+                </button>
+
+                {/* A dica so aparece com a caixa em uso — nao polui o repouso. */}
+                <span className={`${s.captureDica} ${capturaAtiva && text ? s.captureDicaVisivel : ''}`}>
+                  Enter envia · Shift+Enter quebra linha
+                </span>
+
+                <button
+                  className={`${s.btnCapture} ${isFull ? s.btnCaptureFull : ''}`}
+                  onClick={capture}
+                  disabled={isFull || !text.trim()}
+                  title={isFull ? 'Inbox cheio — processe alguns cards primeiro' : 'Capturar (Enter)'}
+                >
+                  {isFull ? 'Cheio' : <Icon name="enviar" size={15} />}
+                </button>
+              </div>
             </div>
+
+            {/* Palpite de destino ANTES de capturar: o motor ja sabe ler o texto,
+                entao ele adianta onde isso costuma morar. So palpite, sem acao. */}
+            {palpiteDestino && (
+              <div className={s.capturePalpite}>
+                <Icon name="sugestao" size={12} />
+                <span>
+                  costuma virar nota em <b>{palpiteDestino.folderName}</b>
+                  <span className={s.capturePalpiteQuad}> · {palpiteDestino.categoryLabel}</span>
+                </span>
+              </div>
+            )}
+
+            <input
+              ref={imgRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={async e => {
+                const file = e.target.files?.[0]
+                e.target.value = ''
+                if (file) await capturarImagem(file)
+              }}
+            />
+
+            {arrastandoArquivo && (
+              <div className={s.captureSolte}>
+                <Icon name="imagem" size={16} /> Solte a imagem aqui
+              </div>
+            )}
           </div>
           <div className={s.list}>
             {inbox.length === 0 ? (
@@ -200,7 +301,7 @@ export function InboxPanel() {
                 </div>
                 {c.type === 'IMAGEM'
                   ? <img className={s.cardImage} src={c.content} alt="imagem capturada" draggable={false} />
-                  : <div className={s.cardContent}>{c.content}</div>}
+                  : <div className={`${s.cardContent} ${TECNICO.has(c.type) ? s.cardContentTecnico : ''}`}>{c.content}</div>}
               </DraggableCard>
             ))}
           </div>
