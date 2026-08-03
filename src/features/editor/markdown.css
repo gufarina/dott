@@ -50,7 +50,7 @@
 
 /* Citacao */
 .md-view blockquote{
-  border-left:3px solid var(--accent);
+  border-left:1px solid var(--accent); background:var(--accent-s);
   background:var(--surface2);
   border-radius:0 var(--r-md) var(--r-md) 0;
   padding:10px 18px; color:var(--fg2); font-style:italic;

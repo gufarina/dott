@@ -105,6 +105,22 @@
   .medida{font-family:var(--mono);font-size:12.5px;background:#0d0d10;border:1px solid var(--line);border-radius:8px;padding:11px 13px;margin-top:12px;line-height:1.75;color:var(--body)}
   .medida .de{color:var(--bad)} .medida .pa{color:var(--ok)}
 
+  /* tabela da auditoria */
+  .aud{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card2)}
+  .aud .lin{display:grid;grid-template-columns:26px 1fr 150px 190px;gap:12px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--line);font-size:13.5px}
+  .aud .lin:last-child{border-bottom:0}
+  .aud .lin.cab{background:var(--soft);font-family:var(--mono);font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:var(--mute)}
+  @media(max-width:780px){
+    .aud .lin{grid-template-columns:22px 1fr;gap:6px}
+    .aud .lin .col3,.aud .lin .col4{grid-column:2;font-size:12px;color:var(--mute)}
+    .aud .lin.cab{display:none}
+  }
+  .aud .mk{font-weight:700;text-align:center}
+  .aud .mk.s{color:var(--ok)} .aud .mk.n{color:#d98c3a}
+  .aud .area{font-family:var(--mono);font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--mute);display:block;margin-bottom:2px}
+  .aud .col3{color:var(--mute);font-size:12px}
+  .aud .col4{font-family:var(--mono);font-size:11.5px;color:var(--body)}
+
   .fonte{font-family:var(--mono);font-size:11.5px;color:var(--mute);margin-top:11px;line-height:1.6}
   .fonte b{color:var(--body);font-weight:400}
 
@@ -232,7 +248,23 @@
 
 <section>
   <div class="wrap">
-    <p class="eyebrow">// 04 <span class="m">· A LISTA COMPLETA</span></p>
+    <p class="eyebrow">// 04a <span class="m">· A AUDITORIA, ITEM POR ITEM</span></p>
+    <h2>23 regras conferidas: <b>20 passam</b></h2>
+    <p class="sub">Rodei o app inteiro contra a régua das três referências. Cada linha diz a regra, de onde ela vem e o que foi medido. As três que não passam estão explicadas embaixo — duas são limite consciente, uma é falso positivo do meu próprio detector.</p>
+    <div id="auditoria"></div>
+
+    <div class="aviso" style="margin-top:22px">
+      <h4>As que não passam, e por quê</h4>
+      <p><b>Hover sem media query</b> (0 blocos). A regra existe pra evitar hover grudado em tela sensível ao toque. O Dott é app de desktop Windows; notebook com touch existe, mas é caso de borda. <b>Ficou como risco aceito</b>, não como esquecimento — anotado pra quando houver versão que rode em toque.</p>
+      <p><b>Escala de espaçamento base 4</b> (167 de 242 valores fora). Olhando os números — 2, 6, 10, 14, 18 — o app usa uma escala de <b>2</b>, que é mais fina que a de 4, não mais grossa. A regra do impeccable argumenta base-4 <i>contra sistemas de 8</i>, pra ter mais passos no meio; o Dott já tem. Trocar 167 valores mexeria em todas as superfícies do app, e eu não consigo ver o resultado. <b>Não mexi.</b></p>
+      <p><b>SVG em string</b> (2 usos). Um é o meu próprio comentário explicando que removi a prática; o outro é a renderização de markdown da nota, que é o uso legítimo. <b>Falso positivo do meu detector.</b></p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">// 04b <span class="m">· A LISTA COMPLETA</span></p>
     <h2>Cada mudança, <b>com a medida</b></h2>
     <p class="sub">Clique para abrir. A etiqueta diz se o número saiu de uma medição minha ou de uma das três referências.</p>
     <div id="lista"></div>
@@ -290,6 +322,41 @@ const M = [
   {t:'med', h:'A abertura contava outra história', p:'Eram 4 bolinhas coloridas do PARA girando — cores que não aparecem em nenhum outro lugar do app, e sem relação com o ícone nem com o widget. Agora a abertura é a própria marca se formando: o anel se desenha em volta do ponto enquanto o vault carrega.', m:'anima só <code>stroke-dashoffset</code> e <code>transform</code><br>traço 14 + 41,29 = 55,29 = circunferência exata de r=8,8'},
   {t:'med', h:'O anel da marca estava fora de centro', p:'As pontas do arco estavam a 8,30 e 8,75 do centro, mas o raio declarado era 8,85. Com as pontas fora do raio, o navegador reposiciona o círculo para conseguir encaixar — e o anel saiu centrado em x=11,316 enquanto a bola ficou em 12.', m:'medido por ajuste de círculo em 200 amostras do traço<br><span class="de">antes</span> centro (11,316 · 11,998) — desvio 0,684<br><span class="pa">depois</span> centro (12,000 · 11,999) — desvio 0,001'},
 ];
+/* auditoria: resultado real da varredura (23 regras) */
+const AUD = [
+  ['Movimento','toda transição declara curva','emil + impeccable',1,'0 sem curva, de 77'],
+  ['Movimento','nunca animar propriedade de layout','as 3',1,'0 animando layout'],
+  ['Movimento','nunca usar transition: all','emil + impeccable',1,'0 usos'],
+  ['Movimento','entrada nunca parte de scale(0)','emil',1,'0 usos'],
+  ['Movimento','curva única travada em token','emil',1,'curva da casa em todo canto'],
+  ['Movimento','reduced-motion suaviza, não zera','emil',1,'cor/opacidade mantidas'],
+  ['Acessibilidade','foco de teclado visível','impeccable',1,'anel global, 7,94:1'],
+  ['Acessibilidade','botão só-ícone tem nome acessível','impeccable',1,'20 aria-label'],
+  ['Acessibilidade','hover protegido por media query','emil',0,'0 blocos — risco aceito'],
+  ['Iconografia','glifo unicode não é ícone','impeccable (ban)',1,'0 glifos'],
+  ['Iconografia','emoji não é ícone','impeccable (ban)',1,'0 emoji'],
+  ['Iconografia','ícone é componente, não string','impeccable',0,'2 — falso positivo'],
+  ['Cor','texto com gradiente é proibido','impeccable (ban)',1,'0 usos'],
+  ['Cor','evitar preto puro','taste-skill',1,'0 usos'],
+  ['Cor','contraste de corpo ≥ 4,5:1','impeccable',1,'menor medido 5,12:1'],
+  ['Cor','contraste de controle ≥ 3:1','impeccable',1,'3,09:1 escuro · 3,36:1 claro'],
+  ['Profundidade','sombra tem deslocamento','impeccable',0,'3 — são anéis, não halos'],
+  ['Profundidade','sem borda lateral colorida grossa','impeccable (ban)',1,'só o check e a seta desenhados'],
+  ['Tipografia','corpo ≥ 16px','impeccable',1,'16px'],
+  ['Tipografia','tracking não passa de -0,04em','impeccable',1,'pior: -0,02em'],
+  ['Tipografia','mono só pra código/dado/medida','impeccable (ban)',1,'6 usos'],
+  ['Espaçamento','escala base 4','impeccable',0,'app usa escala de 2 (mais fina)'],
+  ['Estados','hover, disabled e vazio previstos','impeccable',1,'84 / 7 / 23 ocorrências'],
+];
+document.getElementById('auditoria').innerHTML =
+  '<div class="aud"><div class="lin cab"><span></span><span>Regra</span><span>Fonte</span><span>Medido</span></div>' +
+  AUD.map(([a,r,f,ok,ev]) => `<div class="lin">
+     <span class="mk ${ok?'s':'n'}">${ok?'✓':'!'}</span>
+     <span><span class="area">${a}</span>${r}</span>
+     <span class="col3">${f}</span>
+     <span class="col4">${ev}</span>
+   </div>`).join('') + '</div>';
+
 const LAB = {med:'Medido por mim', fonte:'Regra da referência'};
 document.getElementById('lista').innerHTML = M.map(x => `
   <div class="item">

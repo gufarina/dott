@@ -14,7 +14,7 @@ export type IconName =
   | 'tarefa' | 'grupo' | 'prazo' | 'imagem' | 'simbolo' | 'busca'
   | 'ajustes' | 'tema' | 'grafo' | 'lixo' | 'inbox' | 'tag'
   | 'sugestao' | 'lapis' | 'backup' | 'rever'
-  | 'minimizar' | 'maximizar' | 'acervo'
+  | 'minimizar' | 'maximizar' | 'acervo' | 'leitura'
 
 const P: Record<IconName, React.ReactElement> = {
   // Folha com o canto dobrado + o ponto
@@ -58,6 +58,8 @@ const P: Record<IconName, React.ReactElement> = {
   // Controles de janela — no pacote tambem, pra nao sobrar SVG solto no codigo
   minimizar: <><path d="M3.2 8h9.6"/></>,
   maximizar: <><rect x="3.2" y="3.2" width="9.6" height="9.6" rx="1.4"/></>,
+  // Livro aberto: modo leitura
+  leitura: <><path d="M8 4.4C6.8 3.4 5.1 3 2.4 3v9.4c2.7 0 4.4.4 5.6 1.4 1.2-1 2.9-1.4 5.6-1.4V3c-2.7 0-4.4.4-5.6 1.4z"/><path d="M8 4.4v9.4"/></>,
   // Folha com linhas: o acervo de notas da pasta
   acervo: <><path d="M4 2.6h5l3 3V13a.6.6 0 0 1-.6.6H4a.6.6 0 0 1-.6-.6V3.2a.6.6 0 0 1 .6-.6z"/><path d="M5.8 8.4h4M5.8 10.6h2.8"/></>,
 }

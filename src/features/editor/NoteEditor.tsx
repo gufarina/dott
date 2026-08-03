@@ -130,14 +130,16 @@ export function NoteEditor() {
         />
         {!parseImageOnly(initialBody) && (
           <button className={s.modeToggle} onClick={toggleMode} title={mode === 'read' ? 'Editar (markdown)' : 'Ler (formatado)'}>
-            {mode === 'read' ? '✎ Editar' : '👁 Ler'}
+            {mode === 'read'
+              ? <><Icon name="lapis" size={13} /> Editar</>
+              : <><Icon name="leitura" size={13} /> Ler</>}
           </button>
         )}
       </div>
 
       <div className={s.tags}>
         {current.tags.map(t => (
-          <span key={t} className={s.tagChip}>#{t}<span className={s.tagRm}>×</span></span>
+          <span key={t} className={s.tagChip}>#{t}<span className={s.tagRm}><Icon name="fechar" size={10} /></span></span>
         ))}
         <input
           className={s.tagInput}

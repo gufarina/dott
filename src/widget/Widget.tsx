@@ -211,7 +211,7 @@ export function Widget() {
           <><span className={s.dot} /><span className={s.titleNeutral}>Nova captura</span></>
         )}
         <span className={s.counter}>{count}/10</span>
-        <button className={s.close} onClick={collapse} aria-label="Fechar">×</button>
+        <button className={s.close} onClick={collapse} aria-label="Fechar"><Icon name="fechar" size={12} /></button>
       </div>
 
       {/* Preview de imagem OU textarea */}
@@ -222,7 +222,7 @@ export function Widget() {
             className={s.imgClear}
             onClick={() => { URL.revokeObjectURL(imgPreview.url); setImgPreview(null) }}
             aria-label="Remover imagem"
-          >×</button>
+          ><Icon name="fechar" size={11} /></button>
         </div>
       ) : (
         <textarea

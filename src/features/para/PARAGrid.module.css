@@ -102,13 +102,14 @@
 .q-archives .qAdd { color: var(--q-ar); background: rgba(102,102,128,.12); }
 .q-archives .qAdd:hover { background: rgba(102,102,128,.22); }
 
-/* Coluna com TETO de largura: ao estreitar a janela caem colunas, o card NAO
-   estica. Era o que deformava a proporcao do card (e junto com a capa
-   proporcional, cortava o texto). */
+/* A coluna PREENCHE a largura (1fr), entao nao sobra vao morto na direita.
+   O que evita o corte de texto nao e travar a largura — e a capa com teto de
+   altura + o texto com altura natural (logo abaixo). Largura pode esticar. */
 .qCards {
+  /* Altura da capa: respira com a janela, mas presa entre 80 e 104. */
+  --capa-h: clamp(80px, 8.5vh, 104px);
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 196px));
-  justify-content: start;
+  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
   gap: 13px;
   padding: 8px 16px 16px;
   overflow-y: auto;
@@ -124,7 +125,12 @@
   --sq-r: var(--r-xl);
   -webkit-mask-image: paint(squircle);
   mask-image: paint(squircle);
-  overflow: hidden;
+  /* SEM overflow:hidden aqui de proposito. Ele zerava o tamanho minimo
+     automatico do item de grade, e a linha passava a ser dimensionada por
+     baixo do conteudo real — o card ficava 176 quando precisava de 202 e
+     comia a ultima linha. Quem precisa recortar e so a CAPA (por causa da
+     imagem), e ela ja tem o proprio overflow. O canto do card vem do
+     border-radius + mascara, que arredondam sem precisar cortar. */
   background: var(--surface);
   border: 1px solid var(--border);
   cursor: pointer;
@@ -132,11 +138,14 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  /* Altura firme: capa 88 + info ate 98 + borda 2 = 188.
-     Precisa ser explicita porque `overflow: hidden` (a mascara squircle) zera o
-     tamanho minimo automatico do item de grade — sem isso o card encolhe abaixo
-     do proprio conteudo e corta a ultima linha, mesmo com a info no tamanho certo. */
-  min-height: 188px;
+  /* O piso AMARRA na capa: capa + o pior caso de texto (nome + contagem + barra
+     + legenda = 100px, medido). A grade nao consegue calcular isso sozinha —
+     ela dimensiona a linha pelo min-height e ignora o conteudo real do card —
+     entao o piso precisa ja vir certo. Amarrado ao token, nao chutado: mudou a
+     capa, o piso acompanha.
+     118 = pior caso MEDIDO: nome + contagem + barra + legenda com a legenda
+     quebrando em DUAS linhas (acontece a partir de ~6 colunas, card ~167px). */
+  min-height: calc(var(--capa-h) + 118px);
   animation: appearUp .26s ease both;
 }
 .folderCard:hover { border-color: var(--border2); transform: translateY(-1px); }
@@ -165,14 +174,19 @@
   animation: overlayIn .12s ease both;
 }
 
-/* Capa com ALTURA FIXA, nao proporcao.
-   Com `aspect-ratio` a capa crescia junto com a largura do card e empurrava o
-   texto pra fora — dai "100% concluido" e "acervo" apareciam cortados quando a
-   janela estreitava (menos colunas = cards mais largos = capa mais alta). */
+/* Capa com ALTURA RESOLVIDA (nao proporcao).
+   A elasticidade do card e de LARGURA — a coluna 1fr preenche o painel e nao
+   deixa vao morto. A capa fica estavel de proposito, por dois motivos:
+   1. com `aspect-ratio`, o navegador NAO consegue resolver a altura da capa na
+      hora de dimensionar a linha da grade (ele usa o minimo, nao o real), e a
+      linha sai menor que o conteudo — era exatamente isso que cortava o texto;
+   2. capa de altura igual deixa a grade alinhada, que e o que a proporcao do
+      print 1 tinha de bom.
+   Ela ainda respira com o tamanho da janela, via clamp na altura. */
 .cover {
   width: 100%;
-  height: 88px;
-  flex: 0 0 88px;
+  height: var(--capa-h);
+  flex: 0 0 auto;
   position: relative;
   overflow: hidden;
 }
@@ -302,8 +316,10 @@
   gap: 7px;
   color: var(--fg3);
   transition: border-color var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out);
-  /* Mesma altura do card real, pra grade nao ficar desalinhada. */
-  min-height: 188px;
+  /* Acompanha a altura da linha (que o card real define). O min-height so vale
+     pro caso de o quadrante nao ter nenhuma pasta ainda. */
+  min-height: calc(var(--capa-h) + 118px);
+  align-self: stretch;
 }
 .folderNew:hover { border-color: var(--fg3); color: var(--fg); background: var(--surface); }
 
@@ -486,9 +502,9 @@
 
 /* Cards maiores que no board: aqui a categoria tem a tela inteira. */
 .catCards {
+  --capa-h: clamp(88px, 10vh, 120px);
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 196px));
-  justify-content: start;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 14px;
   align-content: start;
 }
