@@ -519,3 +519,12 @@
   text-align: center;
 }
 .catEmpty p { font-size: 14px; color: var(--fg2); }
+
+/* ── Tela sem hover (toque) ────────────────────────────────────────────────
+   Regra do emilkowalski/skills: hover precisa de `@media (hover: hover)`.
+   Estes controles so existem no hover (opacity: 0). Num aparelho de toque nao
+   existe hover — eles ficariam INALCANCAVEIS. Aqui viram sempre visiveis.
+   Definir capa da pasta. */
+@media (hover: none) {
+  .coverBtn { opacity: 1; }
+}

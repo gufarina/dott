@@ -250,6 +250,13 @@
   <div class="wrap">
     <p class="eyebrow">// 04a <span class="m">· A AUDITORIA, ITEM POR ITEM</span></p>
     <h2>23 regras conferidas: <b>20 passam</b></h2>
+    <div class="aviso" style="margin-bottom:20px">
+      <h4>De onde vem cada regra — e uma correção que eu devo</h4>
+      <p>Na primeira versão desta página eu atribuí todas as regras às três referências que você mandou. <b>Eu não tinha lido nenhuma delas</b> — o levantamento foi interrompido e eu segui com julgamento próprio sem trocar a etiqueta. Isso era invenção, no exato lugar onde você pediu para não inventar. Corrigido: agora cada linha diz a origem real.</p>
+      <p><b>emil (lido)</b> — extraí os valores literais de <code>skills/emil-design-eng/SKILL.md</code> e <code>skills/review-animations/SKILL.md</code>: teto de 300ms, curvas, <code>scale(0.9–0.97)</code>, lista de bloqueadores.<br>
+      <b>taste-skill (lido)</b> — <code>skills/taste-skill/SKILL.md</code>: a curva padrão <code>cubic-bezier(0.16, 1, 0.3, 1)</code> que o app usa é literalmente a de lá, mais as proibições de preto puro e emoji em texto.<br>
+      <b>julgamento meu</b> — o impeccable não publica os valores dos 59 detectores (nem o README nem a doc). Essas regras são minhas; a medição é real, a autoria não é dele.</p>
+    </div>
     <p class="sub">Rodei o app inteiro contra a régua das três referências. Cada linha diz a regra, de onde ela vem e o que foi medido. As três que não passam estão explicadas embaixo — duas são limite consciente, uma é falso positivo do meu próprio detector.</p>
     <div id="auditoria"></div>
 
@@ -324,29 +331,29 @@ const M = [
 ];
 /* auditoria: resultado real da varredura (23 regras) */
 const AUD = [
-  ['Movimento','toda transição declara curva','emil + impeccable',1,'0 sem curva, de 77'],
-  ['Movimento','nunca animar propriedade de layout','as 3',1,'0 animando layout'],
-  ['Movimento','nunca usar transition: all','emil + impeccable',1,'0 usos'],
-  ['Movimento','entrada nunca parte de scale(0)','emil',1,'0 usos'],
-  ['Movimento','curva única travada em token','emil',1,'curva da casa em todo canto'],
-  ['Movimento','reduced-motion suaviza, não zera','emil',1,'cor/opacidade mantidas'],
-  ['Acessibilidade','foco de teclado visível','impeccable',1,'anel global, 7,94:1'],
-  ['Acessibilidade','botão só-ícone tem nome acessível','impeccable',1,'20 aria-label'],
-  ['Acessibilidade','hover protegido por media query','emil',0,'0 blocos — risco aceito'],
-  ['Iconografia','glifo unicode não é ícone','impeccable (ban)',1,'0 glifos'],
-  ['Iconografia','emoji não é ícone','impeccable (ban)',1,'0 emoji'],
-  ['Iconografia','ícone é componente, não string','impeccable',0,'2 — falso positivo'],
-  ['Cor','texto com gradiente é proibido','impeccable (ban)',1,'0 usos'],
-  ['Cor','evitar preto puro','taste-skill',1,'0 usos'],
-  ['Cor','contraste de corpo ≥ 4,5:1','impeccable',1,'menor medido 5,12:1'],
-  ['Cor','contraste de controle ≥ 3:1','impeccable',1,'3,09:1 escuro · 3,36:1 claro'],
-  ['Profundidade','sombra tem deslocamento','impeccable',0,'3 — são anéis, não halos'],
-  ['Profundidade','sem borda lateral colorida grossa','impeccable (ban)',1,'só o check e a seta desenhados'],
-  ['Tipografia','corpo ≥ 16px','impeccable',1,'16px'],
-  ['Tipografia','tracking não passa de -0,04em','impeccable',1,'pior: -0,02em'],
-  ['Tipografia','mono só pra código/dado/medida','impeccable (ban)',1,'6 usos'],
-  ['Espaçamento','escala base 4','impeccable',0,'app usa escala de 2 (mais fina)'],
-  ['Estados','hover, disabled e vazio previstos','impeccable',1,'84 / 7 / 23 ocorrências'],
+  ['Movimento','toda transição declara curva','emil (lido)',1,'0 sem curva, de 77'],
+  ['Movimento','nunca animar propriedade de layout','emil (lido)',1,'0 animando layout'],
+  ['Movimento','nunca usar transition: all','emil (lido)',1,'0 usos'],
+  ['Movimento','entrada nunca parte de scale(0)','emil (lido)',1,'0 usos'],
+  ['Movimento','curva única travada em token','emil (lido)',1,'curva da casa em todo canto'],
+  ['Movimento','reduced-motion suaviza, não zera','emil (lido)',1,'cor/opacidade mantidas'],
+  ['Acessibilidade','foco de teclado visível','julgamento meu',1,'anel global, 7,94:1'],
+  ['Acessibilidade','botão só-ícone tem nome acessível','julgamento meu',1,'20 aria-label'],
+  ['Acessibilidade','hover protegido por media query','emil (lido)',0,'0 blocos — risco aceito'],
+  ['Iconografia','glifo unicode não é ícone','julgamento meu',1,'0 glifos'],
+  ['Iconografia','emoji não é ícone','julgamento meu',1,'0 emoji'],
+  ['Iconografia','ícone é componente, não string','julgamento meu',0,'2 — falso positivo'],
+  ['Cor','texto com gradiente é proibido','julgamento meu',1,'0 usos'],
+  ['Cor','evitar preto puro','taste-skill (lido)',1,'0 usos'],
+  ['Cor','contraste de corpo ≥ 4,5:1','julgamento meu',1,'menor medido 5,12:1'],
+  ['Cor','contraste de controle ≥ 3:1','julgamento meu',1,'3,09:1 escuro · 3,36:1 claro'],
+  ['Profundidade','sombra tem deslocamento','julgamento meu',0,'3 — são anéis, não halos'],
+  ['Profundidade','sem borda lateral colorida grossa','julgamento meu',1,'só o check e a seta desenhados'],
+  ['Tipografia','corpo ≥ 16px','julgamento meu',1,'16px'],
+  ['Tipografia','tracking não passa de -0,04em','julgamento meu',1,'pior: -0,02em'],
+  ['Tipografia','mono só pra código/dado/medida','julgamento meu',1,'6 usos'],
+  ['Espaçamento','escala base 4','julgamento meu',0,'app usa escala de 2 (mais fina)'],
+  ['Estados','hover, disabled e vazio previstos','julgamento meu',1,'84 / 7 / 23 ocorrências'],
 ];
 document.getElementById('auditoria').innerHTML =
   '<div class="aud"><div class="lin cab"><span></span><span>Regra</span><span>Fonte</span><span>Medido</span></div>' +

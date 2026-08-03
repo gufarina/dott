@@ -284,3 +284,13 @@
   transition: opacity var(--dur-micro) var(--ease-out);
 }
 .btnNewBig:hover { opacity: .88; }
+
+/* ── Tela sem hover (toque) ────────────────────────────────────────────────
+   Regra do emilkowalski/skills: hover precisa de `@media (hover: hover)`.
+   Estes controles so existem no hover (opacity: 0). Num aparelho de toque nao
+   existe hover — eles ficariam INALCANCAVEIS. Aqui viram sempre visiveis.
+   Trocar capa da pasta e as acoes de capa/simbolo da nota. */
+@media (hover: none) {
+  .coverBtn { opacity: 1; }
+  .hoverBar { opacity: 1; }
+}

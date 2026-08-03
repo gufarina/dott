@@ -241,3 +241,14 @@
   background: var(--surface2); border: 1px solid var(--accent);
   border-radius: var(--r-sm); padding: 9px; margin-top: 4px; outline: none;
 }
+
+/* ── Tela sem hover (toque) ────────────────────────────────────────────────
+   Regra do emilkowalski/skills: hover precisa de `@media (hover: hover)`.
+   Estes controles so existem no hover (opacity: 0). Num aparelho de toque nao
+   existe hover — eles ficariam INALCANCAVEIS. Aqui viram sempre visiveis.
+   Prazo, excluir grupo e excluir tarefa. */
+@media (hover: none) {
+  .dateBtn { opacity: 1; }
+  .groupDel { opacity: 1; }
+  .taskDel { opacity: 1; }
+}

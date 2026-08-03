@@ -385,3 +385,13 @@
   transition: opacity var(--dur-micro) var(--ease-out);
 }
 .taskOk:hover { opacity: .88; }
+
+/* ── Tela sem hover (toque) ────────────────────────────────────────────────
+   Regra do emilkowalski/skills: hover precisa de `@media (hover: hover)`.
+   Estes controles so existem no hover (opacity: 0). Num aparelho de toque nao
+   existe hover — eles ficariam INALCANCAVEIS. Aqui viram sempre visiveis.
+   Virar tarefa e descartar o card. */
+@media (hover: none) {
+  .cardAction { opacity: 1; }
+  .cardRemove { opacity: 1; }
+}

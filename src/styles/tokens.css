@@ -107,16 +107,18 @@
   --dur-micro:  120ms;   /* botao, chip, item de lista */
   --dur-base:   170ms;   /* painel, card, revelar no hover */
   --dur-medium: 240ms;   /* modal, troca de tela */
-  --dur-slow:   320ms;   /* barra de progresso, percurso longo */
+  --dur-slow:   300ms;   /* barra de progresso, percurso longo (teto da UI) */
 
   /* SAIDA e mais rapida que a ENTRADA: entrando o usuario esta decidindo,
      saindo o sistema so responde. Regra citada nas tres fontes. */
   --dur-exit:    120ms;
 
   /* Curva unica da casa: ease-out exponencial.
-     `cubic-bezier(0.16, 1, 0.3, 1)` e o valor de DUAS das tres fontes
-     (taste-skill e impeccable); o Emil usa 0.23,1,0.32,1 — mesma familia.
-     Escolhida a de maior concordancia e travada como token.
+     `cubic-bezier(0.16, 1, 0.3, 1)` e o valor literal do taste-skill
+     (skills/taste-skill/SKILL.md, "Default transition") — VERIFICADO na fonte.
+     O Emil usa 0.23,1,0.32,1 pra entrada: mesma familia, ligeiramente mais
+     forte. Ficou a do taste-skill por ja estar aplicada no app inteiro.
+     (O impeccable nao publica os valores do detector; nao da pra citar.)
      `ease` puro (o padrao do navegador) e simetrico: comeca e termina no mesmo
      ritmo, e por isso tudo parecia molenga. */
   --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
@@ -129,7 +131,7 @@
 
   /* Compatibilidade com o que ainda referencia os nomes antigos. */
   --ease:       cubic-bezier(0.16, 1, 0.3, 1);
-  --dur-long:   320ms;
+  --dur-long:   300ms;
 }
 
 /* Menos movimento NAO e movimento zero: "keep opacity and color transitions
