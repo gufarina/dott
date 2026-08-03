@@ -401,3 +401,77 @@
   transition: opacity var(--dur-micro);
 }
 .btnPrimary:hover { opacity: .85; }
+
+/* ─── Tela de UMA categoria (todas as pastas dela) ─── */
+.catWrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.catHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.catInfo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.catTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--fg);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.catSubtitle { font-size: 12.5px; color: var(--fg3); line-height: 1.3; }
+.catCount {
+  font-size: 12px;
+  color: var(--fg3);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.catAdd {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--fg2);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  transition: background var(--dur-micro), color var(--dur-micro), border-color var(--dur-micro);
+}
+.catAdd:hover { background: var(--surface3); color: var(--fg); border-color: var(--fg3); }
+
+.catBody { flex: 1; overflow-y: auto; padding: 20px; }
+.catBody::-webkit-scrollbar { width: 3px; }
+.catBody::-webkit-scrollbar-thumb { background: var(--border2); }
+
+/* Cards maiores que no board: aqui a categoria tem a tela inteira. */
+.catCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 14px;
+  align-content: start;
+}
+
+.catEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 72px 20px;
+  text-align: center;
+}
+.catEmpty p { font-size: 14px; color: var(--fg2); }

@@ -24,9 +24,12 @@ export function Breadcrumb() {
       {quad && (
         <>
           <span className={s.sep}>›</span>
+          {/* Sobe UM nivel (a categoria), nao ate o board: o caminho tem que
+              andar degrau por degrau. "PARA" e quem volta pro board. */}
           <span
             className={`${s.item} ${!folder ? s.active : ''}`}
-            onClick={() => setView('board', {})}
+            title={`Ver todas as pastas de ${quad.label}`}
+            onClick={() => setView('canvas', { category: category!, folder: '' })}
           >
             {quad.label}
           </span>

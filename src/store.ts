@@ -344,10 +344,16 @@ export const useStore = create<AppState>((set, get) => ({
     }
   }),
 
+  /** Volta UM degrau: editor -> pasta -> categoria -> board. */
   navigateBack: () => {
-    const { view } = get()
-    if (view === 'editor') get().setView('canvas')
-    else get().setView('board')
+    const { view, folder, category } = get()
+    if (view === 'editor') { get().setView('canvas'); return }
+    // Dentro de uma pasta, o degrau de cima e a categoria (nao o board).
+    if (view === 'canvas' && folder && category) {
+      get().setView('canvas', { category, folder: '' })
+      return
+    }
+    get().setView('board')
   },
 
   toggleTheme: () => set(s => {

@@ -16,6 +16,13 @@ const Q_ICONS: Record<string, React.ReactElement> = {
   archives: <svg width="18" height="18" viewBox="0 0 16 16"><line x1="3" y1="8" x2="13" y2="8" stroke="var(--q-ar)" strokeWidth="2.5" strokeLinecap="round"/></svg>,
 }
 
+const Q_SUBTITULO: Record<string, string> = {
+  projects: 'O que você quer ver concluído.',
+  areas: 'O que você cuida sem prazo.',
+  resources: 'O que você quer guardar pra usar um dia.',
+  archives: 'O que já serviu, mas não some.',
+}
+
 function maxNotes(para: Record<string, Quadrant>) {
   let m = 0
   Object.values(para).forEach(q => q.folders.forEach(f => { if (f.notes > m) m = f.notes }))
@@ -145,24 +152,17 @@ export function PARAGrid() {
             <div key={qid} className={`${s.quadrant} ${s['q-' + qid]}`}>
               <div className={s.qHeader}>
                 <div className={s.qIcon}>{Q_ICONS[qid]}</div>
-                {/* O cabecalho tinha cursor de mao e nenhum clique — agora abre a
-                    primeira pasta do quadrante, que era o que a mao prometia. */}
+                {/* Abre a CATEGORIA (todas as pastas dela), nunca uma pasta
+                    especifica: pular direto pra primeira pasta rouba do usuario
+                    a escolha e some com as outras. */}
                 <div
                   className={s.qInfo}
-                  role={q.folders.length ? 'button' : undefined}
-                  title={q.folders.length ? `Abrir ${q.folders[0].name}` : undefined}
-                  onClick={() => {
-                    const first = q.folders[0]
-                    if (first) setView('canvas', { category: qid, folder: first.id })
-                  }}
+                  role="button"
+                  title={`Ver todas as pastas de ${q.label}`}
+                  onClick={() => setView('canvas', { category: qid, folder: '' })}
                 >
                   <div className={s.qTitle}>{q.label}</div>
-                  <div className={s.qSubtitle}>
-                    {qid === 'projects' && 'O que você quer ver concluído.'}
-                    {qid === 'areas'    && 'O que você cuida sem prazo.'}
-                    {qid === 'resources'&& 'O que você quer guardar pra usar um dia.'}
-                    {qid === 'archives' && 'O que já serviu, mas não some.'}
-                  </div>
+                  <div className={s.qSubtitle}>{Q_SUBTITULO[qid]}</div>
                 </div>
                 <button className={s.qAdd} onClick={() => setCreateIn(qid)} title={`Nova pasta em ${q.label}`} aria-label={`Nova pasta em ${q.label}`}>
                   <Icon name="pasta" size={14} />
@@ -190,5 +190,67 @@ export function PARAGrid() {
 
       {createIn && <CreateFolderModal categoryId={createIn} onClose={() => setCreateIn(null)} />}
     </>
+  )
+}
+
+/**
+ * Tela de UMA categoria do PARA, com TODAS as pastas dela.
+ *
+ * Faltava: clicar em "Areas" no board nao tinha pra onde ir, e a tentativa
+ * anterior mandava direto pra primeira pasta — o usuario perdia a visao do
+ * conjunto. O breadcrumb ja previa este nivel (ele trata "categoria sem pasta"),
+ * so nao existia tela. As pastas aqui sao os MESMOS cards do board, entao
+ * arrastar card do inbox pra ca continua funcionando.
+ */
+export function CategoryView() {
+  const para = useStore(st => st.para)
+  const category = useStore(st => st.category)
+  const setView = useStore(st => st.setView)
+  const [criando, setCriando] = useState(false)
+
+  const q = category ? para[category] : null
+  if (!q || !category) return null
+
+  return (
+    <div className={s.catWrap}>
+      <div className={s.catHeader}>
+        <div className={s.qIcon}>{Q_ICONS[category]}</div>
+        <div className={s.catInfo}>
+          <div className={s.catTitle}>{q.label}</div>
+          <div className={s.catSubtitle}>{Q_SUBTITULO[category]}</div>
+        </div>
+        <span className={s.catCount}>
+          {q.folders.length} pasta{q.folders.length === 1 ? '' : 's'}
+        </span>
+        <button className={s.catAdd} onClick={() => setCriando(true)} title={`Nova pasta em ${q.label}`}>
+          <Icon name="pasta" size={14} /> Nova pasta
+        </button>
+      </div>
+
+      <div className={s.catBody}>
+        {q.folders.length === 0 ? (
+          <div className={s.catEmpty}>
+            <p>Nenhuma pasta em {q.label} ainda.</p>
+            <button className={s.catAdd} onClick={() => setCriando(true)}>
+              <Icon name="pasta" size={14} /> Criar a primeira
+            </button>
+          </div>
+        ) : (
+          <div className={`${s.catCards} ${s['q-' + category]}`}>
+            {q.folders.map(f => (
+              <FolderCard
+                key={f.id}
+                folder={f}
+                quadrant={q}
+                categoryId={category}
+                onNavigate={() => setView('canvas', { category, folder: f.id })}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {criando && <CreateFolderModal categoryId={category} onClose={() => setCriando(false)} />}
+    </div>
   )
 }

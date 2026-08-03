@@ -17,7 +17,7 @@ import { SearchModal } from './components/SearchModal'
 import { Settings } from './components/Settings'
 import { Breadcrumb } from './components/Breadcrumb'
 import { InboxPanel } from './features/inbox/InboxPanel'
-import { PARAGrid } from './features/para/PARAGrid'
+import { PARAGrid, CategoryView } from './features/para/PARAGrid'
 import { TasksPanel } from './features/tasks/TasksPanel'
 import { NoteEditor } from './features/editor/NoteEditor'
 import { FolderNotesView } from './features/folder/FolderNotesView'
@@ -27,6 +27,7 @@ import s from './App.module.css'
 
 export default function App() {
   const view = useStore(st => st.view)
+  const folder = useStore(st => st.folder)
   const booting = useStore(st => st.booting)
   const [searchOpen, setSearchOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -216,7 +217,8 @@ export default function App() {
                 >
                   {view === 'board' && <PARAGrid />}
                   {view === 'graph' && <Constellation />}
-                  {view === 'canvas' && <FolderNotesView />}
+                  {/* canvas com pasta = notas da pasta; sem pasta = a categoria inteira */}
+                  {view === 'canvas' && (folder ? <FolderNotesView /> : <CategoryView />)}
                   {view === 'editor' && <div className={s.canvasLayout}><NoteEditor /></div>}
                 </motion.div>
               </AnimatePresence>
