@@ -39,9 +39,9 @@
   .nota b{color:var(--body);font-weight:600}
 
   /* ══ A MESA: onde o widget mora ══ */
-  .mesa{position:relative;height:330px;background:
+  .mesa{position:relative;height:252px;background:
     linear-gradient(135deg,#1a2434 0%,#2b2438 45%,#141a20 100%);
-    display:flex;align-items:flex-end;justify-content:center;padding-bottom:52px;overflow:hidden}
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:40px;overflow:hidden}
   .mesa.clara{background:linear-gradient(135deg,#e8e9ee,#f3f1f6)}
 
   /* ══ A BOLINHA VIVA ══
@@ -51,7 +51,7 @@
      Todo fade termina em `rgb(cor / 0)` da MESMA cor: `transparent` atravessa
      preto transparente e lava o croma no meio do caminho.
      Interpolacao `in oklch` pra o meio do gradiente nao acinzentar. */
-  .orbe{position:relative;width:60px;height:60px;border-radius:50%;flex-shrink:0;
+  .orbe{position:relative;width:72px;height:72px;border-radius:50%;flex-shrink:0;
     isolation:isolate;overflow:hidden;cursor:pointer;
     background:#070103;
     box-shadow:inset 0 0 0 1px rgb(255 150 105 / .28), 0 12px 26px rgb(0 0 0 / .5);
@@ -172,7 +172,7 @@
   .subInfo .u{font-size:12px;color:var(--body);line-height:1.45}
 
   /* ══ TOAST DE CAPTURA ══ */
-  .toaster{position:absolute;bottom:132px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:7px;align-items:center;z-index:10}
+  .toaster{position:absolute;bottom:146px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:7px;align-items:center;z-index:10}
   .toast{display:flex;align-items:center;gap:10px;padding:9px 14px 9px 10px;border-radius:14px;
     background:rgb(22 22 26 / .9);border:1px solid rgb(255 255 255 / .1);backdrop-filter:blur(20px) saturate(1.6);
     box-shadow:0 16px 40px rgb(0 0 0 / .5);white-space:nowrap;
@@ -367,20 +367,20 @@ const ICO={
   nota:'<path d="M4 2.5h5L12 5.5V13a.5.5 0 0 1-.5.5h-7A.5.5 0 0 1 4 13z"/><path d="M9 2.5V5a.5.5 0 0 0 .5.5H12"/>'
 };
 const svg=(p,s=15)=>`<svg width="${s}" height="${s}" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
-const MARCA='<svg class="marca" width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M20.5 9.722A8.8 8.8 0 1 1 15.719 4.024" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="12" r="4.4" fill="currentColor"/></svg>';
+const MARCA='<svg class="marca" width="31" height="31" viewBox="0 0 24 24" fill="none"><path d="M20.5 9.722A8.8 8.8 0 1 1 15.719 4.024" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="12" r="4.4" fill="currentColor"/></svg>';
 
 const cenaHTML=()=>`
   <div class="aura"></div>
   <div class="trilho">
-    <button class="b" aria-label="Escrever">${svg(ICO.lapis)}<span class="rot">Escrever</span>
-      <span class="sub"><span class="subCaixa"><input class="subCampo" placeholder="O que está na sua mente?"></span></span></button>
-    <button class="b" aria-label="Imagem">${svg(ICO.imagem)}<span class="rot">Imagem</span>
+    <div class="b" role="button" tabindex="0" aria-label="Escrever">${svg(ICO.lapis)}<span class="rot">Escrever</span>
+      <span class="sub"><span class="subCaixa"><input class="subCampo" placeholder="O que está na sua mente?"></span></span></div>
+    <div class="b" role="button" tabindex="0" aria-label="Imagem">${svg(ICO.imagem)}<span class="rot">Imagem</span>
       <span class="sub"><span class="subCaixa">
         <button class="subAcao">${svg(ICO.colar,13)} Colar</button>
-        <button class="subAcao">${svg(ICO.arquivo,13)} Arquivo</button></span></span></button>
-    <button class="b" aria-label="Abrir o Dott">${svg(ICO.janela)}<span class="rot">Abrir</span>
+        <button class="subAcao">${svg(ICO.arquivo,13)} Arquivo</button></span></span></div>
+    <div class="b" role="button" tabindex="0" aria-label="Abrir o Dott">${svg(ICO.janela)}<span class="rot">Abrir</span>
       <span class="sub"><span class="subCaixa subInfo">
-        <span class="t">4 na caixa · último</span><span class="u">fortelabs.com/blog/para-method</span></span></span></button>
+        <span class="t">4 na caixa · último</span><span class="u">fortelabs.com/blog/para-method</span></span></span></div>
   </div>
   <div class="orbe">
     <span class="luz4"></span><span class="luz1"></span><span class="luz2"></span><span class="luz3"></span><span class="grao"></span>
