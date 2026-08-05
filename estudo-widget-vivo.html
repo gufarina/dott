@@ -16,6 +16,15 @@
     --mola-sub: linear(0.0, 0.0233, 0.0813, 0.16, 0.2491, 0.3411, 0.4311, 0.5159, 0.5935, 0.6628, 0.7238, 0.7764, 0.8212, 0.8588, 0.89, 0.9156, 0.9364, 0.9529, 0.966, 0.9762, 0.9841, 0.99, 0.9944, 0.9975, 0.9997, 1.0012, 1.0022);
     --saida: cubic-bezier(0.4,0,1,1);
   }
+  /* Registrar as variaveis e o que permite o navegador INTERPOLAR elas.
+     Sem isso, variavel dentro de gradiente pula de valor em vez de animar,
+     e nao existe pulsacao nenhuma: so troca seca. */
+  @property --nx { syntax:'<percentage>'; inherits:true; initial-value:50%; }
+  @property --ny { syntax:'<percentage>'; inherits:true; initial-value:100%; }
+  @property --p1 { syntax:'<number>'; inherits:true; initial-value:1; }
+  @property --p2 { syntax:'<number>'; inherits:true; initial-value:1; }
+  @property --p3 { syntax:'<number>'; inherits:true; initial-value:1; }
+
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5}
   .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
@@ -52,6 +61,7 @@
      preto transparente e lava o croma no meio do caminho.
      Interpolacao `in oklch` pra o meio do gradiente nao acinzentar. */
   .orbe{position:relative;width:72px;height:72px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
     isolation:isolate;overflow:hidden;cursor:pointer;
     background:#070103;
     box-shadow:inset 0 0 0 1px rgb(255 150 105 / .28), 0 12px 26px rgb(0 0 0 / .5);
@@ -64,32 +74,44 @@
      passam a se referir a caixa maior e o nucleo cai FORA do circulo visivel.
      Foi o que deixou a bolinha escura na primeira tentativa. Como todo fade
      termina em opacidade zero, nao ha borda pra esconder. */
-  .orbe .luz1,.orbe .luz2,.orbe .luz3,.orbe .luz4{position:absolute;inset:0;mix-blend-mode:screen;pointer-events:none}
+  .orbe .luz1,.orbe .luz2,.orbe .luz3,.orbe .luz4{position:absolute;inset:0;mix-blend-mode:screen;pointer-events:none;
+    transition:--nx .5s var(--saida), --ny .5s var(--saida)}
   /* brasa do topo: sem ela o alto da bolinha vira um buraco preto e a silhueta
      some sobre fundo escuro. E fraca de proposito, so pra dar volume. */
+  /* brasa do topo: fica no lugar, so respira. Sem ela o alto vira buraco preto. */
   .orbe .luz4{
-    background:radial-gradient(86% 58% at 50% 2% in oklch,
+    background:radial-gradient(calc(86% * var(--p3)) calc(58% * var(--p3)) at 50% 2% in oklch,
       oklch(.44 .14 32 / .85) 0%, oklch(.20 .08 28 / 0) 72%);
-    animation:deriva4 21s ease-in-out infinite alternate}
-  @keyframes deriva4{from{transform:translate3d(-2%,0,0)}to{transform:translate3d(3%,1.5%,0)}}
+    animation:pulso3 9.3s ease-in-out infinite}
+
+  /* bloom largo: a POSICAO segue o mouse (--nx/--ny), o TAMANHO pulsa. */
   .orbe .luz1{
-    background:radial-gradient(78% 66% at 50% 104% in oklch,
-      oklch(.74 .22 44) 0%, oklch(.52 .20 36 / .82) 40%, oklch(.22 .10 30 / 0) 82%);
-    animation:deriva1 14s ease-in-out infinite alternate}
+    background:radial-gradient(calc(80% * var(--p1)) calc(68% * var(--p1)) at var(--nx) var(--ny) in oklch,
+      oklch(.76 .22 44) 0%, oklch(.53 .20 36 / .84) 40%, oklch(.22 .10 30 / 0) 82%);
+    animation:pulso1 6.4s ease-in-out infinite}
+
+  /* segunda luz: desencontrada da primeira, pra o desenho nao ficar simetrico */
   .orbe .luz2{
-    background:radial-gradient(58% 50% at 32% 100% in oklch,
-      oklch(.70 .21 26) 0%, oklch(.24 .12 26 / 0) 78%);
-    animation:deriva2 18s ease-in-out infinite alternate}
-  /* camada 3: o nucleo. L alta + C BAIXA (nao branco chapado). Onde ela soma
-     com as outras duas sob screen, os canais estouram e o branco aparece. */
+    background:radial-gradient(calc(60% * var(--p2)) calc(52% * var(--p2))
+      at calc(var(--nx) - 16%) calc(var(--ny) - 4%) in oklch,
+      oklch(.71 .21 26) 0%, oklch(.24 .12 26 / 0) 78%);
+    animation:pulso2 8.1s ease-in-out infinite}
+
+  /* o nucleo: L alta e C baixa. Onde soma com as outras sob screen, estoura
+     em branco sozinho. Segue o mouse mais de perto que as outras. */
   .orbe .luz3{
-    background:radial-gradient(40% 32% at 50% 102% in oklch,
-      oklch(.97 .05 62) 0%, oklch(.80 .18 50 / .7) 34%, oklch(.24 .10 40 / 0) 74%);
+    background:radial-gradient(calc(42% * var(--p3)) calc(34% * var(--p3))
+      at var(--nx) calc(var(--ny) - 2%) in oklch,
+      oklch(.97 .05 62) 0%, oklch(.80 .18 50 / .72) 34%, oklch(.24 .10 40 / 0) 74%);
     filter:saturate(1.25);
-    animation:deriva3 11s ease-in-out infinite alternate}
-  @keyframes deriva1{from{transform:translate3d(-3%,1%,0) scale(1)}to{transform:translate3d(4%,-2%,0) scale(1.06)}}
-  @keyframes deriva2{from{transform:translate3d(3%,0,0)}to{transform:translate3d(-5%,-3%,0)}}
-  @keyframes deriva3{from{transform:translate3d(0,1%,0) scale(1)}to{transform:translate3d(1.5%,-2%,0) scale(1.1)}}
+    animation:pulso3 5.1s ease-in-out infinite}
+
+  /* Tres periodos que nao sao multiplos entre si (6.4 / 8.1 / 5.1 e 9.3):
+     o encontro deles so se repete depois de MUITO tempo, entao o respiro
+     nunca cai no mesmo desenho. E o que faz parecer organico em vez de loop. */
+  @keyframes pulso1{0%,100%{--p1:.94}50%{--p1:1.10}}
+  @keyframes pulso2{0%,100%{--p2:1.08}50%{--p2:.92}}
+  @keyframes pulso3{0%,100%{--p3:.90}50%{--p3:1.14}}
 
   /* grao: opacidade baixa (o equivalente a 1 degrau de 8 bits) em `overlay`.
      Sem ele o gradiente escuro mostra faixas, que e o que denuncia o barato. */
@@ -115,7 +137,7 @@
     animation:respiro 4.2s ease-in-out infinite, flutua 6.7s ease-in-out infinite;
     transition:transform .8s var(--mola)}
   @keyframes respiro{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
-  @keyframes flutua{0%,100%{translate:0 0}33%{translate:.4px -.7px}66%{translate:-.5px .4px}}
+  @keyframes flutua{0%,100%{translate:0 0}33%{translate:.3px -.5px}66%{translate:-.35px .3px}}
   .orbe:hover .marca{animation-play-state:paused;transform:rotate(360deg)}
   .orbe:hover{--esc:1.06}
   .orbe:active{--esc:.95}
@@ -404,11 +426,25 @@ const ALCANCE=220, PUXAO=4;
        que e o que da a sensacao de "esta chegando" em vez de linear */
     const f=perto*perto;
     cena.style.setProperty('--perto',f.toFixed(3));
+
+    /* A LUZ SEGUE O CURSOR.
+       O ponto de luz mora em 50%/100% (base da bolinha) quando voce esta longe.
+       Conforme chega, ele caminha ATE 42% na direcao do cursor, dentro do
+       espaco da propria bolinha. Nao e a bolinha que gira: e a fonte de luz
+       que muda de lugar, como um objeto iluminado de outro angulo. */
+    const alcanceLuz = Math.max(r.width, ALCANCE * .55);
+    const lx = 50 + Math.max(-42, Math.min(42, dx / alcanceLuz * 100)) * (.35 + f * .65);
+    const ly = 100 + Math.max(-58, Math.min(14, dy / alcanceLuz * 100)) * (.35 + f * .65);
+    orbe.style.setProperty('--nx', lx.toFixed(1) + '%');
+    orbe.style.setProperty('--ny', ly.toFixed(1) + '%');
+
     orbe.style.setProperty('--puxaX',(dx/Math.max(d,1)*PUXAO*f).toFixed(2)+'px');
     orbe.style.setProperty('--puxaY',(dy/Math.max(d,1)*PUXAO*f).toFixed(2)+'px');
   });
   mesa.addEventListener('mouseleave',()=>{
     cena.style.setProperty('--perto','0');
+    /* volta pro repouso: luz na base, centrada */
+    orbe.style.setProperty('--nx','50%'); orbe.style.setProperty('--ny','100%');
     orbe.style.setProperty('--puxaX','0px'); orbe.style.setProperty('--puxaY','0px');
   });
 });
