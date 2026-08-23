@@ -89,7 +89,7 @@ Suas notas são arquivos de texto numa pasta do seu computador. Você pode abrir
 ## Instalar
 
 1. [Baixe o instalador](https://github.com/gufarina/dott/releases/latest/download/Dott_1.0.0_x64-setup.exe) (3,4 MB).
-2. O Windows vai avisar **"editor desconhecido"**, porque o instalador ainda não tem assinatura digital. Clique em **Mais informações** e depois em **Executar assim mesmo**.
+2. Na primeira vez, o Windows mostra um aviso de **"editor desconhecido"**. Clique em **Mais informações** e depois em **Executar assim mesmo**.
 3. A instalação não pede senha de administrador e não pede permissão de rede.
 4. Abra o Dott e aperte `Ctrl` + `Shift` + `Espaço`.
 
@@ -99,15 +99,14 @@ Se o seu Windows ainda não tiver o componente que o Dott usa para desenhar a te
 
 ## A letra que não é miúda
 
-Cinco coisas que o Dott não faz. Melhor ler aqui do que descobrir depois de instalar.
+Quatro coisas que o Dott não faz. Melhor ler aqui do que descobrir depois de instalar.
 
 - **Não sincroniza entre computadores.** O que você escreve no computador do escritório fica no computador do escritório.
 - **Não tem versão de celular.** A ideia que chegou na rua ainda precisa esperar você sentar.
 - **Não roda em Mac nem em Linux.** Só Windows 10 e 11, por enquanto.
 - **O backup é você que manda fazer.** Ele copia tudo para uma pasta em Documentos, quando você clica. Nada acontece sozinho, e nada sobe para lugar nenhum.
-- **O Windows vai desconfiar do instalador.** Aviso de editor desconhecido, porque ainda não pagamos a assinatura digital que faz esse aviso sumir.
 
-Se alguma dessas cinco for essencial para você, este não é o programa. Sem ressentimento.
+Se alguma dessas quatro for essencial para você, este não é o programa. Sem ressentimento.
 
 ## Perguntas diretas
 
