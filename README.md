@@ -111,19 +111,19 @@ Se alguma dessas cinco for essencial para você, este não é o programa. Sem re
 
 ## Perguntas diretas
 
-**É de graça mesmo?**
+**É de graça mesmo?**<br>
 É. Não tem preço, não tem plano, não tem cadastro e não tem cartão.
 
-**Preciso de internet para usar?**
+**Preciso de internet para usar?**<br>
 Uma vez só, na instalação, e só se faltar o WebView2. Depois disso funciona no avião, com o roteador desligado, sozinho.
 
-**Onde ficam as minhas notas?**
+**Onde ficam as minhas notas?**<br>
 Em `%APPDATA%\com.studiofarina.dott`. Dentro do Dott, na engrenagem, tem um botão que abre essa pasta.
 
-**E se um dia eu desinstalar?**
+**E se um dia eu desinstalar?**<br>
 Antes, clique em fazer backup: o Dott copia tudo para Documentos, Dott Backups. É uma pasta sua, e continua lá depois.
 
-**Como aviso de um problema?**
+**Como aviso de um problema?**<br>
 Abra uma [issue](https://github.com/gufarina/dott/issues) contando o que você fez e o que aconteceu. É beta: se algo quebrar, quebra na sua máquina e não sai de lá.
 
 ## Beta aberto
