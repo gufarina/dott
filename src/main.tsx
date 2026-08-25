@@ -35,7 +35,10 @@ function currentLabel(): string {
   }
 }
 
-const isWidget = currentLabel() === "widget";
+// `#widget` na URL renderiza o widget no navegador: e a unica forma de CONFERIR
+// o desenho dele com screenshot, porque a janela nativa do Tauri nao e alcancada
+// por captura de tela. No app a URL nunca tem hash, entao nao muda nada.
+const isWidget = currentLabel() === "widget" || window.location.hash === "#widget";
 
 // Escala global +20% (conforto em alto DPI) — so na janela principal.
 // O widget tem janela propria de 104px e nao deve escalar.

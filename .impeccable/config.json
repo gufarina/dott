@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "radial-halo",
+        "value": "*",
+        "files": [
+          "landing/lp-dott-lancamento-2026-08-07.html"
+        ],
+        "createdAt": "2026-08-07T19:05:35.331Z",
+        "reason": "E o motor da brasa do proprio widget do Dott (4 camadas oklch em screen, extraidas literalmente do produto) - pedido explicito do operador para usar o gradiente do widget na LP. Contraste ja medido e corrigido (ver comentario L186 do arquivo: campo de luz atras do titulo media 1,84:1, vetado, corrigido). Nao e wash decorativo generico de IA."
+      }
+    ]
+  }
+}

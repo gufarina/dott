@@ -35,8 +35,6 @@ function toNote(v: VaultNote): Note {
     tags: v.tags ?? [],
     glyph: isGlyphId(v.glyph) ? v.glyph : undefined,
     cover: v.cover || undefined,
-    links: [],
-    backlinks: [],
   }
 }
 

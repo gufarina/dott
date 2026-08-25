@@ -27,21 +27,188 @@
   color: var(--fg3);
 }
 
-.svg {
+/* Legenda: a linha cheia foi achada no texto, a tracejada foi inferida. */
+.legenda {
+  margin-left: auto;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.chave {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  color: var(--fg3);
+}
+.linhaAchada,
+.linhaInferida {
+  width: 20px;
+  height: 0;
+  border-top: 1.6px solid var(--accent);
+  display: inline-block;
+}
+.linhaInferida {
+  border-top: 1px dashed var(--fg3);
+}
+
+.palco {
   flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 292px;
+  overflow: hidden;
+}
+
+.svg {
   width: 100%;
   height: 100%;
+  min-height: 0;
 }
 
 .node { cursor: pointer; }
-.node circle {
-  transition: r .2s var(--ease-out), opacity .2s var(--ease-out);
-}
-.node:hover circle { opacity: .75; }
+.node circle { transition: opacity .18s var(--ease-out); }
+.node:hover circle { opacity: .8; }
 
 .label {
-  font-size: 10px;
+  font-size: 10.5px;
   fill: var(--fg2);
   pointer-events: none;
   font-family: var(--font-body);
 }
+
+/* Painel lateral: quem explica a conexao. */
+.painel {
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  padding: 16px 16px 22px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.painelTitulo {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--fg);
+  line-height: 1.25;
+}
+
+.painelLabel {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--fg3);
+  margin-top: 6px;
+}
+
+.painelVazio,
+.dica {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--fg3);
+}
+.dica { margin-top: auto; padding-top: 12px; }
+
+.vazio {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg3);
+  font-size: 13px;
+}
+
+.conceitos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.conceito {
+  font-size: 10.5px;
+  color: var(--fg2);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  padding: 1px 6px;
+}
+
+.vizinho {
+  border: 1px solid var(--border2);
+  border-radius: var(--r-md);
+  padding: 8px 10px;
+  cursor: pointer;
+  background: var(--surface2);
+  transition: border-color var(--dur-micro) var(--ease-out);
+}
+.vizinho:hover { border-color: var(--accent); }
+
+.vizinhoTopo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 3px;
+}
+.vizinhoTitulo {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg);
+  line-height: 1.2;
+}
+.vizinhoWhy {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--fg3);
+}
+
+.marca {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  padding: 1px 5px;
+  color: var(--fg3);
+  flex: none;
+}
+.marca.achada { color: var(--accent); border-color: var(--accent); }
+
+.tema {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 5px 0;
+}
+.bolinha {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--r-full);
+  flex: none;
+  margin-top: 4px;
+}
+.temaNome {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg);
+  line-height: 1.25;
+}
+.temaQtd {
+  font-size: 11px;
+  color: var(--fg3);
+}
+
+.abrir {
+  margin-top: 10px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-md);
+  padding: 7px 12px;
+  cursor: pointer;
+}
+.abrir:hover { filter: brightness(1.07); }

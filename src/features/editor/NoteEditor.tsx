@@ -32,6 +32,8 @@ export function NoteEditor() {
   const saveNote = useStore(st => st.saveNote)
   const deleteNote = useStore(st => st.deleteNote)
   const navigateBack = useStore(st => st.navigateBack)
+  const graph = useStore(st => st.graph)
+  const setView = useStore(st => st.setView)
 
   const current = notes.find(n => n.id === note)
   const [title, setTitle] = useState(current?.title ?? '')
@@ -54,23 +56,17 @@ export function NoteEditor() {
   const options = useMemo<EasyMDE.Options>(() => ({
     spellChecker: false,
     status: false,
-    placeholder: 'Comece a escrever… Use [[ para conectar notas.',
+    placeholder: 'Comece a escrever. O Dott conecta as notas sozinho.',
     autofocus: false,
     toolbar: TOOLBAR,
     sideBySideFullscreen: false,
     minHeight: '240px',
   }), [])
 
-  // Realça [[wikilinks]] e trata colar/arrastar imagem
+  // Trata colar/arrastar imagem. Nao ha mais marcacao de link pra realcar:
+  // conectar virou trabalho do motor, nao do usuario.
   const onInstance = useCallback((instance: EasyMDE) => {
     const cm = instance.codemirror
-    cm.addOverlay({
-      token(stream: { match: (re: RegExp, consume?: boolean) => boolean; next: () => string | null }) {
-        if (stream.match(/\[\[[^\]]*\]\]/)) return 'wikilink'
-        while (stream.next() != null && !stream.match(/\[\[/, false)) { /* avança */ }
-        return null
-      },
-    })
 
     const handleImage = async (e: ClipboardEvent | DragEvent) => {
       const file = imageFromEvent(e)
@@ -114,9 +110,10 @@ export function NoteEditor() {
     return <div className={s.empty}><p>Selecione uma nota para editar</p></div>
   }
 
-  const backlinkNotes = current.backlinks
-    .map(id => notes.find(n => n.id === id))
-    .filter(Boolean) as typeof notes
+  // Conexoes vem do motor, com o motivo de cada uma.
+  const conexoes = (graph.byNote[current.id] ?? [])
+    .map(v => ({ ...v, note: notes.find(n => n.id === v.id) }))
+    .filter(v => v.note)
 
   return (
     <>
@@ -177,13 +174,17 @@ export function NoteEditor() {
         </div>
       )}
 
-      {backlinkNotes.length > 0 && (
+      {conexoes.length > 0 && (
         <div className={s.backlinks}>
-          <div className={s.backlinksLabel}>MENCIONADO EM</div>
+          <div className={s.backlinksLabel}>CONECTADAS AUTOMATICAMENTE</div>
           <div className={s.backlinksList}>
-            {backlinkNotes.map(n => (
-              <div key={n.id} className={s.backlinkItem}>
-                <span className={s.backlinkIcon}><Icon name="voltar" size={12} /></span>{n.title}
+            {conexoes.map(v => (
+              <div key={v.id} className={s.connItem} onClick={() => setView('editor', { note: v.id })}>
+                <span className={`${s.connMark} ${v.confidence === 'ACHADA' ? s.achada : ''}`}>
+                  {v.confidence === 'ACHADA' ? 'achada' : 'inferida'}
+                </span>
+                <span className={s.connTitle}>{v.note!.title}</span>
+                <span className={s.connWhy}>{v.why}</span>
               </div>
             ))}
           </div>
@@ -193,7 +194,7 @@ export function NoteEditor() {
       <div className={s.statusBar}>
         <span className={s.saveStatus}>{current.updatedAt && `Salvo ${current.updatedAt}`}</span>
         <span className={s.linkCount}>
-          {current.links.length > 0 && `${current.links.length} link${current.links.length > 1 ? 's' : ''}`}
+          {conexoes.length > 0 && `${conexoes.length} ${conexoes.length > 1 ? 'conexões' : 'conexão'}`}
         </span>
         <button
           className={s.btnDelete}

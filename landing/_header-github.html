@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Dott - cabecalho do GitHub</title>
+<style>
+@font-face{
+  font-family:'Public Sans';
+  src:url('fonts/PublicSans-Variable.woff2') format('woff2-variations'),
+      url('fonts/PublicSans-Variable.woff2') format('woff2');
+  font-weight:100 900; font-display:block;
+}
+:root{
+  --breu:#070103;
+  --cal:oklch(.97 .006 60);
+  --cal-2:oklch(.78 .012 45);
+  --cal-3:oklch(.62 .014 40);
+  --tinta-brasa:oklch(.74 .169 45);
+  --grao:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='.55'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--breu);}
+body{font-family:'Public Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+
+.quadro{position:relative;width:1600px;height:620px;overflow:hidden;background:var(--breu);isolation:isolate;}
+
+/* ---- motor da brasa (4 camadas em screen + grao) - reuso literal da LP ---- */
+.brasa{position:absolute;pointer-events:none;isolation:isolate;overflow:hidden;--op:1;opacity:var(--op);}
+.brasa i{position:absolute;inset:-25%;display:block;mix-blend-mode:screen;}
+.brasa .l4{background:radial-gradient(74.67% 61.33% at 50% 48.67% in oklch,
+   oklch(.40 .12 34 / .44) 0%, oklch(.27 .10 30 / .20) 48%, oklch(.13 .05 28 / 0) 90%);}
+.brasa .l1{background:radial-gradient(49.33% 42.67% at 50% 68.67% in oklch,
+   oklch(.74 .21 45) 0%, oklch(.54 .20 37 / .76) 42%, oklch(.22 .10 30 / 0) 86%);}
+.brasa .l2{background:radial-gradient(38.67% 36% at 40.67% 64% in oklch,
+   oklch(.70 .21 26) 0%, oklch(.24 .12 26 / 0) 82%);}
+.brasa .l3{background:radial-gradient(25.33% 21.33% at 50% 66.67% in oklch,
+   oklch(.97 .05 62) 0%, oklch(.80 .22 50 / .70) 36%, oklch(.24 .10 40 / 0) 78%);}
+.brasa .grao{position:absolute;inset:0;opacity:.07;mix-blend-mode:overlay;background-image:var(--grao);}
+
+/* ATMOSFERA: a luz da sala, ancorada onde a bolinha mora (canto direito baixo) */
+.aurora{right:-6%;top:-18%;width:900px;aspect-ratio:1;z-index:0;--op:.82;
+  -webkit-mask-image:radial-gradient(closest-side,#000 28%,transparent 72%);
+          mask-image:radial-gradient(closest-side,#000 28%,transparent 72%);}
+
+/* grao da placa inteira: o que impede a luz de virar degrade liso */
+.quadro::after{content:'';position:absolute;inset:0;z-index:4;pointer-events:none;
+  background-image:var(--grao);opacity:.05;mix-blend-mode:overlay;}
+
+.grade{position:relative;z-index:2;height:100%;display:grid;
+  grid-template-columns:1fr 300px;align-items:center;gap:40px;padding:0 88px;}
+
+.selo{display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--cal-2);}
+.selo .pt{width:7px;height:7px;border-radius:50%;background:var(--tinta-brasa);}
+
+h1{margin-top:26px;font-size:76px;line-height:1.02;letter-spacing:-.028em;
+  font-weight:700;color:var(--cal);max-width:15ch;}
+h1 em{font-style:normal;color:var(--tinta-brasa);}
+
+.lede{margin-top:24px;font-size:24px;line-height:1.45;font-weight:400;color:var(--cal-2);max-width:44ch;}
+
+.meta{margin-top:34px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.tag{font-size:16px;font-weight:500;color:var(--cal-3);}
+.sep{width:4px;height:4px;border-radius:50%;background:var(--cal-3);opacity:.6;}
+
+/* ---- a bolinha, corpo literal do produto ---- */
+.orbe-palco{position:relative;justify-self:center;width:184px;}
+.orbe{position:relative;width:184px;height:184px;border-radius:50%;isolation:isolate;
+  overflow:hidden;background:#070103;
+  box-shadow:inset 0 0 0 1px rgb(255 150 105 / .28), 0 20px 48px rgb(0 0 0 / .6);
+  display:flex;align-items:center;justify-content:center;}
+.orbe .brasa{inset:0;}
+.orbe .marca{position:relative;z-index:3;width:44%;color:#fff;
+  filter:drop-shadow(0 1px 4px rgb(0 0 0 / .6));}
+.halo{position:absolute;left:50%;top:50%;width:420%;aspect-ratio:1;z-index:-1;
+  transform:translate(-50%,-50%);--op:.5;
+  -webkit-mask-image:radial-gradient(closest-side,#000 8%,transparent 66%);
+          mask-image:radial-gradient(closest-side,#000 8%,transparent 66%);}
+.teclas{margin-top:26px;display:flex;align-items:center;justify-content:center;gap:6px;}
+.kbd{font-size:13px;font-weight:600;color:var(--cal-2);background:oklch(.24 .012 40);
+  border:1px solid oklch(.97 .006 60 / .14);border-radius:7px;padding:6px 9px;
+  box-shadow:0 2px 0 oklch(.15 .01 40);}
+.mais{font-size:13px;color:var(--cal-3);}
+</style>
+</head>
+<body>
+<div class="quadro">
+
+  <div class="brasa aurora">
+    <i class="l4"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="grao"></i>
+  </div>
+
+  <div class="grade">
+    <div>
+      <div class="selo"><span class="pt"></span> Dott &middot; beta aberto</div>
+      <h1>Anote antes de decidir <em>onde</em> anotar.</h1>
+      <p class="lede">Um lugar no seu computador pro que você não pode perder.
+        Duas teclas, a frase, e você já voltou pro que estava fazendo.</p>
+      <div class="meta">
+        <span class="tag">Windows 10 e 11</span><span class="sep"></span>
+        <span class="tag">instalador de 3,4 MB</span><span class="sep"></span>
+        <span class="tag">sem conta</span><span class="sep"></span>
+        <span class="tag">liga as notas sozinho</span><span class="sep"></span>
+        <span class="tag">sem IA</span>
+      </div>
+    </div>
+
+    <div class="orbe-palco">
+      <div class="brasa halo">
+        <i class="l4"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i>
+      </div>
+      <div class="orbe">
+        <div class="brasa"><i class="l4"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="grao"></i></div>
+        <svg class="marca" viewBox="0 0 24 24" fill="none">
+          <path d="M20.5 9.722A8.8 8.8 0 1 1 15.719 4.024" stroke="currentColor"
+                stroke-width="2.6" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="4.4" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="teclas">
+        <span class="kbd">Ctrl</span><span class="mais">+</span>
+        <span class="kbd">Shift</span><span class="mais">+</span>
+        <span class="kbd">Espaço</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

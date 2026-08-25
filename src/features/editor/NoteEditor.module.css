@@ -93,7 +93,7 @@
   min-height: 0;
 }
 
-/* backlinks panel */
+/* painel de notas conectadas (grafo automatico) */
 .backlinks {
   border-top: 1px solid var(--border);
   padding: 12px 18px;
@@ -130,6 +130,41 @@
 .backlinkItem:hover { background: var(--surface2); color: var(--accent); }
 
 .backlinkIcon { font-size: 12px; color: var(--fg3); }
+
+/* Uma conexao nunca aparece sem dizer de onde veio. */
+.connItem {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--fg2);
+  cursor: pointer;
+  padding: 5px 6px;
+  border-radius: var(--r-sm);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.connItem:hover { background: var(--surface2); color: var(--accent); }
+.connTitle { font-weight: 600; color: var(--fg); }
+.connItem:hover .connTitle { color: var(--accent); }
+.connWhy {
+  grid-column: 2;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--fg3);
+}
+.connMark {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  padding: 1px 5px;
+  color: var(--fg3);
+  flex: none;
+}
+.connMark.achada { color: var(--accent); border-color: var(--accent); }
 
 .saveStatus {
   margin-left: auto;

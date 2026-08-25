@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dott — anote antes de decidir onde anotar</title>
+<meta name="description" content="Um programa de Windows que fica num canto da tela. Você aperta duas teclas, escreve a ideia e volta pro que estava fazendo. Depois, ele liga sozinho as notas que têm a ver umas com as outras. Instalador de 3,4 MB, de graça.">
+<meta name="theme-color" content="#070103">
+<!-- a marca do proprio produto, embutida: a pagina nao busca nada de fora -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23070103'/%3E%3Cg fill='none' stroke='%23ff8346' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M20.5 9.722A8.8 8.8 0 1 1 15.719 4.024'/%3E%3C/g%3E%3Ccircle cx='12' cy='12' r='4.4' fill='%23ff8346'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Dott">
+<meta property="og:title" content="Dott — anote antes de decidir onde anotar">
+<meta property="og:description" content="Um programa de Windows que fica num canto da tela. Você aperta duas teclas, escreve a ideia e volta pro que estava fazendo. Depois, ele liga sozinho as notas que têm a ver umas com as outras. Instalador de 3,4 MB, de graça.">
+<meta property="og:image" content="img/app-inbox-e-para.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dott — anote antes de decidir onde anotar">
+<meta name="twitter:description" content="Um programa de Windows que fica num canto da tela. Você aperta duas teclas, escreve a ideia e volta pro que estava fazendo. Depois, ele liga sozinho as notas que têm a ver umas com as outras. Instalador de 3,4 MB, de graça.">
+<meta name="twitter:image" content="img/app-inbox-e-para.png">
+
+<style>
+/* ============================================================
+   Dott - LP de lancamento. Fonte local, SVG inline, zero CDN.
+   Sistema visual: direcao-arte-lp-2026-08-07.md (CANVAS).
+   Regra LUZ x TINTA: cor da familia LUZ so dentro de camada screen.
+   ============================================================ */
+
+@font-face{
+  font-family:'Public Sans';
+  src:url('fonts/PublicSans-Variable.woff2') format('woff2-variations'),
+      url('fonts/PublicSans-Variable.woff2') format('woff2');
+  font-weight:100 900; font-style:normal; font-display:swap;
+}
+
+:root{
+  /* ---------- SUPERFICIE ---------- */
+  --breu:      #070103;
+  --carvao:    oklch(.17 .014 34);
+  --carvao-2:  oklch(.22 .016 34);
+  --fuligem:   oklch(.30 .014 34);
+  --borda:       oklch(.97 .006 60 / .09);
+  --borda-forte: oklch(.97 .006 60 / .16);
+
+  /* ---------- TINTA (texto, botao, borda, foco) ---------- */
+  --cal:       oklch(.97 .006 60);
+  --cal-2:     oklch(.78 .012 45);
+  --cal-3:     oklch(.62 .014 40);
+  --cal-4:     oklch(.52 .014 40);
+  --tinta-brasa: oklch(.74 .169 45);
+  --tinta-viva:  oklch(.80 .127 50);
+  --tinta-funda: oklch(.62 .203 38);
+
+  /* ---------- PARA (so na secao 6) ---------- */
+  --para-p:  #e04040;  --para-a:  #4a8fd9;
+  --para-r:  #3db37a;  --para-ar: #666680;
+
+  /* ---------- PAPEL DE PAREDE do Windows simulado (frio de proposito) ---------- */
+  --pp-1: oklch(.32 .055 258); --pp-2: oklch(.22 .045 272);
+  --pp-3: oklch(.14 .028 265); --pp-0: oklch(.10 .020 265);
+
+  /* ---------- CURVAS (literais do produto) ---------- */
+  --mola: linear(0,.0235,.0826,.1637,.2561,.3522,.4466,.5357,.6173,.69,.7535,.8079,.8536,.8914,.922,.9465,.9656,.9802,.9911,.9989,1.0043,1.0079,1.0099,1.0109,1.0111,1.0107,1.01);
+  --saida:   cubic-bezier(.4, 0, 1, 1);
+  --chegada: cubic-bezier(.16, 1, .3, 1);
+  --morf:    cubic-bezier(.33, 1, .68, 1);
+
+  /* ---------- GRAO (literal do produto) ---------- */
+  --grao: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
+
+  /* ---------- GRADE ---------- */
+  --maxw: 1240px;
+  --maxw-texto: 62ch;
+  --gut: 32px;
+
+  /* ---------- ESPACO ---------- */
+  --e1:4px; --e2:8px; --e3:12px; --e4:16px; --e5:24px; --e6:32px;
+  --e7:48px; --e8:64px; --e9:96px; --e10:140px; --e11:200px;
+
+  /* ---------- RAIO ---------- */
+  --r-tela:12px; --r-janela:8px; --r-cartao:14px; --r-pilula:999px;
+
+  /* ---------- TIPOGRAFIA ----------
+     Escada FIXA de quatro degraus: 11.5 (rotulo em caixa alta) / 13.5 (apoio,
+     legenda, meta) / 16 (corpo) / 20 (titulo pequeno). Mais as tres medidas de
+     display em clamp() abaixo.
+     Antes havia NOVE medidas fixas (10.5, 11, 11.5, 13.5, 14.5, 15, 16, 17, 20).
+     Meio pixel de diferenca nao e hierarquia, e ruido: ninguem le 14,5 como
+     "um degrau abaixo de 15". Sobraram os degraus que a pagina realmente usa. */
+  --t-hero: clamp(44px, 7.4vw, 96px);
+  --t-h2:   clamp(34px, 4.8vw, 60px);
+  --t-h3:   clamp(21px, 2.4vw, 28px);
+  --t-lede: clamp(17px, 1.5vw, 20px);
+
+  /* ---------- VOZ DE DISPLAY (09/08) ----------
+     A pagina inteira em Public Sans pesado lia como template: todo titulo com
+     o mesmo peso e o mesmo cinza e a assinatura visual de pagina gerada.
+     O contraste editorial agora e de FAMILIA, nao so de peso: a linha de
+     complemento (.leve) fala em serifa italica - a voz baixa da pagina.
+     Georgia e fonte de sistema: zero bytes novos, offline como tudo aqui. */
+  --serifa: Georgia, 'Times New Roman', serif;
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+/* clip nos DOIS: toda manifestacao da brasa sangra pra fora da caixa e a propagacao
+   de overflow do body pra viewport nao segurou isso em 375px. [MEDIDO scrollX=25] */
+html{ scroll-behavior:smooth; overflow-x:clip; }
+body{
+  margin:0; overflow-x:clip; background:var(--breu); color:var(--cal);
+  font-family:'Public Sans', system-ui, -apple-system, Segoe UI, sans-serif;
+  font-size:16px; line-height:1.65; font-weight:400;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+img{ max-width:100%; }
+h1,h2,h3{ margin:0; }
+p{ margin:0 0 var(--e5); max-width:var(--maxw-texto); }
+b,strong{ font-weight:750; }
+
+/* numero nunca muda de largura */
+.num, td, th, time, .barra-canto, .badge, .contador, .medidor-legenda{ font-variant-numeric:tabular-nums; }
+
+:focus-visible{ outline:2px solid var(--tinta-viva); outline-offset:3px; border-radius:4px; }
+.btn:focus-visible, .final :focus-visible{ outline-color:var(--breu); outline-width:3px; }
+
+.pular{ position:absolute; left:-9999px; top:0; background:var(--cal); color:var(--breu);
+  padding:12px 18px; z-index:99; border-radius:6px; }
+.pular:focus{ left:12px; top:12px; }
+
+.env{ width:100%; max-width:var(--maxw); margin:0 auto; padding-inline:var(--gut); }
+section{ position:relative; }
+/* 140px fixos em cima e embaixo davam 280px de preto entre duas secoes num
+   viewport de 900px - quase um terco de tela sem nada. O ritmo agora respira
+   com a altura da janela; os dois apagoes ficam com o espaco maior, porque ali
+   o vazio E o argumento. */
+.sec{ padding-block:clamp(84px, 9.5vh, 132px); }
+.sec.apagao{ padding-block:clamp(104px, 13vh, 168px); padding-inline:var(--gut); }
+/* a sangria horizontal sai do .env e vai pra secao: quem tem o fundo visivel e
+   a secao, entao e ela que precisa do respiro interno. Soma final identica. */
+.sec.apagao > .env{ padding-inline:0; }
+
+/* ---------- rotulo de secao ----------
+   O numero deixa de ser uma etiquetinha e vira o numeral da cena: grande,
+   fino, na tinta funda - ancora editorial que diferencia cada secao antes
+   de qualquer palavra. Um elemento, zero markup novo. */
+.rotulo{ display:flex; align-items:baseline; gap:14px; margin:0 0 var(--e5);
+  font-size:11.5px; font-weight:750; line-height:1.4; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--cal-3); }
+.rotulo b{ font-size:clamp(30px,3.4vw,44px); font-weight:200; line-height:1;
+  letter-spacing:-.02em; color:var(--tinta-funda); }
+.rotulo b::after{ content:''; display:inline-block; width:34px; height:1px;
+  background:var(--tinta-funda); margin:0 0 .18em 12px; opacity:.5; }
+
+/* ---------- tipografia de bloco ---------- */
+h1{ font-size:var(--t-hero); font-weight:850; line-height:.95; letter-spacing:-.045em; }
+h1 .leve{ font-family:var(--serifa); font-style:italic; font-weight:400;
+          font-size:.94em; letter-spacing:-.02em; }
+h2{ font-size:var(--t-h2); font-weight:850; line-height:1.04; letter-spacing:-.035em; }
+h2 .leve{ font-family:var(--serifa); font-style:italic; font-weight:400;
+          font-size:.94em; letter-spacing:-.015em; color:var(--cal-2); }
+h3{ font-size:var(--t-h3); font-weight:750; line-height:1.15; letter-spacing:-.02em; }
+.lede{ font-size:var(--t-lede); font-weight:400; line-height:1.6; letter-spacing:-.005em; color:var(--cal-2); }
+.apoio{ font-size:13.5px; font-weight:500; line-height:1.5; letter-spacing:.005em; color:var(--cal-3); }
+.legenda{ font-size:13.5px; font-weight:500; line-height:1.5; color:var(--cal-3); margin:var(--e3) 0 0; max-width:52ch; }
+.destaque{ color:var(--tinta-brasa); }
+.virada{ font-size:var(--t-h3); font-weight:750; line-height:1.3; letter-spacing:-.02em;
+  color:var(--cal); margin-top:var(--e7); max-width:26ch; }
+
+/* ============================================================
+   O MOTOR DA BRASA - uma classe so, as onze manifestacoes
+   Quatro camadas em screen sobre preto + grao. Nao recriar.
+   ============================================================ */
+.brasa{ position:absolute; pointer-events:none; isolation:isolate; overflow:hidden;
+        --op:1; opacity:var(--op); }
+.brasa i{ position:absolute; inset:-25%; display:block; mix-blend-mode:screen; will-change:transform; }
+
+.brasa .l4{ background:radial-gradient(74.67% 61.33% at 50% 48.67% in oklch,
+              oklch(.40 .12 34 / .44) 0%, oklch(.27 .10 30 / .20) 48%, oklch(.13 .05 28 / 0) 90%);
+            transform-origin:50% 48.67%;   animation:pulso4 9.3s ease-in-out infinite; }
+.brasa .l1{ background:radial-gradient(49.33% 42.67% at 50% 68.67% in oklch,
+              oklch(.74 .21 45) 0%, oklch(.54 .20 37 / .76) 42%, oklch(.22 .10 30 / 0) 86%);
+            transform-origin:50% 68.67%;   animation:pulso1 6.4s ease-in-out infinite; }
+.brasa .l2{ background:radial-gradient(38.67% 36% at 40.67% 64% in oklch,
+              oklch(.70 .21 26) 0%, oklch(.24 .12 26 / 0) 82%);
+            transform-origin:40.67% 64%;   animation:pulso2 8.1s ease-in-out infinite; }
+.brasa .l3{ background:radial-gradient(25.33% 21.33% at 50% 66.67% in oklch,
+              oklch(.97 .05 62) 0%, oklch(.80 .22 50 / .70) 36%, oklch(.24 .10 40 / 0) 78%);
+            transform-origin:50% 66.67%;   animation:pulso3 5.1s ease-in-out infinite; }
+
+.brasa .grao{ position:absolute; inset:0; opacity:.07; mix-blend-mode:overlay;
+              background-image:var(--grao); animation:none; }
+
+/* ------------------------------------------------------------------
+   O GRAO QUE ANDA - o que separa "brasa" de "gradiente laranja"
+
+   Na bolinha do produto (44px) o grao parado esta certo: naquele tamanho
+   ninguem le textura, e o motor foi desenhado para 44px. Mas as manifestacoes
+   grandes desta pagina tem 700, 840, 2200px - e nessa escala um degrade radial
+   liso e exatamente a assinatura visual que o CEO chama de generico. Brasa de
+   verdade tem conveccao: a textura de dentro se move, mesmo quando a forma nao.
+
+   CSS nao anima o INTERIOR de um radial-gradient. O que ele anima e a posicao
+   de uma textura por cima - e e isso que este bloco faz, com o proprio ladrilho
+   de ruido do produto (var(--grao), 180x180). O deslocamento e de exatamente
+   um ladrilho, entao o laco fecha sem salto. Duas camadas, em sentidos opostos
+   e periodos nao multiplos (26s e 41s), pela mesma razao das quatro pulsacoes
+   do motor: o encontro dos dois so se repete depois de muito tempo.
+
+   MEDIDO depois, e a medicao mudou o desenho. Na area de meio-tom (a queda da
+   aurora) o grao e invisivel mesmo a 0,30 - quem resolve o miolo da abertura e
+   o shader. Mas na luz FORTE (o vidro do monitor da secao 8, o campo do fecho)
+   ele rende de verdade: 49,3% dos pixels mudam de forma visivel so com UMA
+   camada. Uma segunda camada em soft-light agregava mais 0,7% de media - custo
+   de um layer inteiro por instancia (sete instancias) para quase nada. Entao
+   ficou UMA camada, com a opacidade subida de .14 para .18 para recuperar
+   quase tudo que a segunda dava, a custo zero de composicao.
+
+   Custo final: um transform por instancia. Roda na placa de video.
+   ------------------------------------------------------------------ */
+.brasa.grande .grao{ inset:-24%; opacity:.18;
+  animation:deriva 26s linear infinite; will-change:transform; }
+@keyframes deriva{ to{ transform:translate3d(-180px,-180px,0) } }
+
+/* periodos NAO multiplos entre si: o respiro nunca cai no mesmo desenho */
+@keyframes pulso1{ 0%,100%{ transform:scale(.94) } 50%{ transform:scale(1.10) } }
+@keyframes pulso2{ 0%,100%{ transform:scale(1.08) } 50%{ transform:scale(.92) } }
+@keyframes pulso3{ 0%,100%{ transform:scale(.90) } 50%{ transform:scale(1.14) } }
+@keyframes pulso4{ 0%,100%{ transform:scale(.90) } 50%{ transform:scale(1.14) } }
+
+/* ============================================================
+   BOTAO
+   ============================================================ */
+.cta{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--e5) var(--e6); margin-top:var(--e7); }
+/* --saida (cubic-bezier(.4,0,1,1)) e uma curva de ease-IN: comeca devagar.
+   Estava no hover do botao principal e no filamento das perguntas, ou seja,
+   nos dois lugares onde o usuario esta olhando o inicio do movimento. Trocado
+   por --chegada nos dois. --saida continua valendo pro que SAI, que e o papel
+   dela na direcao de arte ("entrar e decisao, sair e obediencia"). */
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  min-height:52px; padding:0 26px; border-radius:var(--r-pilula);
+  background:var(--tinta-brasa); color:var(--breu);
+  font-size:16px; font-weight:800; letter-spacing:-.01em; text-decoration:none;
+  transition:background .2s var(--chegada), transform .16s var(--chegada); }
+/* o botao tem que responder ao dedo antes de responder ao clique */
+.btn:active{ transform:scale(.975); }
+.btn svg{ width:18px; height:18px; }
+.link2{ color:var(--cal-2); text-decoration:none; font-weight:600; font-size:16px;
+  border-bottom:1px solid var(--borda-forte); padding-bottom:2px; min-height:44px;
+  display:inline-flex; align-items:center;
+  transition:color .2s var(--chegada), border-color .2s var(--chegada); }
+/* hover so onde existe ponteiro fino: em toque, o hover dispara no tap e o
+   estado fica grudado */
+@media (hover:hover) and (pointer:fine){
+  .btn:hover{ background:var(--tinta-viva); transform:translateY(-1px); }
+  .btn:hover:active{ transform:scale(.975); }
+  .link2:hover{ color:var(--cal); border-color:var(--tinta-brasa); }
+  .pergunta > button:hover .sinal::before,
+  .pergunta > button:hover .sinal::after{ background:var(--cal); }
+}
+.sob-btn{ margin:var(--e4) 0 0; color:var(--cal-3); font-size:13.5px; font-weight:500;
+  letter-spacing:.005em; }
+
+/* ============================================================
+   SECAO 1 - abertura. Brasa em TRES registros: ATMOSFERA, REBOTE, PONTO.
+
+   O defeito que motivou a reconstrucao, medido e nao opinado: no layout
+   anterior a primeira .brasa do documento comecava em y=958 e o nucleo dela
+   caia em ~y=1384, com a bolinha real em y=1342 - tudo isso num viewport de
+   900px. A tela de abertura nao tinha UM pixel de luz emitida, so preto,
+   titulo branco e uma pilula laranja. O conceito estava escrito na direcao de
+   arte e nunca chegou a tela porque a coluna unica empilhava 759px de texto
+   antes da cena.
+
+   Conserto na fonte: a abertura vira composicao de duas colunas. O texto
+   ocupa a coluna esquerda; a maquina, a direita; e a luz aparece em tres
+   escalas do MESMO motor - atmosfera (aurora, escala de viewport), rebote
+   (a poca no tampo) e ponto (a bolinha, escala real, agora com halo proprio
+   escapando da moldura).
+
+   A regra anti-slop 1 continua valendo: nenhuma camada de luz atras de texto
+   corrido. A aurora vive na metade direita e foi mascarada ate o contraste da
+   coluna de texto ser remedido no pixel.
+   ============================================================ */
+.hero{ position:relative; overflow:clip;
+       padding-top:clamp(44px,6.5vh,92px); padding-bottom:var(--e8); }
+
+/* ATMOSFERA: o motor em escala de sala, ancorado no canto da maquina onde a
+   bolinha realmente mora. Fica ATRAS da moldura (z:0), entao o que aparece dela
+   e so o vazamento em volta da silhueta - luz de sala, nao campo de gradiente.
+   A primeira tentativa foi um campo largo e baixo: virou borrao laranja
+   atravessando a legenda. Nucleo alto e mascara curta consertam. */
+/* mascara com PLATO (solido ate 28%) e nao com queda desde o centro: sem o plato
+   o nucleo e comido pelo proprio degrade e o resultado e neblina marrom em vez
+   de brasa. O que da presenca e o centro cheio, nao a opacidade geral.
+   A geometria e compartilhada com a versao WebGL: as duas ocupam exatamente a
+   mesma caixa, entao a troca entre elas nao move um pixel. */
+/* ANCORA (09/08): a aurora era presa na BORDA DA VIEWPORT (right:-17%). Com a
+   maquina capada, num monitor largo ela descolava e virava uma bola laranja
+   boiando no vazio a 800px de qualquer objeto - o "orbe de gradiente atras do
+   heroi" que e a assinatura mais batida de pagina gerada. Agora ela e presa ao
+   CONTAINER (50% + metade da medida), que e onde a maquina realmente esta:
+   a luz volta a vazar em volta da silhueta, em qualquer largura de tela. */
+.hero .aurora, .hero .aurora-gl{ position:absolute;
+  left:calc(50% + 100px); right:auto; top:-6%;
+  width:min(58vw,780px); aspect-ratio:1; z-index:0; pointer-events:none;
+  -webkit-mask-image:radial-gradient(closest-side, #000 28%, transparent 72%);
+          mask-image:radial-gradient(closest-side, #000 28%, transparent 72%); }
+.hero .aurora{ --op:.9; transition:opacity .9s var(--chegada); }
+/* a versao WebGL entra desligada e so aparece se o contexto existir de verdade;
+   ate la o que esta na tela e a brasa em CSS, que e a base e nunca sai do DOM */
+.hero .aurora-gl{ display:block; opacity:0; mix-blend-mode:screen;
+  transition:opacity .9s var(--chegada); }
+.hero.gl .aurora-gl{ opacity:.95; }
+.hero.gl .aurora{ opacity:0; }
+
+/* A abertura quebra a grade DE PROPOSITO: o texto respeita a medida da pagina
+   (mesma sangria de .env, entao o H1 alinha com todos os H2 abaixo) e a cena
+   avanca para fora do container, na direcao da borda direita. A assimetria e a
+   composicao; o alinhamento a esquerda e o que impede que ela leia como erro. */
+.hero-grade{ position:relative; z-index:1; width:100%; max-width:var(--maxw);
+  margin:0 auto; padding-left:var(--gut); padding-right:0;
+  display:grid; align-items:center;
+  grid-template-columns:minmax(0,545px) minmax(0,1fr); gap:clamp(28px,3.4vw,60px); }
+.hero-texto{ position:relative; z-index:2; }
+/* A sangria tem TETO (09/08). Sem o teto ela era "toda a sobra da viewport", e
+   a maquina crescia 1:1 com a largura da tela enquanto o H1 ficava congelado em
+   545px. MEDIDO: a tela do monitor simulado ia a 683px num monitor de 1440,
+   1231px num de 2560 e 1871x1169px num de 3840 - metade da tela ocupada por
+   uma captura, com o titulo do tamanho de uma legenda ao lado. A composicao
+   invertia: a foto virava outdoor e a frase virava nota de rodape.
+   Com o teto de 96px, a cena mede o MESMO em qualquer monitor acima de 1240px. */
+.hero-cena{ position:relative;
+  margin-right:calc(-1 * min(96px, max(0px, (100vw - var(--maxw))/2 - var(--gut)))); }
+/* o segundo cinto (o teto da propria maquina) vive na regra .mesa, mais abaixo -
+   aqui ele seria atropelado pelo `margin:0` de la. */
+
+/* A pilula com borda era o primeiro pixel da pagina - e "badge em capsula
+   sobre o hero" e assinatura de template. Vira uma linha de rotulo nua:
+   ponto de brasa, caixa alta espacada, nenhuma moldura pedindo credito. */
+/* align-items:flex-start (nao center): no celular o rotulo quebra em duas
+   linhas e o ponto, centralizado no bloco inteiro, ficava boiando no meio -
+   descolado da palavra. Preso no topo + meio em de recuo, ele volta a
+   pertencer a PRIMEIRA linha, quebrando ou nao. */
+.selo{ display:inline-flex; align-items:flex-start; gap:10px; padding:0;
+  border:0; font-size:12px; font-weight:750; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--cal-3); margin-bottom:var(--e5); }
+/* O ponto NAO pulsa. Eu tinha colocado um respiro infinito nele nesta sessao;
+   um detector de padroes pegou, e com razao: pulsar simula dado vivo, e "beta
+   aberto" nao muda. Numa pagina cujo argumento e "nao prometemos, construimos
+   sem a outra opcao", enfeite que finge status e exatamente o tipo de mentira
+   pequena que corroi o resto. Ponto estatico, rotulo honesto. */
+.selo i{ width:7px; height:7px; border-radius:50%; background:var(--tinta-brasa);
+  display:block; flex:none; margin-top:.42em; }
+
+.hero h1{ font-size:clamp(38px,4.4vw,64px); max-width:15ch; }
+.hero .lede{ margin-top:var(--e5); max-width:46ch; }
+.hero .corpo{ color:var(--cal); font-weight:600; max-width:42ch; }
+/* --cal-3 REPROVA aqui: a legenda cai dentro do alcance da aurora e mediu
+   2,56:1 no pixel. Com --cal-2 sobre o pior pixel medido rgb(88,67,42) da
+   4,63:1 (AA). Mexeu na aurora, remede este par. */
+.hero .legenda{ margin-top:var(--e4); color:var(--cal-2); }
+
+/* a mesa: o rebote + o monitor + o halo da bolinha */
+/* max-width e o segundo cinto contra o outdoor: mesmo que a coluna cresca por
+   outro caminho, a maquina para de crescer. Ela e um OBJETO na cena, com
+   tamanho proprio - nao um plano de fundo que acompanha o monitor de quem ve.
+   margin-left:auto mantem ela encostada na direita, que e a composicao. */
+.mesa{ position:relative; margin:0 0 0 auto; width:100%; max-width:760px; }
+/* REBOTE: a poca de luz que a bolinha derrama no tampo, por tras da moldura */
+/* 09/08: medidas reduzidas - o transbordo antigo (64% a -26%) derramava uma
+   mancha lisa ate ~350px abaixo da cena, sobre area vazia; luz sem objeto
+   perto le como borrao, nao como brasa. O rebote agora morre perto do tampo. */
+.mesa .rebote{ right:-12%; bottom:-16%; width:50%; aspect-ratio:1; z-index:0; --op:.55;
+  -webkit-mask-image:radial-gradient(closest-side,#000 18%,transparent 76%);
+          mask-image:radial-gradient(closest-side,#000 18%,transparent 76%); }
+/* PONTO: o halo da bolinha, DEPOIS da moldura, ancorado no ponto exato onde ela
+   mora. E o que faz um objeto de 40px ler como fonte de luz: a bolinha e um
+   ponto brilhante, o halo e a luz que ela joga por cima da propria tela e
+   escapa pela borda. Sem isso, o conceito "PONTO" e so um pixel aceso. */
+.mesa .halo{ right:-10%; bottom:-11%; width:34%; aspect-ratio:1; z-index:2; --op:.85;
+  -webkit-mask-image:radial-gradient(closest-side,#000 14%,transparent 66%);
+          mask-image:radial-gradient(closest-side,#000 14%,transparent 66%); }
+
+/* ---------- o Windows 11 simulado: zero imagem, zero logotipo alheio ---------- */
+.tela{ position:relative; z-index:1; aspect-ratio:16/10; border-radius:var(--r-tela);
+  overflow:hidden; isolation:isolate; background:var(--pp-0);
+  box-shadow:
+    0 1px 0 0 oklch(.97 .006 60 / .13) inset,
+    0 0 0 1px oklch(.97 .006 60 / .07),
+    0 2px 5px oklch(.04 0 0 / .6),
+    0 44px 90px -34px oklch(.04 0 0 / .9); }
+
+.parede{ position:absolute; inset:0;
+  background:
+    radial-gradient(38% 46% at 26% 14% in oklch, var(--pp-1) 0%, oklch(.22 .045 272 / 0) 76%),
+    radial-gradient(44% 52% at 78% 8% in oklch, oklch(.26 .05 292 / .8) 0%, oklch(.20 .04 285 / 0) 74%),
+    radial-gradient(80% 88% at 50% 108% in oklch, var(--pp-2) 0%, var(--pp-3) 46%, var(--pp-0) 84%),
+    var(--pp-0); }
+.parede-arcos{ position:absolute; inset:-20% -10% auto; height:120%; opacity:.5; }
+.parede-arcos i{ position:absolute; left:50%; top:0; border-radius:50%;
+                 transform:translateX(-50%); border:1px solid oklch(.72 .07 258 / .16); }
+.parede-arcos i:nth-child(1){ width:52%; aspect-ratio:1; top:-26%; }
+.parede-arcos i:nth-child(2){ width:74%; aspect-ratio:1; top:-40%; border-color:oklch(.72 .07 258 / .11); }
+.parede-arcos i:nth-child(3){ width:98%; aspect-ratio:1; top:-56%; border-color:oklch(.72 .07 258 / .07); }
+.parede-grao{ position:absolute; inset:0; opacity:.05; mix-blend-mode:overlay; background-image:var(--grao); }
+
+.janelas{ position:absolute; inset:0; padding:2.6% 3% 8.2%; }
+.janela{ position:absolute; margin:0; border-radius:var(--r-janela); overflow:hidden; background:var(--carvao);
+  border:1px solid oklch(.97 .006 60 / .07);
+  box-shadow:0 1px 0 0 oklch(.97 .006 60 / .10) inset,
+             0 2px 6px oklch(.04 0 0 / .55),
+             0 26px 54px -22px oklch(.04 0 0 / .85); }
+.janela img{ display:block; width:100%; height:auto; }
+/* a janela de tras recua por SATURACAO e OPACIDADE, nunca por blur */
+.janela--tras{ left:6%; top:5%; width:60%; filter:saturate(.72); opacity:.5; }
+.janela--frente{ right:3%; top:11%; width:70%; }
+
+/* barra de tarefas - UNICO backdrop-filter da pagina inteira */
+.barra{ position:absolute; left:0; right:0; bottom:0; height:6.4%; min-height:34px;
+  display:flex; align-items:center; background:oklch(.16 .012 265 / .86);
+  -webkit-backdrop-filter:blur(22px) saturate(1.5); backdrop-filter:blur(22px) saturate(1.5);
+  border-top:1px solid oklch(.97 .006 60 / .07); }
+.barra-centro{ position:absolute; left:50%; transform:translateX(-50%);
+               display:flex; align-items:center; gap:clamp(8px,1.5vw,18px); }
+.barra-centro > *{ width:clamp(16px,1.7vw,22px); height:clamp(16px,1.7vw,22px);
+                   color:var(--cal-3); display:block; }
+.inicio{ display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:2px; }
+.inicio span{ background:currentColor; border-radius:1.5px; opacity:.9; }
+.dott-tb{ color:var(--cal); position:relative; }
+.dott-tb::after{ content:''; position:absolute; left:50%; bottom:-6px; width:5px; height:2px;
+                 border-radius:2px; background:var(--tinta-brasa); transform:translateX(-50%); }
+.barra-canto{ margin-left:auto; padding-right:clamp(10px,1.4vw,20px); text-align:right;
+  line-height:1.15; font-size:clamp(8px,.86vw,11.5px); color:var(--cal-2); }
+.barra-canto b{ display:block; font-weight:600; color:var(--cal); }
+
+/* a bolinha, com o corpo literal do produto */
+.orbe-palco{ position:absolute; right:1.6%; bottom:9.4%; z-index:3; width:clamp(38px,5.2%,58px); }
+.orbe{ position:relative; width:100%; aspect-ratio:1; border-radius:50%;
+  isolation:isolate; overflow:hidden; background:#070103;
+  box-shadow:inset 0 0 0 1px rgb(255 150 105 / .28), 0 12px 26px rgb(0 0 0 / .5);
+  display:flex; align-items:center; justify-content:center; }
+.orbe .brasa{ inset:0; }
+.orbe .marca{ position:relative; z-index:3; width:44%; color:#fff;
+  filter:drop-shadow(0 1px 3px rgb(0 0 0 / .55)); animation:respiro 4.2s ease-in-out infinite; }
+@keyframes respiro{ 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.045) } }
+.badge{ position:absolute; top:-2px; right:-2px; z-index:4; min-width:18px; height:18px;
+  padding:0 5px; border-radius:9px; background:#0d0d10; color:#fff; font-size:11.5px;
+  font-weight:700; display:flex; align-items:center; justify-content:center;
+  border:1px solid rgb(255 255 255 / .18); }
+.badge.salta{ animation:salta .5s var(--mola) 1 both; }
+@keyframes salta{ 0%{ transform:scale(1) } 40%{ transform:scale(1.45) } 100%{ transform:scale(1) } }
+
+/* ============================================================
+   A DEMONSTRACAO VIVA (09/08) - a pagina executa o produto.
+   A caixa de captura abre POR CIMA do Windows simulado, digita uma
+   ideia, salva; o aviso sobe e o distintivo da bolinha conta +1.
+   E o visitante pode abrir a caixa de verdade - com o MESMO atalho
+   do produto - e guardar a propria nota nesta pagina.
+   Nenhuma imagem: a caixa e o aviso sao a interface do app redesenhada
+   em DOM, com as curvas literais do produto (--mola pra entrar,
+   --saida pra sair).
+   ============================================================ */
+.cx{ position:absolute; left:50%; top:38%; z-index:4; width:min(76%,430px);
+  transform:translate(-50%,-50%) scale(.94); opacity:0; pointer-events:none;
+  background:oklch(.15 .012 34 / .97); border-radius:12px;
+  border:1px solid oklch(.97 .006 60 / .14);
+  box-shadow:0 1px 0 0 oklch(.97 .006 60 / .10) inset,
+             0 0 0 1px oklch(.04 0 0 / .5),
+             0 18px 50px -12px oklch(.04 0 0 / .9);
+  transition:opacity .18s var(--chegada), transform .46s var(--mola); }
+.cx.aberta{ opacity:1; transform:translate(-50%,-50%) scale(1); pointer-events:auto; }
+.cx-topo{ display:flex; align-items:center; gap:10px; padding:12px 14px 0; }
+.cx-tag{ font-size:10px; font-weight:800; letter-spacing:.14em; color:var(--tinta-brasa);
+  border:1px solid oklch(.74 .169 45 / .4); border-radius:5px; padding:2px 7px; }
+.cx-conta{ margin-left:auto; font-size:11.5px; font-weight:600; color:var(--cal-3); }
+.cx-campo{ position:relative; padding:10px 14px 14px; }
+.cx-campo input{ width:100%; background:none; border:0; outline:none; color:var(--cal);
+  font-family:inherit; font-size:16px; font-weight:500; line-height:1.5; padding:0;
+  caret-color:var(--tinta-brasa); }
+.cx-campo input::placeholder{ color:var(--cal-4); }
+.cx-barra{ display:flex; align-items:center; gap:12px; padding:10px 14px;
+  border-top:1px solid oklch(.97 .006 60 / .08); }
+.cx-dica{ font-size:11.5px; font-weight:500; color:var(--cal-3); }
+.cx-salvar{ margin-left:auto; font-size:12px; font-weight:800; letter-spacing:.01em;
+  color:var(--breu); background:var(--tinta-brasa); border-radius:var(--r-pilula);
+  padding:6px 14px; }
+/* o aviso do produto: sobe do canto da bolinha, some sozinho */
+.aviso{ position:absolute; right:2%; bottom:16%; z-index:4; width:min(64%,340px);
+  display:flex; align-items:flex-start; gap:10px;
+  background:oklch(.15 .012 34 / .97); border-radius:10px;
+  border:1px solid oklch(.97 .006 60 / .12); padding:11px 13px;
+  box-shadow:0 12px 34px -10px oklch(.04 0 0 / .85);
+  opacity:0; transform:translateY(12px); pointer-events:none;
+  transition:opacity .3s var(--chegada), transform .5s var(--mola); }
+.aviso.some{ opacity:1; transform:none; }
+.aviso svg{ width:16px; height:16px; flex:none; color:var(--tinta-brasa); margin-top:2px; }
+.aviso b{ display:block; font-size:12.5px; font-weight:750; color:var(--cal); }
+.aviso span{ display:block; font-size:12px; font-weight:500; color:var(--cal-2);
+  line-height:1.45; max-height:3em; overflow:hidden; }
+/* o convite: a unica frase da pagina que pede uma acao AGORA */
+.convite{ display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-top:var(--e4);
+  font-size:13.5px; font-weight:600; color:var(--cal-2); }
+.convite kbd{ font-family:inherit; display:inline-flex; align-items:center; justify-content:center;
+  min-width:26px; height:24px; padding:0 7px; border-radius:5px; background:var(--carvao-2);
+  border:1px solid var(--borda-forte); color:var(--cal); font-size:11.5px; font-weight:700;
+  box-shadow:0 1px 0 0 oklch(.97 .006 60 / .10) inset; }
+.convite .ou{ color:var(--cal-3); font-weight:500; }
+@media (hover:hover) and (pointer:fine){ .orbe-palco{ cursor:pointer; } }
+
+/* ============================================================
+   SECAO 2 - a faisca que apaga
+   ============================================================ */
+.reconhecimento{ text-align:center; }
+.reconhecimento .env{ display:flex; flex-direction:column; align-items:center; }
+.reconhecimento p{ margin-inline:auto; text-align:center; max-width:48ch; }
+/* A versao anterior era uma bola laranja que perdia opacidade: lia como
+   "gradiente redondo", nao como faisca. Agora sao DUAS coisas com papeis
+   distintos, e e a diferenca entre elas que conta a frase da secao:
+     .vazio - o contorno do lugar. Nunca apaga.
+     .viva  - a luz. Apaga E ENCOLHE conforme voce rola.
+   No fim da secao sobra o contorno sem luz dentro: "a ideia nao foi embora,
+   ela nunca chegou a entrar" desenhado, sem uma linha de copy a mais. */
+.faisca{ position:relative; width:128px; aspect-ratio:1; margin:var(--e7) auto var(--e8); }
+.faisca .vazio{ position:absolute; inset:0; border-radius:50%;
+  border:1px solid oklch(.62 .014 40 / .34); }
+/* o anel de dentro so aparece quando a luz ja foi: e o rastro frio */
+.faisca .vazio::after{ content:''; position:absolute; inset:26%; border-radius:50%;
+  border:1px dashed oklch(.62 .014 40 / .22); }
+.faisca .viva{ position:absolute; inset:0; border-radius:50%; overflow:hidden;
+  transform-origin:50% 62%;
+  animation:apaga linear both; animation-timeline:view(); animation-range:cover 20% cover 88%; }
+.faisca .brasa{ inset:0; border-radius:50%; }
+@keyframes apaga{ from{ opacity:1; transform:scale(1) } to{ opacity:.07; transform:scale(.62) } }
+@supports not (animation-timeline: view()){
+  .faisca .viva{ animation:none; opacity:1; transform:none;
+    transition:opacity 1.4s var(--chegada), transform 1.4s var(--chegada); }
+  .faisca.esfriou .viva{ opacity:.07; transform:scale(.62); }
+}
+
+/* ============================================================
+   SECAO 3 - APAGAO. Zero brasa.
+   ============================================================ */
+.apagao{ background:var(--carvao); }
+.apagao::after{ content:''; position:absolute; inset:0; pointer-events:none;
+  opacity:.035; mix-blend-mode:overlay; background-image:var(--grao); }
+.apagao .env{ position:relative; z-index:1; }
+
+/* A tabela era so texto dentro de linhas: honesta e completamente sem desenho.
+   O tratamento NAO pode ser luz - esta secao e um dos dois apagoes, e a
+   ausencia de brasa aqui e o argumento. Entao a elevacao e ESTRUTURAL: a ultima
+   coluna, que e a resposta do Dott, vira uma FAIXA continua descendo a tabela
+   inteira, um degrau de superficie acima do fundo e separada por um fio de 1px.
+   O olho passa a ler "deste lado as outras ferramentas, deste lado nos" antes
+   de ler uma palavra - que e exatamente o trabalho que a secao tem que fazer. */
+.tabela{ width:100%; border-collapse:collapse; margin-top:var(--e7); text-align:left; }
+.tabela th{ font-size:11.5px; font-weight:750; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--cal-3); padding:0 var(--e5) var(--e3) 0; border-bottom:1px solid var(--borda-forte);
+  vertical-align:bottom; }
+.tabela td{ padding:var(--e5) var(--e5) var(--e5) 0; border-bottom:1px solid var(--borda);
+  vertical-align:top; color:var(--cal-2); font-size:16px; line-height:1.55; }
+.tabela td:first-child{ color:var(--cal); font-weight:800; font-size:16px; width:15%; }
+.tabela td:nth-child(2){ width:19%; }
+.tabela td:nth-child(3){ width:32%; }
+.tabela tr:last-child td{ border-bottom:0; }
+
+/* a faixa do Dott: superficie um degrau acima, fio de 1px na entrada, respiro
+   proprio. --cal sobre --carvao-2 mede 15,9:1. */
+.tabela th:last-child, .tabela td:last-child{
+  background:var(--carvao-2); border-left:1px solid var(--borda-forte);
+  padding-inline:var(--e5); }
+.tabela th:last-child{ color:var(--cal-2); padding-top:var(--e4); border-radius:6px 6px 0 0; }
+.tabela td:last-child{ color:var(--cal); }
+.tabela tr:last-child td:last-child{ border-radius:0 0 6px 6px; padding-bottom:var(--e6); }
+.rodape-tabela{ margin-top:var(--e5); }
+
+/* ============================================================
+   SECAO 4 - a brasa como OBJETO. Tres quadros na ordem travada.
+   ============================================================ */
+.teclas{ display:flex; align-items:center; gap:8px; margin:var(--e6) 0 0; flex-wrap:wrap; }
+.tecla{ display:inline-flex; align-items:center; justify-content:center; min-width:44px; height:38px;
+  padding:0 12px; border-radius:7px; background:var(--carvao-2); color:var(--cal);
+  border:1px solid var(--borda-forte); font-size:13.5px; font-weight:700;
+  box-shadow:0 1px 0 0 oklch(.97 .006 60 / .10) inset, 0 2px 5px oklch(.04 0 0 / .5); }
+.tecla.acesa{ border-color:var(--tinta-brasa); color:var(--tinta-brasa); }
+/* --cal-4 mede 3,74:1 sobre --breu e a propria direcao de arte so o autoriza
+   em NAO-TEXTO ou texto >=24px. Aqui ele estava pintando o "+" de 16px entre as
+   teclas. --cal-3 da 5,65:1 (AA) e mantem o "+" discreto. */
+.mais{ color:var(--cal-3); font-weight:700; }
+
+/* A secao se chama "aquela bolinha no canto da tela" e na versao anterior nao
+   tinha bolinha nenhuma nela: seis paragrafos de corpo sobre preto com a metade
+   direita do viewport vazia. Agora a coluna da direita e a propria bolinha, no
+   canto que a copy descreve, presa na rolagem enquanto voce le. */
+.captura-grade{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,420px);
+  gap:clamp(32px,5vw,88px); align-items:start; }
+.captura-cena{ position:sticky; top:calc(50vh - 190px); }
+.canto{ position:relative; width:100%; aspect-ratio:1.12/1; }
+/* o canto da tela, desenhado com duas linhas que se apagam ao se afastar do
+   vertice - a moldura implicita de um monitor que a pagina nao precisa desenhar */
+.canto .aresta{ position:absolute; display:block;
+  background:linear-gradient(to var(--dir), transparent, var(--fuligem)); }
+.canto .aresta.b{ --dir:right; left:14%; right:0; bottom:0; height:1px; }
+.canto .aresta.d{ --dir:bottom; top:14%; bottom:0; right:0; width:1px; }
+.canto .orbe-palco{ position:absolute; right:9%; bottom:11%; width:86px; }
+.canto .halo{ right:-14%; bottom:-16%; width:64%; aspect-ratio:1; z-index:0; --op:.8;
+  -webkit-mask-image:radial-gradient(closest-side,#000 12%,transparent 68%);
+          mask-image:radial-gradient(closest-side,#000 12%,transparent 68%); }
+.canto .dica{ position:absolute; left:0; bottom:11%; max-width:19ch;
+  color:var(--cal-3); font-size:13.5px; font-weight:500; line-height:1.5; }
+
+.quadros{ display:grid; grid-template-columns:repeat(3,1fr); gap:var(--e6); margin-top:var(--e8); }
+.quadro{ margin:0; }
+/* O "morf" real do produto (460ms, --morf) no lugar do crossfade de opacidade
+   que estava aqui: o quadro ativo cresce e satura, os outros recuam por
+   DESSATURACAO - a mesma regra da janela de tras do hero, nunca blur. */
+.quadro .moldura{ position:relative; aspect-ratio:1; overflow:hidden; border-radius:var(--r-janela);
+  background:var(--breu); border:1px solid oklch(.97 .006 60 / .07);
+  box-shadow:0 1px 0 0 oklch(.97 .006 60 / .10) inset,
+             0 2px 6px oklch(.04 0 0 / .55),
+             0 26px 54px -22px oklch(.04 0 0 / .85);
+  opacity:.42; filter:saturate(.55); transform:scale(.965); transform-origin:50% 50%;
+  transition:opacity .46s var(--morf), transform .46s var(--morf), filter .46s var(--morf); }
+.quadro.ativo .moldura, .quadros.parado .moldura{ opacity:1; filter:none; transform:scale(1); }
+.quadro .moldura img{ display:block; width:100%; height:auto; }
+/* o filamento: varre a largura do quadro ativo no ritmo do proprio laco (2600ms).
+   Diz que a demonstracao roda por TEMPO - e a leitura honesta, ja que o produto
+   proibe abrir por hover. */
+.quadro .passo::after{ content:''; position:absolute; left:0; right:0; bottom:-7px; height:1px;
+  background:var(--tinta-brasa); transform:scaleX(0); transform-origin:0 50%; }
+.quadro .passo{ position:relative; }
+.quadro.ativo .passo::after{ animation:varre 2600ms linear 1 both; }
+@keyframes varre{ from{ transform:scaleX(0) } to{ transform:scaleX(1) } }
+/* Quadro Tres: reenquadramento, nao retoque. A foto de 680x680 traz a bolinha
+   no canto inferior direito com o distintivo em 9 - numero de OUTRA rodada da
+   demonstracao, que contradizia o 6/10 do quadro Dois. Aqui a janela visivel
+   e a faixa de origem y -196..484: pega o aviso inteiro (y 337..451) e para
+   ANTES do brilho da bolinha (o primeiro pixel nao-preto dela e y 486, valor 1
+   de 255). O que sobra em cima e preto puro, igual ao topo da propria foto -
+   por isso o fundo aqui e #000 e nao --breu. Nenhum pixel foi pintado. */
+.quadro .moldura--aviso{ background:#000; }
+.quadro .moldura--aviso img{ position:absolute; left:0; top:28.8%; width:100%; }
+.quadro .passo{ display:flex; align-items:center; gap:8px; margin-bottom:var(--e3);
+  font-size:13.5px; font-weight:750; letter-spacing:.04em; color:var(--cal-3); }
+.quadro.ativo .passo, .quadros.parado .passo{ color:var(--tinta-brasa); }
+.quadro .passo i{ width:6px; height:6px; border-radius:50%; background:currentColor; display:block; }
+/* o cursor real, no ponto exato onde ele estava na foto */
+.cursor{ position:absolute; left:74.7%; top:27.3%; width:2px; height:3.9%;
+  background:var(--cal); animation:pisca 1.06s steps(1,end) infinite; }
+@keyframes pisca{ 0%,49%{ opacity:1 } 50%,100%{ opacity:0 } }
+
+/* ============================================================
+   SECAO 5 - a brasa como QUANTIDADE
+   ============================================================ */
+.duas{ display:grid; grid-template-columns:1.15fr .85fr; gap:var(--e9); align-items:start; }
+.duas > figure{ width:min(100%,400px); margin-inline:auto; }
+/* Os dez pontos eram tinta chapada: a secao diz "a brasa vira quantidade" e os
+   pontos nao emitiam nada. Agora cada um acende com halo proprio em screen
+   sobre o preto - mesma familia LUZ do motor, dentro de camada screen, como
+   manda a regra. E no decimo a fileira inteira pulsa uma vez, que e o estado
+   `full` real do app e estava prometido na direcao de arte sem ter sido feito. */
+.medidor{ display:flex; gap:12px; margin:var(--e7) 0 var(--e4); width:max-content; }
+.medidor b{ position:relative; width:14px; height:14px; border-radius:50%;
+            background:var(--carvao-2); transform:scale(.7); opacity:0;
+            transition:opacity .3s var(--chegada), transform .5s var(--mola), background .3s var(--chegada); }
+.medidor b::after{ content:''; position:absolute; inset:-11px; border-radius:50%;
+  pointer-events:none; mix-blend-mode:screen; opacity:0;
+  transition:opacity .55s var(--chegada); }
+.medidor.in b{ opacity:1; transform:scale(1); transition-delay:calc(var(--i) * 70ms); }
+.medidor.in b::after{ opacity:1; transition-delay:calc(var(--i) * 70ms); }
+.medidor.in b:nth-child(-n+7){ background:oklch(.74 .169 45); }
+.medidor.in b:nth-child(-n+7)::after{ background:radial-gradient(closest-side in oklch, oklch(.74 .21 45 / .85), oklch(.54 .20 37 / 0) 74%); }
+.medidor.in b:nth-child(8),
+.medidor.in b:nth-child(9){ background:#d98c3a; }
+.medidor.in b:nth-child(8)::after,
+.medidor.in b:nth-child(9)::after{ background:radial-gradient(closest-side in oklch, oklch(.74 .15 70 / .8), oklch(.54 .14 60 / 0) 74%); }
+.medidor.in b:nth-child(10){ background:#e04040; }
+/* matiz 20 e nao 26: sobre o proprio #e04040 em screen, 26 subia pro rosa e o
+   decimo ponto lia como enfeite em vez de alarme */
+.medidor.in b:nth-child(10)::after{ background:radial-gradient(closest-side in oklch, oklch(.60 .22 20 / .95), oklch(.42 .18 22 / 0) 74%); }
+/* o estado `full`: um pulso so, quando o decimo lugar e ocupado */
+.medidor.cheio{ animation:pulso-cheio 640ms var(--chegada) 1 both; }
+@keyframes pulso-cheio{ 0%{ transform:scale(1) } 26%{ transform:scale(1.055) } 100%{ transform:scale(1) } }
+.medidor-legenda{ color:var(--cal-3); font-size:13.5px; font-weight:500; }
+
+/* recorte de foto: mira uma regiao do PNG a 2x, sem passar de 1x da resolucao nativa */
+.recorte{ position:relative; overflow:hidden; aspect-ratio:var(--ar); margin:0;
+  border-radius:var(--r-janela); background:var(--breu);
+  border:1px solid oklch(.97 .006 60 / .07);
+  box-shadow:0 1px 0 0 oklch(.97 .006 60 / .10) inset,
+             0 2px 6px oklch(.04 0 0 / .55),
+             0 26px 54px -22px oklch(.04 0 0 / .85); }
+.recorte img{ position:absolute; top:0; left:0; max-width:none; width:calc(var(--z) * 100%); height:auto;
+  transform:translate(calc(var(--tx) * -1%), calc(var(--ty) * -1%)); }
+
+/* ============================================================
+   SECAO 6 - LUZ RASANTE POR BAIXO, quatro matizes
+   ============================================================ */
+/* A luz rasante estava tao fraca que os quatro quadrantes liam como quatro
+   cartoes cinzas iguais. O que faz luz rasante ler nao e opacidade, e a ARESTA
+   que ela acende: o filete de 1px na borda de baixo, na cor da propria gaveta,
+   e o que diz "vem de baixo". Sem ele e so um degrade dentro de um cartao. */
+.gavetas{ display:grid; grid-template-columns:repeat(4,1fr); gap:var(--e4); margin-top:var(--e8); }
+.gaveta{ position:relative; background:var(--carvao); overflow:hidden; border-radius:var(--r-cartao);
+  border:1px solid var(--borda); padding:var(--e6) var(--e5) var(--e7); min-height:230px;
+  transition:transform .5s var(--chegada); }
+.gaveta::before{ content:''; position:absolute; inset:0; opacity:.9; pointer-events:none;
+  mix-blend-mode:screen; }
+/* a aresta acesa: 1px na base, no matiz da gaveta */
+.gaveta::after{ content:''; position:absolute; left:12%; right:12%; bottom:0; height:1px;
+  pointer-events:none; }
+.gaveta.p::before{ background:radial-gradient(78% 52% at 50% 108% in oklch, oklch(.55 .20 27 / .62), oklch(.30 .12 27 / 0) 74%); }
+.gaveta.a::before{ background:radial-gradient(78% 52% at 50% 108% in oklch, oklch(.55 .15 252 / .62), oklch(.30 .09 252 / 0) 74%); }
+.gaveta.r::before{ background:radial-gradient(78% 52% at 50% 108% in oklch, oklch(.58 .14 158 / .62), oklch(.32 .09 158 / 0) 74%); }
+.gaveta.ar::before{ background:radial-gradient(78% 52% at 50% 108% in oklch, oklch(.50 .04 285 / .62), oklch(.28 .03 285 / 0) 74%); }
+.gaveta.p::after{ background:linear-gradient(90deg, transparent, var(--para-p), transparent); opacity:.7; }
+.gaveta.a::after{ background:linear-gradient(90deg, transparent, var(--para-a), transparent); opacity:.7; }
+.gaveta.r::after{ background:linear-gradient(90deg, transparent, var(--para-r), transparent); opacity:.7; }
+.gaveta.ar::after{ background:linear-gradient(90deg, transparent, var(--para-ar), transparent); opacity:.7; }
+.gaveta > *{ position:relative; z-index:1; }
+.gaveta .ponto{ width:12px; height:12px; border-radius:50%; display:block; margin-bottom:var(--e4); }
+.gaveta.p .ponto{ background:var(--para-p); }
+.gaveta.a .ponto{ background:var(--para-a); border-radius:2px; }
+.gaveta.r .ponto{ background:var(--para-r); border-radius:2px; transform:rotate(45deg); }
+.gaveta.ar .ponto{ background:var(--para-ar); border-radius:2px; height:4px; width:14px; margin-top:4px; margin-bottom:calc(var(--e4) + 4px); }
+.gaveta h3{ color:var(--cal); }
+.gaveta p{ margin:var(--e2) 0 0; color:var(--cal-2); font-size:16px; }
+
+/* ============================================================
+   SECAO 7 - CONSTELACAO. Croma no minimo, o texto manda.
+
+   Esta manifestacao estava PROMETIDA na direcao de arte e nao existia no
+   arquivo: a secao tinha tres fotos e nenhum desenho. Agora a brasa se quebra
+   em pontos ligados por fios de 1px, como manda o conceito - e obedece o veto
+   herdado do produto: layout radial FIXO por indice, sem fisica, sem nos se
+   reorganizando sozinhos [Constellation.tsx:14]. Os pontos so mudam de
+   opacidade, nunca de posicao.
+   ============================================================ */
+.constelacao{ position:absolute; right:0; top:var(--e8); width:min(46%,520px);
+  aspect-ratio:1.15/1; pointer-events:none; z-index:0; opacity:.9;
+  -webkit-mask-image:radial-gradient(72% 72% at 62% 42%, #000 34%, transparent 82%);
+          mask-image:radial-gradient(72% 72% at 62% 42%, #000 34%, transparent 82%); }
+.constelacao svg{ width:100%; height:100%; display:block; }
+/* o desenho fica ATRAS do texto da secao, sempre */
+.sec-constelacao .env > :not(.constelacao){ position:relative; z-index:1; }
+.constelacao .fio{ stroke:oklch(.62 .014 40 / .30); stroke-width:1; fill:none; }
+.constelacao .no{ fill:var(--cal-4); }
+/* tres nos quentes so - a assinatura da brasa em croma minimo, como pedido */
+.constelacao .no.aceso{ fill:var(--tinta-brasa); }
+.constelacao .no{ animation:cintila 7.4s ease-in-out infinite; }
+@keyframes cintila{ 0%,100%{ opacity:.42 } 50%{ opacity:1 } }
+
+.trio{ position:relative; z-index:1; display:grid; grid-template-columns:1.7fr .9fr;
+       gap:var(--e6) var(--e7); margin-top:var(--e8); align-items:center; }
+.trio .larga{ grid-column:1 / -1; }
+/* a Constelacao entra pequena: com muitas notas os rotulos se sobrepoem no proprio
+   produto, entao ela vale aqui como desenho das ligacoes, nao como mapa de leitura. */
+.trio .miuda{ width:min(100%,320px); margin-inline:auto; }
+
+/* ============================================================
+   SECAO 8 - a brasa CONTIDA. A luz para na borda da maquina.
+   ============================================================ */
+/* A versao anterior era um retangulo arredondado cheio de laranja - exatamente
+   o "cartao com gradiente" que a propria direcao de arte vetou, com um pe de
+   10px que ninguem via. "Conter" so significa alguma coisa se o continente for
+   reconhecivel: agora ha CHASSI (a carcaca), VIDRO (a tela, embutida, onde a
+   luz mora) e um SUPORTE com pescoco e base. A luz encosta no vidro e para. */
+.perimetro{ position:relative; width:min(100%,660px); margin:0 auto; padding:15% 12%; }
+.perimetro .fora{ position:absolute; inset:0; border-radius:50%;
+                  border:1px dashed oklch(.62 .014 40 / .55); }
+/* as marcas do perimetro: quatro tracos curtos nos eixos. Sem eles o circulo
+   pontilhado le como sobra de layout, e nao como fronteira. */
+.perimetro .fora::before,.perimetro .fora::after{ content:''; position:absolute;
+  background:oklch(.62 .014 40 / .55); }
+.perimetro .fora::before{ left:-5px; top:50%; width:11px; height:1px; }
+.perimetro .fora::after{ right:-5px; top:50%; width:11px; height:1px; }
+.perimetro .rotulo-fora{ position:absolute; left:50%; top:-9px; transform:translateX(-50%);
+  background:var(--breu); padding:0 14px; font-size:11.5px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--cal-3); font-weight:700; white-space:nowrap; }
+
+.perimetro .maquina{ position:relative; aspect-ratio:16/10.6; border-radius:var(--r-tela);
+  padding:10px 10px 20px; background:linear-gradient(180deg, oklch(.21 .010 34), oklch(.14 .008 34));
+  box-shadow:0 1px 0 0 oklch(.97 .006 60 / .14) inset,
+             0 0 0 1px oklch(.97 .006 60 / .10),
+             0 30px 60px -26px oklch(.04 0 0 / .9); }
+/* o vidro: e AQUI que a luz mora, e o corte na borda dele e o argumento */
+.perimetro .vidro{ position:relative; height:100%; border-radius:5px; overflow:hidden;
+  isolation:isolate; background:var(--breu);
+  box-shadow:0 0 0 1px oklch(.04 0 0 / .9) inset; }
+.perimetro .vidro .brasa{ left:50%; bottom:-46%; width:132%; aspect-ratio:1.25/1;
+                          transform:translateX(-50%); --op:1; }
+/* o suporte: pescoco + base. Um pe de 10px nao le como monitor.
+   display:block obrigatorio - sao <span>, e em inline nem largura nem altura
+   valem (foi assim que o pe anterior sumia da captura sem ninguem notar). */
+.perimetro .pescoco{ display:block; width:9%; height:22px; margin:0 auto;
+  background:linear-gradient(90deg, oklch(.15 .010 34), oklch(.27 .012 34), oklch(.15 .010 34)); }
+.perimetro .base{ display:block; width:27%; height:8px; margin:0 auto; border-radius:0 0 5px 5px;
+  background:linear-gradient(180deg, oklch(.29 .012 34), oklch(.15 .010 34));
+  box-shadow:0 1px 0 0 oklch(.97 .006 60 / .10) inset; }
+
+.contador{ margin-top:var(--e8); text-align:center; }
+.contador p{ max-width:none; margin-inline:auto; }
+/* o argumento em numero: o zero e o maior glifo da pagina, na tinta da brasa.
+   Nao e enfeite - e o unico dado ao vivo que a pagina tem, e ele nunca muda. */
+.contador .valor{ font-size:clamp(44px,7vw,96px); font-weight:850; letter-spacing:-.045em;
+  line-height:1.02; color:var(--cal); }
+.contador .valor #bytes{ color:var(--tinta-brasa); }
+.contador .desde{ color:var(--cal-3); font-size:13.5px; font-weight:500; margin-top:var(--e2); }
+.contador .obs{ color:var(--cal-3); font-size:13.5px; font-weight:500; margin-top:var(--e3); }
+
+/* Eram quatro cartoes iguais com borda - o grid de cartoezinhos que denuncia
+   pagina generica. Viram um LIVRO-RAZAO: quatro linhas separadas por fio,
+   titulo a esquerda como carimbo, explicacao correndo ao lado. */
+.selos{ display:block; margin-top:var(--e8); max-width:70ch; }
+.selos div{ display:grid; grid-template-columns:minmax(150px,220px) 1fr;
+  gap:var(--e2) var(--e6); align-items:baseline;
+  border:0; border-top:1px solid var(--borda); border-radius:0;
+  padding:var(--e5) 0; background:none; }
+.selos div:last-child{ border-bottom:1px solid var(--borda); }
+.selos h3{ font-size:16px; font-weight:800; letter-spacing:.01em; }
+.selos p{ margin:0; color:var(--cal-2); font-size:16px; line-height:1.5; }
+@media (max-width:600px){ .selos div{ grid-template-columns:1fr; } }
+
+/* ============================================================
+   SECAO 9 - APAGAO 2. A secao mais escura da pagina.
+   ============================================================ */
+.limites{ list-style:none; margin:var(--e8) 0 0; padding:0; max-width:70ch; }
+.limites li{ padding:var(--e6) 0; border-top:1px solid var(--borda); }
+.limites li:last-child{ border-bottom:1px solid var(--borda); }
+.limites strong{ display:block; font-size:var(--t-h3); font-weight:750; line-height:1.15;
+  letter-spacing:-.02em; color:var(--cal); margin-bottom:var(--e3); }
+.limites span{ color:var(--cal-2); display:block; max-width:60ch; }
+
+/* ============================================================
+   SECAO 10 - FILAMENTO. Fio de 1px que so acende na pergunta aberta.
+   ============================================================ */
+.perguntas{ margin-top:var(--e8); max-width:76ch; }
+.pergunta{ border-top:1px solid var(--borda); }
+.perguntas .pergunta:last-child{ border-bottom:1px solid var(--borda); }
+.pergunta > button{ display:flex; align-items:center; justify-content:space-between; gap:var(--e5);
+  width:100%; padding:26px 4px 26px var(--e5); background:none; border:0; cursor:pointer;
+  color:var(--cal); font-family:inherit; font-size:var(--t-h3); font-weight:750;
+  letter-spacing:-.02em; line-height:1.2; text-align:left; position:relative; }
+.pergunta > button::before{ content:''; position:absolute; left:0; top:18px; bottom:18px; width:1px;
+  background:var(--fuligem); transform-origin:50% 0;
+  transition:background .25s var(--chegada); }
+.pergunta > button[aria-expanded="true"]::before{ background:var(--tinta-brasa); }
+.pergunta .sinal{ flex:none; width:14px; height:14px; position:relative; }
+.pergunta .sinal::before,.pergunta .sinal::after{ content:''; position:absolute; background:var(--cal-3);
+  left:0; top:6px; width:14px; height:2px; transition:background .2s var(--chegada); }
+.pergunta .sinal::after{ transform:rotate(90deg); transition:transform .3s var(--morf); }
+.pergunta > button[aria-expanded="true"] .sinal::after{ transform:rotate(0deg); }
+.resposta{ padding:0 var(--e5) var(--e6); }
+.resposta p{ color:var(--cal-2); margin:0; max-width:62ch; }
+.resposta[hidden]{ display:none; }
+
+/* ============================================================
+   SECAO 11 - CAMPO. A viewport vira o interior da bolinha.
+   O texto mora no ESCURO e a brasa e o CHAO da bolinha, abaixo dele.
+   O -54vmin da versao anterior punha o nucleo da luz debaixo das duas
+   ultimas linhas: medido no pixel, o fecho dava 2,51:1 no desktop e
+   2,60:1 no celular - reprova AA (minimo 4,50:1) e viola a regra
+   anti-slop 1 ("nenhuma brasa atras de texto corrido"). Empurrar o campo
+   16vmin pra baixo e o unico ajuste que resolve sem apagar a luz.
+   ============================================================ */
+/* O campo era filho da .final, que tem overflow:hidden - entao a luz era cortada
+   por uma linha horizontal dura exatamente na costura com o rodape. O fecho da
+   pagina agora e um bloco so (.fim), a luz pertence a ele e morre dentro do
+   rodape: o circuito fecha DENTRO da brasa, como diz o conceito. */
+.fim{ position:relative; overflow:clip; isolation:isolate; }
+.fim > .campo{ position:absolute; }
+.final{ position:relative; z-index:2; min-height:92vh; display:flex; flex-direction:column;
+        align-items:center; justify-content:flex-start; padding-top:11vh;
+        text-align:center; }
+/* bottom MEDIDO, nao escolhido: com -70vmin o pior pixel sob o .fecho da
+   7,14:1 no desktop (1440x900) e 6,06:1 no celular (375x812), varrendo as
+   4 camadas da brasa em fases independentes. Mexeu aqui, remede. */
+/* -30vmin, e o numero saiu de tres medicoes, nao de gosto. O campo agora e
+   ancorado no bloco .fim (secao 11 + rodape), ~400px mais alto que a secao
+   sozinha, entao o -70vmin antigo afundava o nucleo e o fecho ficava apagado.
+   Subindo demais o problema inverte: a -18vmin a ultima linha media 3,58:1 com
+   --cal-2, que REPROVA para texto normal. A -30vmin ela volta para AA sem que
+   a luz do fecho se perca. Mexeu na altura do rodape ou na secao, REMEDE. */
+.fim .campo{ left:50%; bottom:-30vmin; width:min(190vmin,2200px); aspect-ratio:1.35/1;
+  transform:translateX(-50%); z-index:0;
+  -webkit-mask-image:radial-gradient(64% 58% at 50% 62%, #000 30%, transparent 76%);
+          mask-image:radial-gradient(64% 58% at 50% 62%, #000 30%, transparent 76%); }
+.final .wrap{ position:relative; z-index:2; padding-inline:var(--gut); }
+/* o halo do orbe de fecho: a mesma logica do hero - o objeto e o ponto, o halo
+   e a luz que ele joga. Sem isso o orbe de 78px flutua sem pertencer a cena. */
+.orbe-final .halo{ left:50%; top:50%; width:340%; aspect-ratio:1; z-index:-1;
+  transform:translate(-50%,-50%); --op:.55;
+  -webkit-mask-image:radial-gradient(closest-side,#000 8%,transparent 66%);
+          mask-image:radial-gradient(closest-side,#000 8%,transparent 66%); }
+.final h2{ margin-top:var(--e6); font-size:var(--t-hero); line-height:.95; letter-spacing:-.045em; }
+.final p{ margin-inline:auto; }
+.final .lede{ color:var(--cal); margin-top:var(--e5); max-width:44ch; }
+.final .cta{ justify-content:center; }
+/* --cal-2 sobre o fundo ja escurecido: 8,86:1 (desktop) e 10,13:1 (celular)
+   no pior pixel. --cal-3 continua VETADO aqui - so ele ja reprovava a 2,56:1. */
+.final .apoio{ color:var(--cal-2); }
+/* a ultima linha da pagina: 7,14:1 (desktop) e 6,06:1 (celular), medido */
+.final .fecho{ color:var(--cal-2); margin-top:var(--e6); font-size:13.5px; font-weight:500; }
+.orbe-final{ position:relative; width:78px; margin:0 auto; }
+.orbe-final .orbe{ width:78px; }
+
+/* ============================================================
+   RODAPE
+   ============================================================ */
+/* MEDIDO, e foi um erro meu de meio-caminho: ao deixar o campo pertencer ao
+   bloco de fecho inteiro pra tirar o corte duro na costura, a luz passou a
+   atravessar o texto do rodape - o "um produto Studio Farina" mediu 2,01:1
+   contra rgb(247,152,75). Reprova em qualquer tinta e viola a regra anti-slop 1.
+   O rodape volta a ser opaco; a RAMPA de 150px acima dele e o que mata a
+   costura sem apagar a luz. Ganha-se as duas coisas. */
+footer{ position:relative; z-index:2; background:var(--breu);
+        padding-block:var(--e8) var(--e9); }
+footer::before{ content:''; position:absolute; left:0; right:0; top:-150px; height:150px;
+  pointer-events:none; background:linear-gradient(180deg, transparent, var(--breu)); }
+footer .marca-rod{ display:flex; align-items:center; gap:10px; font-size:20px; font-weight:850;
+  letter-spacing:-.03em; color:var(--cal); }
+footer .marca-rod svg{ width:22px; height:22px; color:var(--tinta-brasa); }
+footer p{ color:var(--cal-2); margin:var(--e4) 0 0; max-width:46ch; }
+footer .meta{ color:var(--cal-3); font-size:13.5px; font-weight:500; margin-top:var(--e5); }
+footer .assina{ color:var(--cal-3); font-size:13.5px; font-weight:500; margin-top:var(--e6); }
+footer .assina b{ color:var(--cal-2); }
+
+/* ============================================================
+   REVELACAO AO ROLAR - uma coisa por secao, uma vez so
+   ============================================================ */
+.reveal{ opacity:0; transform:translateY(24px);
+  transition:opacity .7s var(--chegada), transform .7s var(--chegada); }
+.reveal.in{ opacity:1; transform:none; }
+/* serie de irmaos entra escalonada (60ms), nunca tudo de uma vez. Teto de 4,
+   que e o tamanho das duas series que existem na pagina. */
+.gavetas .reveal, .selos .reveal{ transition-delay:0ms; }
+.gavetas .reveal:nth-child(2), .selos .reveal:nth-child(2){ transition-delay:60ms; }
+.gavetas .reveal:nth-child(3), .selos .reveal:nth-child(3){ transition-delay:120ms; }
+.gavetas .reveal:nth-child(4), .selos .reveal:nth-child(4){ transition-delay:180ms; }
+
+/* ============================================================
+   RESPONSIVO - o arco da brasa sobrevive inteiro no celular
+   ============================================================ */
+@media (max-width:1099px){
+  .duas{ grid-template-columns:1fr; gap:var(--e7); }
+  .gavetas{ grid-template-columns:repeat(2,1fr); }
+  .selos{ grid-template-columns:repeat(2,1fr); }
+  /* a abertura volta a ser uma coluna, mas a luz NAO fica pra baixo da dobra:
+     a aurora sobe e a cena encosta no texto.
+     padding-right VOLTA: no desktop ele e zero pra cena avancar pra fora do
+     container, e sem esta linha o texto do celular encostava na borda direita
+     da tela (medido a 390px: o H1 terminava em x=390 exato). */
+  .hero-grade{ grid-template-columns:1fr; gap:var(--e7); max-width:var(--maxw);
+               padding-right:var(--gut); }
+  .hero h1{ font-size:clamp(38px,6.4vw,62px); max-width:17ch; }
+  .hero .lede, .hero .corpo{ max-width:56ch; }
+  /* left:auto OBRIGATORIO: a regra base agora ancora pela esquerda; sem zerar,
+     os dois lados valem juntos e a aurora estica em vez de se mover. */
+  .hero .aurora, .hero .aurora-gl{ left:auto; right:-34%; top:-10%; width:min(112vw,1040px); }
+  .hero .aurora{ --op:.78; }
+  .mesa{ margin-top:var(--e5); }
+  .hero-cena{ margin-right:0; }
+  /* a bolinha da secao 4 deixa de ser coluna e vira uma faixa curta acima dos
+     tres quadros - continua presente, sem roubar a largura do texto */
+  .captura-grade{ grid-template-columns:1fr; gap:var(--e7); }
+  .captura-cena{ position:static; }
+  .canto{ width:min(100%,420px); margin-left:auto; aspect-ratio:1.5/1; }
+  .constelacao{ width:min(56%,420px); }
+}
+@media (max-width:759px){
+  :root{ --gut:20px; --maxw-texto:none; }
+  .sec{ padding-block:var(--e9); }
+  .mesa{ margin-top:var(--e7); }
+  /* No celular nao existe "metade vazia": toda faixa horizontal tem texto.
+     Entao a brasa sobe para o CANTO, com o nucleo acima da primeira linha e
+     fora do quadro - o que aparece e a queda dela, nao o campo. O selo passa a
+     caber em UMA linha (media e espacamento menores), o que o tira de dentro
+     da luz. Os dois pares foram medidos no pixel a 390px. */
+  .hero{ padding-top:clamp(56px,9vh,84px); }
+  .hero .aurora, .hero .aurora-gl{ left:auto; right:-38%; top:-30%; width:min(128vw,560px); }
+  .hero .aurora{ --op:.85; }
+  .selo{ font-size:13.5px; padding:6px 12px; }
+  .janela--tras{ display:none; }
+  .janela--frente{ right:auto; left:50%; transform:translateX(-50%); top:9%; width:88%;
+                   border-radius:6px; }
+  .orbe-palco{ right:3.4%; bottom:13%; }
+  .quadros{ grid-template-columns:1fr; gap:var(--e6); }
+  .trio{ grid-template-columns:1fr; }
+  .faisca{ width:92px; }
+  .medidor{ display:grid; grid-template-columns:repeat(5,14px); gap:16px; width:max-content; }
+  .perimetro{ padding:10% 7%; }
+  .constelacao{ width:78%; top:auto; bottom:var(--e9); opacity:.55; }
+  .tabela, .tabela tbody, .tabela tr, .tabela td{ display:block; width:100%; }
+  .tabela thead{ position:absolute; left:-9999px; }
+  .tabela tr{ padding:var(--e5) 0; border-bottom:1px solid var(--borda); }
+  .tabela tr:last-child{ border-bottom:0; }
+  .tabela td{ border:0; padding:0 0 var(--e4); }
+  .tabela td:first-child, .tabela td:nth-child(2), .tabela td:nth-child(3){ width:auto; }
+  .tabela td:first-child{ font-size:var(--t-h3); font-weight:750; letter-spacing:-.02em;
+                          padding-bottom:var(--e3); }
+  /* empilhada, a faixa vira um BLOCO destacado no fim de cada comparacao -
+     mesma leitura ("deste lado nos"), sem depender de coluna */
+  .tabela td:last-child{ background:var(--carvao-2); border-left:2px solid var(--tinta-brasa);
+    border-radius:0 6px 6px 0; padding:var(--e4) var(--e5); margin-top:var(--e2); }
+  .tabela tr:last-child td:last-child{ border-radius:0 6px 6px 0; padding-bottom:var(--e4); }
+  .tabela td[data-rot]::before{ content:attr(data-rot); display:block; font-size:11px; font-weight:750;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--cal-3); margin-bottom:4px; }
+  .final{ min-height:88vh; }
+  .final .campo{ --op:.85; }
+  .rolavel{ overflow-x:auto; overscroll-behavior-x:contain; }
+}
+@media (max-width:459px){
+  .gavetas{ grid-template-columns:1fr; }
+  .selos{ grid-template-columns:1fr; }
+}
+
+/* ============================================================
+   MOVIMENTO REDUZIDO - a brasa nao apaga, congela num quadro bonito
+   ============================================================ */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation-duration:.01ms !important; animation-iteration-count:1 !important;
+                        transition-duration:.01ms !important; scroll-behavior:auto !important; }
+  .brasa .l1{ animation:none; transform:scale(1.02); }
+  .brasa .l2{ animation:none; transform:scale(1.00); }
+  .brasa .l3{ animation:none; transform:scale(1.02); }
+  .brasa .l4{ animation:none; transform:scale(1.02); }
+  .orbe .marca{ animation:none; }
+  .selo i{ animation:none; opacity:1; }
+  /* o grao para de andar, mas continua la: a textura e o que impede a luz
+     de virar degrade liso, e ela nao depende de movimento pra existir */
+  .brasa.grande .grao{ animation:none; transform:none; }
+  .faisca .viva{ animation:none; opacity:1; transform:none; }
+  .cursor{ animation:none; opacity:1; }
+  .constelacao .no{ animation:none; opacity:.8; }
+  .quadro.ativo .passo::after{ animation:none; transform:scaleX(1); }
+  .medidor.cheio{ animation:none; }
+  .reveal{ opacity:1; transform:none; transition-delay:0ms !important; }
+  .quadro .moldura{ opacity:1; filter:none; transform:none; }
+}
+</style>
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+<!-- ============================================================
+     SECAO 1 - ABERTURA. Brasa = PONTO + REBOTE.
+     ============================================================ -->
+<section class="hero" id="conteudo">
+  <!-- ATMOSFERA: a luz da brasa em escala de viewport. Vive na metade direita,
+       longe da coluna de texto - contraste da coluna remedido no pixel. -->
+  <span class="brasa grande aurora" aria-hidden="true">
+    <i class="l4"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i>
+    <span class="grao"></span>
+  </span>
+  <!-- a mesma brasa, com o interior deformado por ruido. Se o WebGL nao existir,
+       este elemento nunca acende e o que fica na tela e a versao CSS acima. -->
+  <canvas class="aurora-gl" aria-hidden="true"></canvas>
+
+  <div class="hero-grade">
+   <div class="hero-texto">
+    <span class="selo"><i aria-hidden="true"></i>Beta aberto · de graça · sem cadastro</span>
+    <h1>Anote antes <span class="leve">de decidir onde anotar.</span></h1>
+    <p class="lede">Um programa de Windows que fica num canto da sua tela. A ideia chega, você aperta duas teclas, escreve e volta pro que estava fazendo. Onde ela vai morar você decide depois - com calma, ou nunca.</p>
+    <p class="corpo">Sem conta. Sem cobrança. E ele liga as suas notas sozinho.</p>
+
+    <div class="cta">
+      <!-- caminho do instalador: trocar por a URL definitiva na hora de publicar -->
+      <a class="btn" href="dott-setup.exe" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/>
+        </svg>
+        Baixar na hora, de graça
+      </a>
+      <a class="link2" href="#captura">Ver como funciona</a>
+    </div>
+    <p class="sob-btn num">Windows 10 e 11 · instalador de 3,4 MB · nenhum campo pra preencher</p>
+   </div>
+
+   <div class="hero-cena">
+    <!-- a mesa: o rebote da luz + o monitor + o halo da bolinha -->
+    <div class="mesa">
+      <span class="brasa grande rebote" aria-hidden="true">
+        <i class="l4"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i>
+        <span class="grao"></span>
+      </span>
+
+      <div class="tela">
+        <div class="parede" aria-hidden="true"></div>
+        <div class="parede-arcos" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="parede-grao" aria-hidden="true"></div>
+
+        <div class="janelas">
+          <figure class="janela janela--tras">
+            <img src="img/app-constelacao-cheia.png" alt="" width="1680" height="1050" loading="lazy" decoding="async">
+          </figure>
+          <figure class="janela janela--frente">
+            <img src="img/app-inbox-e-para.png" width="1680" height="1050" loading="eager" decoding="async"
+                 alt="O Dott aberto: a Caixa de Entrada a esquerda, as quatro gavetas do metodo no centro e o painel de tarefas a direita.">
+          </figure>
+        </div>
+
+        <!-- a bolinha viva, em escala real. Badge 6 porque a Caixa da foto esta em 6/10 -->
+        <div class="orbe-palco" id="orbe-hero" title="Abrir a caixa de captura (Ctrl + Shift + Espaço)">
+          <div class="orbe">
+            <span class="brasa" aria-hidden="true">
+              <i class="l4"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><span class="grao"></span>
+            </span>
+            <svg class="marca" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M20.5 9.722A8.8 8.8 0 1 1 15.719 4.024" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="4.4" fill="currentColor"/>
+            </svg>
+          </div>
+          <span class="badge" id="badge-hero">6</span>
+        </div>
+
+        <!-- A DEMONSTRACAO VIVA: a caixa de captura do produto, em DOM.
+             Roda sozinha uma vez; depois e do visitante (atalho real ou
+             clique na bolinha). Nada aqui e video nem imagem. -->
+        <div class="cx" id="cx" role="dialog" aria-label="Caixa de captura do Dott (demonstração)" aria-modal="false">
+          <div class="cx-topo">
+            <span class="cx-tag" id="cx-tag">NOTA</span>
+            <span class="cx-conta num" id="cx-conta">6/10</span>
+          </div>
+          <div class="cx-campo">
+            <input id="cx-input" type="text" maxlength="140" autocomplete="off" spellcheck="false"
+                   placeholder="O que está na sua mente?" aria-label="Escreva a sua nota">
+          </div>
+          <div class="cx-barra">
+            <span class="cx-dica">Enter salva · Esc fecha</span>
+            <span class="cx-salvar">Salvar</span>
+          </div>
+        </div>
+        <div class="aviso" id="aviso" aria-live="polite">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20.5 9.722A8.8 8.8 0 1 1 15.719 4.024" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="4.4" fill="currentColor"/>
+          </svg>
+          <span><b>Guardado no Dott</b><span id="aviso-txt"></span></span>
+        </div>
+
+        <div class="barra" aria-hidden="true">
+          <div class="barra-centro">
+            <span class="inicio"><span></span><span></span><span></span><span></span></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+              <circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4 4" stroke-linecap="round"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+              <path d="M3 6.5h6l2 2.5h10v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+              <path d="M12 2.6 21 7.4v9.2L12 21.4 3 16.6V7.4z" stroke-linejoin="round"/>
+              <path d="M3 7.4 12 12m0 0 9-4.6M12 12v9.4"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+              <rect x="3" y="4" width="18" height="16" rx="1.6"/><path d="M3 9.5h18M9 9.5V20M15 9.5V20"/></svg>
+            <svg class="dott-tb" viewBox="0 0 24 24" fill="none">
+              <path d="M20.5 9.722A8.8 8.8 0 1 1 15.719 4.024" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="4.4" fill="currentColor"/></svg>
+          </div>
+          <div class="barra-canto"><b>08:12</b>07/08/2026</div>
+        </div>
+      </div>
+
+      <!-- o halo da bolinha, DEPOIS da moldura: e ele que faz um objeto de 40px
+           ler como fonte de luz da cena inteira -->
+      <span class="brasa grande halo" aria-hidden="true">
+        <i class="l4"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i>
+        <span class="grao"></span>
+      </span>
+    </div>
+    <p class="legenda">O Dott aberto, com a Caixa de Entrada de uma terça-feira qualquer.</p>
+    <p class="convite">Sinta agora: aperte <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Espaço</kbd>
+      <span class="ou">ou clique na bolinha — a caixa abre aqui mesmo.</span></p>
+   </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECAO 2 - O RECONHECIMENTO. Brasa = FAISCA QUE APAGA.
+     ============================================================ -->
+<section class="sec reconhecimento">
+  <div class="env">
+    <p class="rotulo reveal"><b class="num">01</b> Você já viveu isso</p>
+    <h2 class="reveal">Você não esqueceu a ideia.<br><span class="leve">Você nunca chegou a guardar ela.</span></h2>
+
+    <div class="faisca" aria-hidden="true">
+      <span class="vazio"></span>
+      <span class="viva">
+        <span class="brasa"><i class="l4"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><span class="grao"></span></span>
+      </span>
+    </div>
+
+    <p class="lede">Terça, 17h40, parada no trânsito. Você resolve, de cabeça, o problema que estava travado há três dias. Sente aquele alívio curto de quem destravou. E pensa: chegando eu anoto.</p>
+    <p class="lede">Chegando tem lição de casa, jantar, um áudio de dois minutos e meio.</p>
+    <p class="lede">Às nove da noite você senta na frente do computador e sabe que teve uma ideia boa. Você lembra do alívio. Não lembra da ideia.</p>
+    <p class="lede">Isso não é falta de memória. É que não existia, naquele minuto, um lugar barato o suficiente pra ela caber.</p>
+    <p class="virada">A ideia não foi embora. Ela nunca chegou a entrar.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECAO 3 - POR QUE O RESTO FALHA. APAGAO: zero brasa.
+     ============================================================ -->
+<section class="sec apagao">
+  <div class="env">
+    <p class="rotulo reveal"><b class="num">02</b> Por que nada disso pegou</p>
+    <h2 class="reveal">Não foi falta de disciplina.<br><span class="leve">Foi preço.</span></h2>
+
+    <p class="lede" style="margin-top:var(--e6)">Todo lugar onde você já tentou anotar cobra alguma coisa antes da primeira letra: escolher a pasta, achar o título, decidir a etiqueta, esperar carregar. São quatro decisões para um pensamento de cinco segundos.</p>
+    <p class="lede">Ninguém paga isso. Você fez a conta certa.</p>
+
+    <div class="rolavel">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th scope="col">Onde você anota hoje</th>
+            <th scope="col">No que ele é bom</th>
+            <th scope="col">Onde ele te deixa na mão</th>
+            <th scope="col">O que o Dott faz nessa hora</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Bloco de Notas</td>
+            <td data-rot="No que ele é bom">É o mais rápido que existe. Zero atrito.</td>
+            <td data-rot="Onde ele te deixa na mão">Guarda e nunca mais organiza. Vira um paredão de quatrocentas linhas onde nada é achável, e você para de reler.</td>
+            <td data-rot="O que o Dott faz nessa hora">A mesma velocidade de anotar, mas com um lugar pra onde o item vai depois.</td>
+          </tr>
+          <tr>
+            <td>Notion</td>
+            <td data-rot="No que ele é bom">Promete ser a sua cabeça inteira, e é bonito.</td>
+            <td data-rot="Onde ele te deixa na mão">Cobra administração antes de escrever: qual base, qual propriedade, qual visualização. E precisa de conta e de conexão.</td>
+            <td data-rot="O que o Dott faz nessa hora">Quatro gavetas que já vêm prontas. Não há o que configurar, então não há o que abandonar.</td>
+          </tr>
+          <tr>
+            <td>Mandar mensagem pra você mesma</td>
+            <td data-rot="No que ele é bom">Já está na sua mão, já está aberto.</td>
+            <td data-rot="Onde ele te deixa na mão">O que você mandou desce na rolagem junto com o grupo da escola. Recuperar exige rolar meses.</td>
+            <td data-rot="O que o Dott faz nessa hora">O item cai numa Caixa de Entrada que você é obrigada a esvaziar, num arquivo que é seu.</td>
+          </tr>
+          <tr>
+            <td>Papel</td>
+            <td data-rot="No que ele é bom">Funciona com a mão suja de obra.</td>
+            <td data-rot="Onde ele te deixa na mão">Não é buscável, não vai junto pro computador, e o papel se perde.</td>
+            <td data-rot="O que o Dott faz nessa hora">O Dott não briga com o papel na rua. Ele espera você sentar no computador.</td>
+          </tr>
+          <tr>
+            <td>O histórico de cópia do Windows</td>
+            <td data-rot="No que ele é bom">Pega o que você acabou de copiar.</td>
+            <td data-rot="Onde ele te deixa na mão">Ele some quando o computador reinicia. E ele para no colar: não vira nota, não vira pasta, não vira nada.</td>
+            <td data-rot="O que o Dott faz nessa hora">O Windows guarda até você reiniciar. O Dott guarda até você apagar.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="apoio rodape-tabela">Nenhuma dessas ferramentas é ruim. Elas só não foram feitas pra esse minuto.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECAO 4 - A CAPTURA. Brasa = OBJETO. Tres quadros, ordem travada.
+     ============================================================ -->
+<section class="sec" id="captura">
+  <div class="env">
+    <p class="rotulo reveal"><b class="num">03</b> Guardar</p>
+    <h2 class="reveal">Aquela bolinha no canto da tela.</h2>
+    <p class="lede" style="margin-top:var(--e5)">É a única parte do Dott que continua ligada quando o Dott está fechado.</p>
+
+    <div class="captura-grade">
+     <div class="captura-texto">
+      <p>Você está no meio de um desenho, de uma planilha, de uma conversa. A ideia chega.</p>
+      <p>Aperta <strong>Ctrl + Shift + Espaço</strong>. Uma caixa aparece por cima do que você estava fazendo. Você escreve a frase do jeito que ela saiu da sua cabeça, sem título, sem pasta, sem etiqueta. Aperta Enter.</p>
+      <p>A caixa some. Aparece um aviso curto dizendo o que foi guardado. E você já voltou pro desenho.</p>
+      <p>Se você acabou de copiar alguma coisa, ela já vem escrita na caixa quando você abre - é só dar Enter.</p>
+      <p>Não tem janela pra abrir, programa pra procurar, decisão pra tomar. É por isso que dá pra fazer isso todo dia.</p>
+
+      <div class="teclas" aria-hidden="true">
+        <span class="tecla" data-tecla="0">Ctrl</span><span class="mais">+</span>
+        <span class="tecla" data-tecla="1">Shift</span><span class="mais">+</span>
+        <span class="tecla" data-tecla="2">Espaço</span>
+      </div>
+     </div>
+
+     <!-- a bolinha, no canto que a copy descreve, acompanhando a leitura -->
+     <div class="captura-cena" aria-hidden="true">
+      <div class="canto">
+        <span class="aresta b"></span>
+        <span class="aresta d"></span>
+        <span class="brasa grande halo"><i class="l4"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><span class="grao"></span></span>
+        <div class="orbe-palco">
+          <div class="orbe">
+            <span class="brasa">
+              <i class="l4"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><span class="grao"></span>
+            </span>
+            <svg class="marca" viewBox="0 0 24 24" fill="none">
+              <path d="M20.5 9.722A8.8 8.8 0 1 1 15.719 4.024" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="4.4" fill="currentColor"/>
+            </svg>
+          </div>
+          <span class="badge">6</span>
+        </div>
+        <p class="dica">Ela não pisca, não notifica, não pede nada. Só fica acesa.</p>
+      </div>
+     </div>
+    </div>
+
+    <div class="quadros" id="quadros">
+      <figure class="quadro" data-passo="0">
+        <figcaption class="passo"><i aria-hidden="true"></i>Um</figcaption>
+        <div class="moldura">
+          <img src="img/widget-repouso-preto.png" width="680" height="680" loading="lazy" decoding="async"
+               alt="A bolinha de brasa acesa no canto da tela, com o número seis ao lado indicando seis itens à espera.">
+        </div>
+        <p class="legenda">Ela fica acesa no canto, esperando. Clique pra abrir, arraste pra mudar de lugar.</p>
+      </figure>
+
+      <figure class="quadro" data-passo="1">
+        <figcaption class="passo"><i aria-hidden="true"></i>Dois</figcaption>
+        <div class="moldura">
+          <img src="img/widget-painel-aberto-digitando.png" width="680" height="680" loading="lazy" decoding="async"
+               alt="A caixa de captura aberta, com a frase &quot;aquela luminária de fita que a menina do instagram põe embutida no rodapé&quot; sendo escrita, a etiqueta Nota já detectada e o contador em 6 de 10.">
+          <span class="cursor" aria-hidden="true"></span>
+        </div>
+        <p class="legenda">A caixa abre por cima de tudo. Você escreve e dá Enter.</p>
+      </figure>
+
+      <figure class="quadro" data-passo="2">
+        <figcaption class="passo"><i aria-hidden="true"></i>Três</figcaption>
+        <div class="moldura moldura--aviso">
+          <img src="img/widget-aviso-guardado-no-dott.png" width="680" height="680" loading="lazy" decoding="async"
+               alt="O aviso &quot;Guardado no Dott&quot;, com a etiqueta Nota e o começo do que foi escrito, aparecendo por cima do que estava na tela.">
+        </div>
+        <p class="legenda">Guardado no Dott, e você nem saiu do que estava fazendo. O aviso some sozinho em menos de três segundos - este é de outra ideia, do mesmo dia.</p>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECAO 5 - O QUE ACONTECE DEPOIS. Brasa = QUANTIDADE.
+     ============================================================ -->
+<section class="sec">
+  <div class="env">
+    <p class="rotulo reveal"><b class="num">04</b> Esvaziar</p>
+    <div class="duas">
+      <div>
+        <h2 class="reveal">A Caixa de Entrada para em dez.<br><span class="leve">De propósito.</span></h2>
+
+        <div class="medidor" id="medidor" aria-hidden="true">
+          <b style="--i:0"></b><b style="--i:1"></b><b style="--i:2"></b><b style="--i:3"></b><b style="--i:4"></b>
+          <b style="--i:5"></b><b style="--i:6"></b><b style="--i:7"></b><b style="--i:8"></b><b style="--i:9"></b>
+        </div>
+        <p class="medidor-legenda">Do primeiro ao décimo. No décimo, acabou o espaço.</p>
+
+        <p style="margin-top:var(--e7)">No décimo item, o Dott trava a caixa e não deixa você guardar mais nada até esvaziar.</p>
+        <p>Parece defeito. É o contrário: é a única razão de isso aqui não virar o mesmo paredão de quatrocentas linhas do bloco de notas.</p>
+        <p>Esvaziar leva menos de um minuto. Você arrasta o item pra uma pasta e ele vira uma nota. Ou transforma em tarefa. Ou joga fora, sem cerimônia e sem culpa - metade do que a gente anota existia só pra sair da cabeça.</p>
+        <p>Quando você abre o item, ele já chega com uma pasta sugerida. Você aceita ou escolhe outra.</p>
+        <p class="virada">Você não precisa organizar. Você precisa esvaziar.</p>
+      </div>
+
+      <figure style="margin:0">
+        <div class="recorte" style="--ar:.395; --z:1; --tx:0; --ty:0">
+          <img src="img/app-caixa-de-entrada.png" width="522" height="1320" loading="lazy" decoding="async"
+               alt="A Caixa de Entrada em seis de dez: a ideia da coluna da geladeira com a etiqueta IDEIA, a pergunta pro serralheiro com a etiqueta NOTA e um endereco de site com a etiqueta URL.">
+        </div>
+        <figcaption class="legenda">Seis dos dez lugares ocupados. O primeiro item, a ideia da coluna da geladeira, entrou com a etiqueta <strong>IDEIA</strong> - quem colocou foi o próprio Dott, olhando o formato do texto.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECAO 6 - AS QUATRO GAVETAS. LUZ RASANTE POR BAIXO.
+     ============================================================ -->
+<section class="sec">
+  <div class="env">
+    <p class="rotulo reveal"><b class="num">05</b> Onde as coisas vão</p>
+    <h2 class="reveal">Quatro gavetas. Uma pergunta cada vez.</h2>
+    <p class="lede" style="margin-top:var(--e5)">Elas já vêm montadas. Você não precisa aprender método nenhum pra usar o Dott.</p>
+
+    <p>Toda coisa que você anota cabe numa destas quatro. A pergunta que decide é sempre a mesma: isso tem fim, ou é pra sempre? Isso é pra agora, ou é pra um dia?</p>
+    <p>Não tem nome pra inventar, estrutura pra montar, campo pra configurar. As quatro estão lá desde a primeira vez que você abre o programa. Você só cria as pastas dentro delas - e as pastas você já sabe quais são, porque são as suas obras, as suas contas, os seus fornecedores.</p>
+
+    <div class="gavetas">
+      <div class="gaveta p reveal"><span class="ponto" aria-hidden="true"></span><h3>Projetos</h3><p>O que você quer ver concluído.</p></div>
+      <div class="gaveta a reveal"><span class="ponto" aria-hidden="true"></span><h3>Áreas</h3><p>O que você cuida sem prazo.</p></div>
+      <div class="gaveta r reveal"><span class="ponto" aria-hidden="true"></span><h3>Recursos</h3><p>O que você quer guardar pra usar um dia.</p></div>
+      <div class="gaveta ar reveal"><span class="ponto" aria-hidden="true"></span><h3>Arquivo</h3><p>O que já serviu, mas não some.</p></div>
+    </div>
+
+    <figure style="margin:var(--e8) 0 0">
+      <div class="recorte" style="--ar:.955; --z:1; --tx:0; --ty:0">
+        <img src="img/app-quatro-gavetas.png" width="2120" height="2220" loading="lazy" decoding="async"
+             alt="As quatro gavetas preenchidas: em Projetos, Ap Ana Paula - Belvedere, Cozinha Buritis - reforma e Loja Refugio - Savassi; em Areas, Financeiro do escritorio, Helena - escola e Saude; em Recursos, Fornecedores BH e Marcenaria - detalhes que dao certo; em Arquivo, Ap Marcinha - Funcionarios (entregue).">
+      </div>
+      <figcaption class="legenda">As quatro gavetas de uma arquiteta com quatro obras andando ao mesmo tempo. Na foto, a reforma da Cozinha Buritis está em <span class="num">67%</span> concluído, com uma tarefa pendente.</figcaption>
+    </figure>
+    <p class="apoio" style="margin-top:var(--e5)">A reforma do Buritis tem fim. O financeiro do escritório não tem. Pronto, decidido.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECAO 7 - GUARDA PENSAMENTO. Brasa = CONSTELACAO, croma minimo.
+     ============================================================ -->
+<section class="sec sec-constelacao">
+  <div class="env">
+    <!-- a brasa quebrada em pontos ligados por fios de 1px. Layout radial FIXO
+         por indice, igual ao produto: sem fisica, sem no se reorganizando. -->
+    <div class="constelacao" aria-hidden="true">
+      <svg viewBox="0 0 468 392" fill="none">
+        <g>
+          <line class="fio" x1="267" y1="127.5" x2="234" y2="46"/>
+          <line class="fio" x1="267" y1="127.5" x2="299.1" y2="60.9"/>
+          <line class="fio" x1="308.1" y1="179.1" x2="351.3" y2="102.5"/>
+          <line class="fio" x1="308.1" y1="179.1" x2="380.2" y2="162.6"/>
+          <line class="fio" x1="293.4" y1="243.4" x2="380.2" y2="229.4"/>
+          <line class="fio" x1="293.4" y1="243.4" x2="351.3" y2="289.5"/>
+          <line class="fio" x1="234" y1="272" x2="299.1" y2="331.1"/>
+          <line class="fio" x1="234" y1="272" x2="234" y2="346"/>
+          <line class="fio" x1="174.6" y1="243.4" x2="168.9" y2="331.1"/>
+          <line class="fio" x1="174.6" y1="243.4" x2="116.7" y2="289.5"/>
+          <line class="fio" x1="159.9" y1="179.1" x2="87.8" y2="229.4"/>
+          <line class="fio" x1="159.9" y1="179.1" x2="87.8" y2="162.6"/>
+          <line class="fio" x1="201" y1="127.5" x2="116.7" y2="102.5"/>
+          <line class="fio" x1="201" y1="127.5" x2="168.9" y2="60.9"/>
+          <line class="fio" x1="234" y1="46" x2="351.3" y2="289.5"/>
+          <line class="fio" x1="351.3" y1="102.5" x2="116.7" y2="289.5"/>
+          <line class="fio" x1="380.2" y1="162.6" x2="87.8" y2="162.6"/>
+          <line class="fio" x1="299.1" y1="331.1" x2="116.7" y2="102.5"/>
+          <line class="fio" x1="299.1" y1="60.9" x2="168.9" y2="331.1"/>
+          <line class="fio" x1="380.2" y1="229.4" x2="168.9" y2="60.9"/>
+        </g>
+        <g>
+          <circle class="no" cx="234" cy="46" r="4.4" style="animation-delay:0s"/>
+          <circle class="no" cx="299.1" cy="60.9" r="4.4" style="animation-delay:-.82s"/>
+          <circle class="no aceso" cx="351.3" cy="102.5" r="5.2" style="animation-delay:-1.64s"/>
+          <circle class="no" cx="380.2" cy="162.6" r="4.4" style="animation-delay:-2.46s"/>
+          <circle class="no" cx="380.2" cy="229.4" r="4.4" style="animation-delay:-3.28s"/>
+          <circle class="no" cx="351.3" cy="289.5" r="4.4" style="animation-delay:-4.1s"/>
+          <circle class="no" cx="299.1" cy="331.1" r="4.4" style="animation-delay:-4.92s"/>
+          <circle class="no" cx="234" cy="346" r="4.4" style="animation-delay:-5.74s"/>
+          <circle class="no" cx="168.9" cy="331.1" r="4.4" style="animation-delay:-6.56s"/>
+          <circle class="no aceso" cx="116.7" cy="289.5" r="5.2" style="animation-delay:0s"/>
+          <circle class="no" cx="87.8" cy="229.4" r="4.4" style="animation-delay:-.82s"/>
+          <circle class="no" cx="87.8" cy="162.6" r="4.4" style="animation-delay:-1.64s"/>
+          <circle class="no" cx="116.7" cy="102.5" r="4.4" style="animation-delay:-2.46s"/>
+          <circle class="no" cx="168.9" cy="60.9" r="4.4" style="animation-delay:-3.28s"/>
+          <circle class="no" cx="267" cy="127.5" r="3.2" style="animation-delay:-4.1s"/>
+          <circle class="no" cx="308.1" cy="179.1" r="3.2" style="animation-delay:-4.92s"/>
+          <circle class="no" cx="293.4" cy="243.4" r="3.2" style="animation-delay:-5.74s"/>
+          <circle class="no aceso" cx="234" cy="272" r="5.2" style="animation-delay:-6.56s"/>
+          <circle class="no" cx="174.6" cy="243.4" r="3.2" style="animation-delay:0s"/>
+          <circle class="no" cx="159.9" cy="179.1" r="3.2" style="animation-delay:-.82s"/>
+          <circle class="no" cx="201" cy="127.5" r="3.2" style="animation-delay:-1.64s"/>
+        </g>
+      </svg>
+    </div>
+
+    <p class="rotulo reveal"><b class="num">06</b> Guardar de verdade</p>
+    <h2 class="reveal">Cabe coisa séria aqui dentro.</h2>
+
+    <p class="lede" style="margin-top:var(--e6)">Nem tudo que você precisa guardar tem tamanho de recado.</p>
+    <p>"A cliente odeia branco. Falou três vezes. Não é implicância com cor clara, é com hospital - o pai ficou internado seis meses." Isso não cabe numa lista de tarefas, não cabe numa planilha, e se você esquecer, custa o cliente.</p>
+    <p>No Dott isso é uma nota inteira, com o tamanho que precisar. Você escreve como escreve.</p>
+    <p>E aqui acontece a parte que nenhum caderno faz: <strong>você não liga nada</strong>. O Dott lê o que você escreveu e encontra sozinho as notas que têm a ver umas com as outras. A anotação da reunião acha o orçamento daquele cliente sem que nenhuma das duas cite a outra, porque as duas falam das mesmas coisas.</p>
+    <p>E ele nunca esconde de onde veio a ligação. <strong>Achada</strong> quer dizer que estava escrita no seu texto. <strong>Inferida</strong> quer dizer que ele deduziu por semelhança. Quando não existe parentesco de verdade, a nota fica sozinha mesmo: o Dott prefere ficar quieto a inventar. Isso roda dentro do seu computador, em milésimos de segundo, sem internet e sem inteligência artificial nenhuma.</p>
+    <p>Pra achar qualquer coisa depois, <strong>Ctrl + K</strong> e o começo da palavra.</p>
+
+    <div class="trio">
+      <figure class="larga" style="margin:0">
+        <!-- Imagem inteira, sem recorte: ela ja foi cortada no arquivo. O assunto
+             da figura e o rodape da nota, onde cada conexao diz de onde veio. -->
+        <div class="recorte" style="--ar:4.325; --z:1; --tx:0; --ty:0">
+          <img src="img/app-conexoes-da-nota.png" width="1090" height="252" loading="lazy" decoding="async"
+               alt="O rodape de uma nota sobre a cozinha do Buritis: tres notas conectadas automaticamente, cada uma com o selo achada e a frase que explica a ligacao.">
+        </div>
+        <figcaption class="legenda">O pé de cada nota. Você não escreveu nenhuma dessas ligações: <strong>o Dott achou, e disse por quê.</strong></figcaption>
+      </figure>
+
+      <figure style="margin:0">
+        <div class="recorte" style="--ar:1.271; --z:1; --tx:0; --ty:0">
+          <img src="img/app-busca-fermento.png" width="610" height="480" loading="lazy" decoding="async"
+               alt="A busca aberta com a palavra fermento escrita: aparecem as notas de pao, de cuidar do fermento e outras, com a pasta de cada uma.">
+        </div>
+        <figcaption class="legenda">Ctrl + K acha qualquer nota, pasta ou item da caixa pelo começo da palavra.</figcaption>
+      </figure>
+
+      <figure class="miuda" style="margin:0">
+        <div class="recorte" style="--ar:1; --z:1; --tx:0; --ty:0">
+          <img src="img/app-constelacao-temas.png" width="790" height="790" loading="lazy" decoding="async"
+               alt="A tela de Constelacao: as notas aparecem agrupadas por assunto, cada grupo com sua cor, e as ligacoes entre elas como fios finos.">
+        </div>
+        <figcaption class="legenda">A Constelação. Cada cor é um assunto que ele encontrou sozinho, e cada fio é uma ligação com motivo.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECAO 8 - PRIVACIDADE. Brasa CONTIDA: a luz para na borda da maquina.
+     ============================================================ -->
+<section class="sec">
+  <div class="env">
+    <p class="rotulo reveal"><b class="num">07</b> Onde os seus dados estão</p>
+    <h2 class="reveal">Não prometemos que seus dados ficam aqui.<br><span class="leve">Construímos sem a outra opção.</span></h2>
+
+    <p class="lede" style="margin-top:var(--e6)">Promessa de privacidade é fácil de escrever e impossível de conferir. Então não é promessa.</p>
+    <p>O Dott não tem, dentro dele, nenhum pedaço de programa que saiba conversar com a internet. Não foi desligado: nunca foi colocado. Não existe servidor pra onde mandar, não existe conta pra criar, não existe login pra fazer.</p>
+    <p>Suas notas são arquivos de texto numa pasta do seu computador. Você pode abrir cada uma delas em qualquer editor, hoje ou daqui a dez anos, mesmo que o Dott tenha deixado de existir.</p>
+    <p>E nenhum modelo de inteligência artificial lê o que você escreve, porque não tem nenhum aqui dentro. Quando o Dott percebe que o que você colou é um link, ele está olhando o formato do texto - é regra fixa, escrita à mão por gente, e roda dentro da sua máquina.</p>
+
+    <div class="perimetro reveal" style="margin-top:var(--e8)">
+      <span class="fora" aria-hidden="true"></span>
+      <span class="rotulo-fora">a rede</span>
+      <div class="maquina">
+        <div class="vidro">
+          <span class="brasa grande" aria-hidden="true"><i class="l4"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><span class="grao"></span></span>
+        </div>
+      </div>
+      <span class="pescoco" aria-hidden="true"></span>
+      <span class="base" aria-hidden="true"></span>
+    </div>
+
+    <div class="contador">
+      <p class="valor num" style="margin:0"><span id="bytes">0</span> bytes enviados</p>
+      <p class="desde num" style="margin:0">— há <span id="segundos">0</span>s nesta página</p>
+      <p class="obs" style="margin:0">é assim, o tempo todo, pra sempre</p>
+    </div>
+
+    <div class="selos">
+      <div class="reveal"><h3>Sem nuvem</h3><p>Tudo numa pasta do seu computador.</p></div>
+      <div class="reveal"><h3>Sem conta</h3><p>Baixou, abriu, escreveu. Não tem cadastro.</p></div>
+      <div class="reveal"><h3>Sem modelo de IA</h3><p>Nenhum algoritmo lê suas notas. Não tem algoritmo.</p></div>
+      <div class="reveal"><h3>Sem sincronização</h3><p>Backup manual pra uma pasta sua, quando você mandar.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECAO 9 - O QUE O DOTT NAO FAZ. APAGAO 2: a mais escura da pagina.
+     ============================================================ -->
+<section class="sec apagao">
+  <div class="env">
+    <p class="rotulo reveal"><b class="num">08</b> A letra que não é miúda</p>
+    <h2 class="reveal">Cinco coisas que o Dott não faz.</h2>
+    <p class="lede" style="margin-top:var(--e5)">Melhor você ler aqui do que descobrir depois de instalar.</p>
+
+    <ul class="limites">
+      <li><strong>Não sincroniza entre computadores.</strong><span>O que você escreve no computador do escritório fica no computador do escritório. Não existe um segundo lugar onde isso apareça.</span></li>
+      <li><strong>Não tem versão de celular.</strong><span>A ideia que chegou na rua ainda precisa esperar você sentar.</span></li>
+      <li><strong>Não roda em Mac nem em Linux.</strong><span>Só Windows 10 e 11, e só isso, por enquanto.</span></li>
+      <li><strong>O backup é você que manda fazer.</strong><span>Ele copia tudo pra uma pasta em Documentos, quando você clica. Nada acontece sozinho, e nada sobe pra lugar nenhum.</span></li>
+      <li><strong>O Windows vai desconfiar do instalador.</strong><span>Vai aparecer um aviso de "editor desconhecido", porque a gente ainda não pagou a assinatura digital que faz esse aviso sumir. Clique em "Mais informações" e depois em "Executar assim mesmo".</span></li>
+    </ul>
+    <p class="apoio" style="margin-top:var(--e6)">Se alguma dessas cinco for essencial pra você, este não é o programa. Sem ressentimento.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECAO 10 - PERGUNTAS DIRETAS. Brasa = FILAMENTO de 1px.
+     ============================================================ -->
+<section class="sec">
+  <div class="env">
+    <p class="rotulo reveal"><b class="num">09</b> Perguntas diretas</p>
+    <h2 class="reveal">Sem letra miúda.</h2>
+
+    <div class="perguntas">
+      <div class="pergunta">
+        <button type="button" aria-expanded="true" aria-controls="r1" id="p1">
+          É de graça mesmo? <span class="sinal" aria-hidden="true"></span>
+        </button>
+        <div class="resposta" id="r1" role="region" aria-labelledby="p1">
+          <p>É. Não tem preço, não tem plano, não tem cadastro e não tem cartão. Você baixa o instalador e usa. O Dott é uma ferramenta pessoal, não uma assinatura.</p>
+        </div>
+      </div>
+      <div class="pergunta">
+        <button type="button" aria-expanded="false" aria-controls="r2" id="p2">
+          Preciso de internet pra usar? <span class="sinal" aria-hidden="true"></span>
+        </button>
+        <div class="resposta" id="r2" role="region" aria-labelledby="p2" hidden>
+          <p>Uma vez só, na instalação. O instalador tem 3,4 MB e, se o seu Windows ainda não tiver um componente que o Dott usa pra desenhar a tela, ele baixa esse componente na hora - é rápido e acontece sozinho. Depois disso, nunca mais. Funciona no avião, funciona com o roteador desligado, funciona sozinho.</p>
+        </div>
+      </div>
+      <div class="pergunta">
+        <button type="button" aria-expanded="false" aria-controls="r3" id="p3">
+          O Windows vai bloquear a instalação? <span class="sinal" aria-hidden="true"></span>
+        </button>
+        <div class="resposta" id="r3" role="region" aria-labelledby="p3" hidden>
+          <p>Ele vai avisar "editor desconhecido", porque o instalador ainda não tem assinatura digital. É normal em programa novo e pequeno. Clique em "Mais informações" e depois em "Executar assim mesmo". A instalação não pede senha de administrador e não pede permissão de rede.</p>
+        </div>
+      </div>
+      <div class="pergunta">
+        <button type="button" aria-expanded="false" aria-controls="r4" id="p4">
+          E se um dia eu desinstalar? <span class="sinal" aria-hidden="true"></span>
+        </button>
+        <div class="resposta" id="r4" role="region" aria-labelledby="p4" hidden>
+          <p>Suas notas são arquivos numa pasta do seu computador, não ficam presas dentro do programa. Antes de desinstalar, clique em fazer backup: o Dott copia tudo pra Documentos > Dott Backups, uma pasta que é sua e continua lá depois.</p>
+        </div>
+      </div>
+    </div>
+    <p class="apoio" style="margin-top:var(--e6)">Não tem pegadinha. Se tivesse, estaria escrito aqui.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECAO 11 - ACAO. Brasa = CAMPO. A viewport vira o interior da bolinha.
+     ============================================================ -->
+<div class="fim">
+<!-- o campo pertence ao bloco INTEIRO de fecho (secao 11 + rodape), pra luz
+     morrer sozinha em vez de ser cortada na costura -->
+<span class="brasa grande campo" aria-hidden="true">
+  <i class="l4"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i>
+  <span class="grao"></span>
+</span>
+<section class="final" id="baixar">
+  <div class="wrap">
+    <div class="orbe-final">
+      <span class="brasa grande halo" aria-hidden="true">
+        <i class="l4"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i>
+        <span class="grao"></span>
+      </span>
+      <div class="orbe">
+        <span class="brasa" aria-hidden="true">
+          <i class="l4"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><span class="grao"></span>
+        </span>
+        <svg class="marca" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M20.5 9.722A8.8 8.8 0 1 1 15.719 4.024" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="4.4" fill="currentColor"/>
+        </svg>
+      </div>
+    </div>
+
+    <h2>Esvazie a cabeça hoje.</h2>
+    <p class="lede">Baixe, instale, aperte Ctrl + Shift + Espaço e escreva a primeira coisa que estava te incomodando. Leva menos de um minuto, e não vai ser pedido nada de você.</p>
+
+    <div class="cta">
+      <a class="btn" href="dott-setup.exe" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/>
+        </svg>
+        Baixar na hora, de graça
+      </a>
+    </div>
+    <p class="apoio num" style="margin-top:var(--e4)">Windows 10 e 11 · instalador de 3,4 MB · sem cadastro, sem e-mail, sem cartão</p>
+    <p class="fecho">Beta aberto. Se algo quebrar, quebra na sua máquina e não sai de lá.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="env">
+    <div class="marca-rod">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M20.5 9.722A8.8 8.8 0 1 1 15.719 4.024" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+        <circle cx="12" cy="12" r="4.4" fill="currentColor"/>
+      </svg>
+      Dott
+    </div>
+    <p>Um lugar no seu computador pro que você não pode perder.</p>
+    <p class="meta num">Windows 10 e 11 · beta aberto · suas notas ficam na sua máquina</p>
+    <p class="assina">um produto <b>Studio Farina</b></p>
+  </div>
+</footer>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var parado = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- revelacao: uma vez so, 18% de visibilidade ---------- */
+  var alvos = document.querySelectorAll('.reveal');
+  if (parado || !('IntersectionObserver' in window)) {
+    for (var i=0;i<alvos.length;i++) alvos[i].classList.add('in');
+  } else {
+    var ob = new IntersectionObserver(function(ent){
+      ent.forEach(function(e){
+        if (e.isIntersecting){ e.target.classList.add('in'); ob.unobserve(e.target); }
+      });
+    }, { threshold:.18 });
+    for (var j=0;j<alvos.length;j++) ob.observe(alvos[j]);
+  }
+
+  /* ---------- o medidor: dez brasas acendendo em serie ---------- */
+  var med = document.getElementById('medidor');
+  if (med){
+    if (parado || !('IntersectionObserver' in window)) med.classList.add('in');
+    else {
+      var obM = new IntersectionObserver(function(ent){
+        ent.forEach(function(e){
+          if (e.isIntersecting){
+            e.target.classList.add('in'); obM.unobserve(e.target);
+            /* o estado `full`: um pulso so, quando o decimo ponto termina de
+               acender. 9*70ms de atraso + 550ms de transicao = 1180ms. */
+            setTimeout(function(){ med.classList.add('cheio'); }, 1180);
+          }
+        });
+      }, { threshold:.4 });
+      obM.observe(med);
+    }
+  }
+
+  /* ---------- a faisca que apaga: fallback para quem nao tem view() ---------- */
+  var temTimeline = CSS && CSS.supports && CSS.supports('animation-timeline','view()');
+  var faisca = document.querySelector('.faisca');
+  if (faisca && !temTimeline && !parado && 'IntersectionObserver' in window){
+    var obF = new IntersectionObserver(function(ent){
+      ent.forEach(function(e){ if (e.isIntersecting){ faisca.classList.add('esfriou'); obF.unobserve(e.target); } });
+    }, { threshold:.6 });
+    obF.observe(faisca);
+  }
+
+  /* ---------- a demonstracao do widget: roda POR TEMPO, nunca por hover ---------- */
+  var caixa = document.getElementById('quadros');
+  if (caixa){
+    var quadros = caixa.querySelectorAll('.quadro');
+    var teclas = document.querySelectorAll('.tecla');
+    if (parado){
+      caixa.classList.add('parado');
+      for (var t=0;t<teclas.length;t++) teclas[t].classList.add('acesa');
+    } else {
+      var passo = 0, rodando = false, timer = null;
+      function pinta(){
+        for (var k=0;k<quadros.length;k++) quadros[k].classList.toggle('ativo', k===passo);
+        for (var m=0;m<teclas.length;m++) teclas[m].classList.toggle('acesa', passo===0);
+        passo = (passo+1) % quadros.length;
+      }
+      function liga(){
+        if (rodando) return; rodando = true; passo = 0; pinta();
+        timer = setInterval(pinta, 2600);
+      }
+      function desliga(){ if(!rodando) return; rodando=false; clearInterval(timer); }
+      if ('IntersectionObserver' in window){
+        var obQ = new IntersectionObserver(function(ent){
+          ent.forEach(function(e){ e.isIntersecting ? liga() : desliga(); });
+        }, { threshold:.25 });
+        obQ.observe(caixa);
+      } else { liga(); }
+    }
+  }
+
+  /* ================================================================
+     A DEMONSTRACAO VIVA - a pagina executa o fluxo do produto.
+     1) Sozinha, uma vez: a caixa abre sobre o Windows simulado, uma
+        ideia se escreve, Enter, o aviso sobe, o distintivo conta +1.
+     2) Do visitante, sempre: o MESMO atalho do produto (Ctrl+Shift+
+        Espaco) ou um clique na bolinha abre a caixa de verdade, e o
+        que ele escrever aparece no aviso e soma no distintivo.
+     Regras: por cima de nada que importe (a caixa mora dentro da cena);
+     reduced-motion pula a auto-demonstracao e mantem a interacao;
+     nada do que o visitante digita sai desta pagina - nao ha rede.
+     ================================================================ */
+  (function demoViva(){
+    var cx = document.getElementById('cx');
+    var input = document.getElementById('cx-input');
+    var aviso = document.getElementById('aviso');
+    var avisoTxt = document.getElementById('aviso-txt');
+    var badge = document.getElementById('badge-hero');
+    var conta = document.getElementById('cx-conta');
+    var orbe = document.getElementById('orbe-hero');
+    if (!cx || !input || !aviso || !badge) return;
+
+    var n = 6, aberta = false, autoRodou = false, autoTimers = [];
+    function limpaAuto(){ autoTimers.forEach(clearTimeout); autoTimers = []; }
+    function abre(interativa){
+      cx.classList.add('aberta'); aberta = true;
+      aviso.classList.remove('some');
+      /* o visitante assumiu: a auto-demonstracao nunca mais atropela */
+      if (interativa){ autoRodou = true; input.readOnly = false; input.value = ''; input.focus(); }
+    }
+    function fecha(){ cx.classList.remove('aberta'); aberta = false; input.blur(); }
+    function salva(texto){
+      if (!texto) { fecha(); return; }
+      fecha();
+      avisoTxt.textContent = texto.length > 64 ? texto.slice(0,64) + '…' : texto;
+      aviso.classList.add('some');
+      if (n < 10) n++;
+      conta.textContent = n + '/10';
+      setTimeout(function(){
+        badge.textContent = n;
+        badge.classList.remove('salta');
+        void badge.offsetWidth;
+        badge.classList.add('salta');
+      }, 260);
+      setTimeout(function(){ aviso.classList.remove('some'); }, 3400);
+    }
+
+    /* a auto-demonstracao: so quando a cena esta na tela, so uma vez */
+    var FRASE = 'ligar pro contador amanhã antes das 18h';
+    function autoDemo(){
+      if (autoRodou || parado) return; autoRodou = true;
+      input.readOnly = true;
+      autoTimers.push(setTimeout(function(){ abre(false); }, 900));
+      var t = 1450;
+      FRASE.split('').forEach(function(ch, i){
+        autoTimers.push(setTimeout(function(){
+          input.value = FRASE.slice(0, i + 1);
+        }, t + i * 34));
+      });
+      var fim = t + FRASE.length * 34 + 620;
+      autoTimers.push(setTimeout(function(){ salva(FRASE); input.readOnly = false; }, fim));
+    }
+    var mesa = document.querySelector('.mesa');
+    if (mesa && 'IntersectionObserver' in window && !parado){
+      var obD = new IntersectionObserver(function(ent){
+        ent.forEach(function(e){ if (e.isIntersecting){ autoDemo(); obD.unobserve(e.target); } });
+      }, { threshold:.45 });
+      obD.observe(mesa);
+    }
+
+    /* o atalho REAL do produto, vivo na pagina */
+    document.addEventListener('keydown', function(e){
+      if (e.ctrlKey && e.shiftKey && (e.code === 'Space')){
+        e.preventDefault(); limpaAuto();
+        aberta ? fecha() : abre(true);
+      } else if (e.key === 'Escape' && aberta){ fecha(); }
+    });
+    input.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' && !input.readOnly){ salva(input.value.trim()); }
+    });
+    if (orbe){
+      orbe.addEventListener('click', function(){ limpaAuto(); aberta ? fecha() : abre(true); });
+    }
+  })();
+
+  /* ---------- o contador de bytes: o numero e sempre zero, o tempo anda ---------- */
+  var seg = document.getElementById('segundos');
+  if (seg){
+    var t0 = Date.now();
+    setInterval(function(){
+      seg.textContent = String(Math.floor((Date.now()-t0)/1000));
+    }, 1000);
+  }
+
+  /* ================================================================
+     A BRASA DA ABERTURA EM WebGL - por que ela existe
+
+     O motor de 4 camadas oklch em screen e o corpo da marca e continua
+     sendo a base da pagina inteira: onze manifestacoes, todas em CSS.
+     Mas ele foi desenhado para uma bolinha de 44px, e na abertura ele
+     aparece com 840px. MEDIDO nesta sessao: nessa escala o degrade radial
+     fica perfeitamente liso, e o grao por cima nao resolve - `overlay` e
+     `soft-light` sobre meio-tom sao praticamente nulos, e mesmo a .30 de
+     opacidade a captura ampliada 3x continuou lisa. CSS move uma textura
+     POR CIMA da luz; ele nao consegue deformar a FORMA do proprio
+     radial-gradient. Brasa de verdade tem isofotas tortas e conveccao.
+
+     Entao aqui, e so aqui, o interior da luz e desenhado por um shader:
+     as MESMAS quatro camadas, as MESMAS cores do widget (convertidas de
+     oklch para sRGB nesta sessao), os MESMOS quatro periodos primos entre
+     si, compostas com a MESMA conta do `screen`. A unica coisa que o
+     shader acrescenta e o que o CSS nao alcanca: um domain warp de ruido
+     que entorta a forma e a faz convectar.
+
+     Contratos que isto respeita:
+     - sem three.js, sem CDN, sem arquivo externo. E WebGL cru, o shader
+       mora nesta string. A pagina continua autonoma e offline.
+     - se nao houver WebGL, nada acontece: a brasa em CSS ja esta na tela.
+     - prefers-reduced-motion: nem inicializa.
+     - fora do viewport: para o laco.
+     - resolucao interna a 55% e teto de 32 quadros/s. E luz difusa; nessa
+       escala a diferenca nao aparece e o custo cai por volta de 4x.
+     ================================================================ */
+  (function brasaGL(){
+    var cv = document.querySelector('.aurora-gl');
+    var hero = document.querySelector('.hero');
+    if (!cv || !hero || parado) return;
+
+    var gl = null;
+    try {
+      gl = cv.getContext('webgl', { alpha:false, antialias:false, depth:false,
+                                    stencil:false, powerPreference:'low-power' })
+        || cv.getContext('experimental-webgl');
+    } catch(e){ gl = null; }
+    if (!gl) return;
+
+    var VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+
+    var FS = [
+      'precision mediump float;',
+      'uniform vec2 u_res; uniform float u_t;',
+
+      /* ruido de valor + fbm. 4 oitavas bastam: a luz e difusa. */
+      'float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123); }',
+      'float vnoise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);',
+      '  float a=hash(i), b=hash(i+vec2(1.,0.)), c=hash(i+vec2(0.,1.)), d=hash(i+vec2(1.,1.));',
+      '  return mix(mix(a,b,f.x), mix(c,d,f.x), f.y); }',
+      'float fbm(vec2 p){ float v=0.0, a=0.5;',
+      '  for(int i=0;i<4;i++){ v+=a*vnoise(p); p*=2.03; a*=0.5; } return v; }',
+
+      /* distancia normalizada dentro da elipse da camada, com a escala da
+         respiracao (o mesmo scale dos @keyframes pulso1..4) */
+      'float lobo(vec2 uv, vec2 c, vec2 r, float s){',
+      '  return length((uv-c)/(r*s)); }',
+
+      /* rampa entre duas paradas do gradiente, igual as paradas do CSS */
+      'float rampa(float t, float a, float b){ return 1.0-clamp((t-a)/(b-a),0.0,1.0); }',
+
+      'void main(){',
+      '  vec2 uv = gl_FragCoord.xy / u_res;',
+      '  uv.y = 1.0 - uv.y;',
+
+      /* O DOMAIN WARP - a unica coisa que o CSS nao faz.
+         Duas amostras de fbm deslocam o ponto antes de calcular as camadas,
+         entao as isofotas deixam de ser elipses perfeitas e a luz convecta. */
+      '  float t = u_t;',
+      '  vec2 q = vec2( fbm(uv*2.6 + vec2(0.0, -t*0.028)),',
+      '                 fbm(uv*2.6 + vec2(4.7, 2.1) + vec2(0.0, -t*0.019)) );',
+      '  vec2 w = uv + (q - 0.5) * 0.135;',
+
+      /* as quatro respiracoes, periodos literais do produto */
+      '  float s4 = mix(0.90, 1.14, 0.5-0.5*cos(6.2831853*t/9.3));',
+      '  float s1 = mix(0.94, 1.10, 0.5-0.5*cos(6.2831853*t/6.4));',
+      '  float s2 = mix(1.08, 0.92, 0.5-0.5*cos(6.2831853*t/8.1));',
+      '  float s3 = mix(0.90, 1.14, 0.5-0.5*cos(6.2831853*t/5.1));',
+
+      '  vec3 col = vec3(0.0);',
+      '  float d; vec3 c; float al;',
+
+      /* l4 - o corpo escuro. oklch(.40 .12 34)/.44 -> (.27 .10 30)/.20 -> 0 */
+      '  d = lobo(w, vec2(0.500,0.4867), vec2(0.7467,0.6133), s4);',
+      '  c = mix(vec3(0.482,0.157,0.082), vec3(0.298,0.031,0.012), clamp(d/0.53,0.0,1.0));',
+      '  al = rampa(d, 0.0, 1.0) * 0.44;',
+      '  col = 1.0 - (1.0-col)*(1.0-c*al);',
+
+      /* l1 - o corpo da brasa. oklch(.74 .21 45) -> (.54 .20 37)/.76 -> 0 */
+      '  d = lobo(w, vec2(0.500,0.6867), vec2(0.4933,0.4267), s1);',
+      '  c = mix(vec3(1.000,0.455,0.027), vec3(0.784,0.169,0.000), clamp(d/0.49,0.0,1.0));',
+      '  al = rampa(d, 0.0, 1.0) * mix(1.0, 0.76, clamp(d/0.49,0.0,1.0));',
+      '  col = 1.0 - (1.0-col)*(1.0-c*al);',
+
+      /* l2 - o sangue. oklch(.70 .21 26) -> 0 */
+      '  d = lobo(w, vec2(0.4067,0.640), vec2(0.3867,0.360), s2);',
+      '  c = vec3(1.000,0.353,0.329);',
+      '  al = rampa(d, 0.0, 1.0) * 0.9;',
+      '  col = 1.0 - (1.0-col)*(1.0-c*al);',
+
+      /* l3 - o nucleo. oklch(.97 .05 62) -> (.80 .22 50)/.70 -> 0 */
+      '  d = lobo(w, vec2(0.500,0.6667), vec2(0.2533,0.2133), s3);',
+      '  c = mix(vec3(1.000,0.933,0.831), vec3(1.000,0.533,0.000), clamp(d/0.46,0.0,1.0));',
+      '  al = rampa(d, 0.0, 1.0) * mix(1.0, 0.70, clamp(d/0.46,0.0,1.0));',
+      '  col = 1.0 - (1.0-col)*(1.0-c*al);',
+
+      /* o grao, agora dentro da propria luz e nao numa camada por cima:
+         e aqui que ele finalmente aparece, porque multiplica a luz em vez
+         de tentar um blend de meio-tom */
+      '  float g = vnoise(gl_FragCoord.xy*0.9 + vec2(0.0, t*6.0));',
+      '  col *= 1.0 + (g - 0.5) * 0.115;',
+
+      '  gl_FragColor = vec4(clamp(col,0.0,1.0), 1.0);',
+      '}'
+    ].join('\n');
+
+    function compila(tipo, src){
+      var s = gl.createShader(tipo);
+      gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) return null;
+      return s;
+    }
+    var vs = compila(gl.VERTEX_SHADER, VS), fs = compila(gl.FRAGMENT_SHADER, FS);
+    if (!vs || !fs) return;
+    var pr = gl.createProgram();
+    gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.linkProgram(pr);
+    if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return;
+    gl.useProgram(pr);
+
+    var buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+    var loc = gl.getAttribLocation(pr, 'p');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    var uRes = gl.getUniformLocation(pr, 'u_res');
+    var uT   = gl.getUniformLocation(pr, 'u_t');
+
+    var ESCALA = 0.55, lw = 0, lh = 0;
+    function dimensiona(){
+      var r = cv.getBoundingClientRect();
+      var w = Math.max(2, Math.round(r.width  * ESCALA));
+      var h = Math.max(2, Math.round(r.height * ESCALA));
+      if (w === lw && h === lh) return;
+      lw = w; lh = h; cv.width = w; cv.height = h;
+      gl.viewport(0, 0, w, h); gl.uniform2f(uRes, w, h);
+    }
+    dimensiona();
+
+    var t0 = performance.now(), visivel = true, rodando = false, ultimo = 0;
+    var INTERVALO = 1000 / 32;   /* teto de 32 quadros por segundo */
+
+    function quadro(agora){
+      if (!visivel){ rodando = false; return; }
+      requestAnimationFrame(quadro);
+      if (agora - ultimo < INTERVALO) return;
+      ultimo = agora;
+      dimensiona();
+      gl.uniform1f(uT, (agora - t0) / 1000);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+    function liga(){ if (rodando) return; rodando = true; ultimo = 0; requestAnimationFrame(quadro); }
+
+    if ('IntersectionObserver' in window){
+      new IntersectionObserver(function(ent){
+        ent.forEach(function(e){ visivel = e.isIntersecting; if (visivel) liga(); });
+      }, { threshold:0 }).observe(cv);
+    } else { liga(); }
+
+    liga();
+    /* so agora a pagina troca a brasa CSS pela do shader - se qualquer passo
+       acima tivesse falhado, a troca nunca acontece */
+    hero.classList.add('gl');
+
+    /* contexto perdido (troca de GPU, suspensao do notebook): volta pro CSS */
+    cv.addEventListener('webglcontextlost', function(ev){
+      ev.preventDefault(); visivel = false; rodando = false; hero.classList.remove('gl');
+    });
+
+    window.addEventListener('resize', dimensiona, { passive:true });
+  })();
+
+  /* ---------- perguntas: botao de verdade, aria-expanded de verdade ---------- */
+  var bts = document.querySelectorAll('.pergunta > button');
+  for (var b=0;b<bts.length;b++){
+    bts[b].addEventListener('click', function(){
+      var aberto = this.getAttribute('aria-expanded') === 'true';
+      this.setAttribute('aria-expanded', aberto ? 'false' : 'true');
+      var painel = document.getElementById(this.getAttribute('aria-controls'));
+      if (painel) painel.hidden = aberto;
+    });
+  }
+})();
+</script>
+</body>
+</html>

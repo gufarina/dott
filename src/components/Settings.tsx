@@ -4,6 +4,7 @@ import { useStore } from '../store'
 import { showToast } from './Toast'
 import { backupNow, backupsList, restoreBackup, openBackupsFolder } from '../lib/backupService'
 import { Icon } from './Icon'
+import { waitlistEmail } from '../lib/online'
 import s from './Settings.module.css'
 
 export function Settings({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -43,6 +44,7 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
   }
 
   const replayOnboarding = () => { onClose(); window.dispatchEvent(new Event('dott:replay-onboarding')) }
+  const openOnline = () => { onClose(); window.dispatchEvent(new Event('dott:open-online')) }
 
   return (
     <div className={s.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
@@ -103,11 +105,17 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
                 <Icon name="rever" size={13} /> Rever
               </button>
             </div>
+            <div className={s.row}>
+              <div><div className={s.label}>Dott Online</div><div className={s.hint}>Suas notas em todos os aparelhos. Ainda não está pronto.</div></div>
+              <button className={s.btn} onClick={openOnline}>
+                <Icon name="rever" size={13} /> {waitlistEmail() ? 'Você está na lista' : 'Quero saber'}
+              </button>
+            </div>
             <div className={s.pathRow}>
               <div className={s.label}>Onde seus dados ficam</div>
               <code className={s.path}>{dataPath || '%APPDATA%\\com.studiofarina.dott'}</code>
             </div>
-            <div className={s.foot}>Dott · 100% offline · seus dados nunca saem da máquina</div>
+            <div className={s.foot}>Dott · suas notas são arquivos de texto seus, hoje e daqui a dez anos</div>
           </section>
         </div>
       </div>

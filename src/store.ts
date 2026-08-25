@@ -1,5 +1,7 @@
 import { create } from 'zustand'
-import { extractLinks, extractTags, buildBacklinks, normalizeTitle } from './lib/wiki'
+import { extractTags } from './lib/tags'
+import { SEED_NOTES } from './lib/seedNotes'
+import { buildGraph, type DottGraph } from './lib/graphify'
 import { loadVault, saveNoteToVault, deleteNoteFromVault } from './lib/notesService'
 import { loadInbox, setInbox, addInbox, removeInbox } from './lib/inboxService'
 import { loadFolders, saveFolders } from './lib/foldersService'
@@ -91,10 +93,6 @@ export interface Note {
   glyph?: GlyphId
   /** Capa da nota: url de imagem em attachments. Vive no frontmatter do .md. */
   cover?: string
-  /** Títulos normalizados das notas que ESTA nota aponta via [[link]] */
-  links: string[]
-  /** IDs das notas que apontam PARA esta nota (backlinks) — computado */
-  backlinks: string[]
 }
 
 interface AppState {
@@ -112,8 +110,8 @@ interface AppState {
   tags: Tag[]
   notes: Note[]
 
-  /** Índice invertido: normalizedTitle → [noteId, ...] que têm backlink */
-  backlinkIndex: Record<string, string[]>
+  /** Grafo de conexoes, recalculado sozinho a cada mudanca nas notas. */
+  graph: DottGraph
 
   /** true durante o boot (carregando o vault); controla a tela de loading */
   booting: boolean
@@ -140,7 +138,7 @@ interface AppState {
   createFolder: (categoryId: string, name: string) => void
   /** Define (ou remove, se cover='') a imagem de capa de uma pasta */
   setFolderCover: (categoryId: string, folderId: string, cover: string) => void
-  /** Salva corpo e título, extrai wiki-links, reconstrói backlinks, persiste */
+  /** Salva corpo e título, extrai etiquetas, refaz o grafo, persiste */
   saveNote: (id: string, title: string, body: string, tags?: string[]) => void
   /** Cria nova nota numa pasta */
   createNote: (folderId: string, title: string) => string
@@ -203,8 +201,11 @@ const INITIAL_INBOX: InboxCard[] = [
   { id: 'i4', type: 'TAREFA', content: 'Criar minha primeira pasta no quadrante Projetos', time: '3h' },
 ]
 
-function initBacklinks(notes: Note[]): Record<string, string[]> {
-  return buildBacklinks(notes.map(n => ({ id: n.id, title: n.title, links: n.links })))
+/** Reconstroi o grafo inteiro a partir das notas. Deterministico e local. */
+function graphOf(notes: Note[]): DottGraph {
+  return buildGraph(notes.map(n => ({
+    id: n.id, title: n.title, body: n.body, tags: n.tags, folderId: n.folderId,
+  })))
 }
 
 /** Paleta fixa das tags — a cor sai do nome, entao nao dança entre sessoes. */
@@ -240,39 +241,7 @@ function recountFolders(
   return next
 }
 
-const SEED_NOTES: Note[] = [
-  {
-    id: 'n1', title: 'Bem-vindo ao Dott', date: '10/06/2026', updatedAt: '10/06/2026', img: false, folderId: 'start',
-    body: '# Bem-vindo ao Dott\n\nDott é um segundo cérebro 100% offline. Tudo que você pensa, captura e organiza fica só na sua máquina.\n\n## Como funciona\n\n- **Inbox** (painel esquerdo): capture qualquer coisa sem pensar. Textos, links, ideias, imagens.\n- **PARA** (centro): organize em Projetos, Áreas, Recursos e Arquivo.\n- **Notas**: escreva em markdown. Use `[[ ]]` para conectar notas — veja [[Conecte ideias com wiki-links]].\n- **Widget**: pressione `Ctrl+Shift+Space` em qualquer app para capturar algo rapidinho.\n\nComeçe pela pasta **Comece aqui** e explore as outras notas do tutorial.',
-    tags: ['tutorial', 'inicio'], links: ['conecte ideias com wiki-links'], backlinks: [],
-  },
-  {
-    id: 'n2', title: 'O método PARA', date: '10/06/2026', updatedAt: '10/06/2026', img: false, folderId: 'start',
-    body: '# O método PARA\n\nPARA é um sistema criado por Tiago Forte para organizar qualquer tipo de informação digital.\n\n## Os 4 quadrantes\n\n- **Projetos**: coisas com prazo e resultado esperado. Ex.: "Lançar site até julho".\n- **Áreas**: responsabilidades contínuas sem prazo. Ex.: "Saúde", "Finanças".\n- **Recursos**: referências e materiais que você quer guardar. Ex.: "Leituras", "Modelos".\n- **Arquivo**: tudo que já foi útil mas está inativo. Não jogue fora — arquive.\n\n## Regra de ouro\n\nUm item pertence ao quadrante mais **acionável**. Projeto > Área > Recurso > Arquivo.\n\nVeja também: [[Bem-vindo ao Dott]].',
-    tags: ['tutorial', 'para', 'metodo'], links: ['bem-vindo ao dott'], backlinks: [],
-  },
-  {
-    id: 'n3', title: 'Conecte ideias com wiki-links', date: '10/06/2026', updatedAt: '10/06/2026', img: false, folderId: 'start',
-    body: '# Conecte ideias com wiki-links\n\nEscreva `[[nome da nota]]` para criar um link entre notas. O Dott constrói um grafo de conexões automaticamente.\n\n## Exemplo\n\nEsta nota aponta para [[O método PARA]] e para [[Bem-vindo ao Dott]].\n\n## Backlinks\n\nQuando você abre uma nota, ela mostra quais outras notas apontam para ela — os **backlinks**. Isso revela conexões que você nem sabia que existiam.\n\n## Dica\n\nDigite `[[` dentro do editor para ver sugestões de notas existentes.',
-    tags: ['tutorial', 'wikilinks', 'conexoes'], links: ['o método para', 'bem-vindo ao dott'], backlinks: [],
-  },
-  {
-    id: 'n4', title: 'Captura pelo widget', date: '10/06/2026', updatedAt: '10/06/2026', img: false, folderId: 'start',
-    body: '# Captura pelo widget\n\nO widget do Dott é um orb flutuante que fica disponível **em qualquer aplicativo**.\n\n## Como usar\n\n1. Pressione `Ctrl+Shift+Space` em qualquer lugar.\n2. O widget aparece na tela.\n3. Digite sua ideia, cole um link, ou escreva uma tarefa.\n4. Pressione Enter — o card vai direto para o seu Inbox.\n\n## Por que importa\n\nCaptura zero-fricção significa que você não perde nenhuma ideia esperando abrir o app. Capture agora, processe depois.\n\nVeja como processar: [[Processe seu inbox]].',
-    tags: ['tutorial', 'widget', 'captura'], links: ['processe seu inbox'], backlinks: [],
-  },
-  {
-    id: 'n5', title: 'Processe seu inbox', date: '10/06/2026', updatedAt: '10/06/2026', img: false, folderId: 'start',
-    body: '# Processe seu inbox\n\nO Inbox não é um destino — é uma caixa de entrada temporária. Processe regularmente.\n\n## Como processar um card\n\n**Opção 1 — Arrastar:** arraste o card do Inbox até uma pasta no board. O card vira nota automaticamente.\n\n**Opção 2 — Deletar:** se não serve para nada, delete. Sem culpa.\n\n## Frequência recomendada\n\n- Inbox cheio (10 cards)? Processe antes de capturar mais.\n- Rotina ideal: revise o inbox uma vez por dia, como e-mail.\n\nVeja também: [[Bem-vindo ao Dott]].',
-    tags: ['tutorial', 'inbox', 'gtd'], links: ['bem-vindo ao dott'], backlinks: [],
-  },
-]
-
-const SEED_BACKLINKS = initBacklinks(SEED_NOTES)
-const SEED_NOTES_WITH_BL = SEED_NOTES.map(n => ({
-  ...n,
-  backlinks: SEED_BACKLINKS[normalizeTitle(n.title)] ?? [],
-}))
+const SEED_GRAPH = graphOf(SEED_NOTES)
 
 function loadTheme(): Theme {
   try {
@@ -288,7 +257,7 @@ const SEED_TASKS: TaskGroup[] = [
     { id: 't3', done: false, text: 'Criar sua primeira pasta' },
   ]},
   { id: 'g2', name: 'Explorar o Dott', color: '#4a8fd9', items: [
-    { id: 't4', done: false, text: 'Escrever uma nota com [[ ]] para conectar' },
+    { id: 't4', done: false, text: 'Abrir a Constelação e ver suas notas ligadas' },
     { id: 't5', done: false, text: 'Arrastar um card do inbox para uma pasta' },
     { id: 't6', done: false, text: 'Usar Ctrl+K para buscar uma nota' },
   ]},
@@ -322,8 +291,8 @@ export const useStore = create<AppState>((set, get) => ({
     { name: 'inbox', color: '#3db3b3', count: 1 },
   ],
   tasks: SEED_TASKS,
-  notes: SEED_NOTES_WITH_BL,
-  backlinkIndex: SEED_BACKLINKS,
+  notes: SEED_NOTES,
+  graph: SEED_GRAPH,
   booting: true,
 
   setView: (view, data = {}) => set(s => {
@@ -512,23 +481,18 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   saveNote: (id, title, body, tagsOverride) => {
-    const links = extractLinks(body).map(l => l.target)
     const tags = tagsOverride ?? extractTags(body)
     const now = new Date().toLocaleDateString('pt-BR')
     let saved: Note | undefined
     set(s => {
       const notes = s.notes.map(n =>
-        n.id === id ? { ...n, title, body, tags, links, updatedAt: now } : n
+        n.id === id ? { ...n, title, body, tags, updatedAt: now } : n
       )
-      const index = buildBacklinks(notes.map(n => ({ id: n.id, title: n.title, links: n.links })))
-      const notesWithBl = notes.map(n => ({
-        ...n,
-        backlinks: index[normalizeTitle(n.title)] ?? [],
-      }))
-      saved = notesWithBl.find(n => n.id === id)
-      return { notes: notesWithBl, backlinkIndex: index, tags: deriveTags(notesWithBl) }
+      saved = notes.find(n => n.id === id)
+      // O grafo e derivado: refaz inteiro a cada salvamento, nunca fica velho.
+      return { notes, graph: graphOf(notes), tags: deriveTags(notes) }
     })
-    // Persiste só o arquivo .md alterado (backlinks são derivados, não gravados).
+    // Persiste só o arquivo .md alterado (as conexoes sao derivadas, nao gravadas).
     if (saved) saveNoteToVault(saved)
   },
 
@@ -537,7 +501,7 @@ export const useStore = create<AppState>((set, get) => ({
     const now = new Date().toLocaleDateString('pt-BR')
     const note: Note = {
       id, title, date: now, updatedAt: now,
-      folderId, img: false, body: '', tags: [], links: [], backlinks: [],
+      folderId, img: false, body: '', tags: [],
     }
     set(s => {
       const notes = [...s.notes, note]
@@ -590,7 +554,7 @@ export const useStore = create<AppState>((set, get) => ({
       const notes = s.notes.filter(n => n.id !== id)
       const para = recountFolders(s.para, notes)
       saveFolders(para)
-      return { notes, para, tags: deriveTags(notes) }
+      return { notes, para, graph: graphOf(notes), tags: deriveTags(notes) }
     })
     deleteNoteFromVault(id)
   },
@@ -619,25 +583,20 @@ export const useStore = create<AppState>((set, get) => ({
       // Primeiro uso: grava os exemplos no vault nativo.
       for (const n of get().notes) await saveNoteToVault(n)
       const seeded = recountFolders(get().para, get().notes)
-      set({ para: seeded, tags: deriveTags(get().notes) })
+      set({ para: seeded, graph: graphOf(get().notes), tags: deriveTags(get().notes) })
       saveFolders(seeded)
       return
     }
-    // Deriva links e backlinks do conteúdo carregado (graphify-style).
-    const withLinks = loaded.map(n => ({
+    // Etiquetas vem do frontmatter; se a nota nao tiver, sai do corpo (#tag).
+    const withBl = loaded.map(n => ({
       ...n,
-      links: extractLinks(n.body).map(l => l.target),
       tags: n.tags.length ? n.tags : extractTags(n.body),
-    }))
-    const index = buildBacklinks(withLinks.map(n => ({ id: n.id, title: n.title, links: n.links })))
-    const withBl = withLinks.map(n => ({
-      ...n,
-      backlinks: index[normalizeTitle(n.title)] ?? [],
     }))
     // Pastas e tags sao DERIVADAS das notas reais — nunca do que estava salvo,
     // senao o numero da pasta e a lista de tags envelhecem e mentem.
     const para = recountFolders(get().para, withBl)
-    set({ notes: withBl, backlinkIndex: index, para, tags: deriveTags(withBl) })
+    // O grafo nasce aqui, do acervo REAL do usuario, sem nenhuma marcacao manual.
+    set({ notes: withBl, graph: graphOf(withBl), para, tags: deriveTags(withBl) })
     saveFolders(para)
   },
 }))

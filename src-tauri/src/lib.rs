@@ -4,6 +4,7 @@ mod folders;
 mod inbox;
 mod tasks;
 mod vault;
+mod widget_geo;
 
 use tauri::{Emitter, Manager};
 
@@ -71,7 +72,8 @@ pub fn run() {
             backup::backup_now,
             backup::backups_folder,
             backup::backups_list,
-            backup::backup_restore
+            backup::backup_restore,
+            widget_geo::widget_set_geometry
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

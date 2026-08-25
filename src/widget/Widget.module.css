@@ -1,44 +1,210 @@
 /* Widget flutuante — orb de captura + painel. Fundo da janela é transparente. */
 
+/* Registrar a variavel e o que permite o navegador INTERPOLAR ela. Sobraram so
+   as quatro da pulsacao, uma por camada de luz, cada uma no seu proprio
+   elemento — por isso NAO herdam.
+   As variaveis de POSICAO (--nx/--ny) e de ESTIRAMENTO (--sx/--sy) morreram
+   junto com o campo fluido: a luz nao persegue mais o cursor. */
+@property --p1 { syntax: '<number>'; inherits: false; initial-value: 1; }
+@property --p2 { syntax: '<number>'; inherits: false; initial-value: 1; }
+@property --p3 { syntax: '<number>'; inherits: false; initial-value: 1; }
+@property --p4 { syntax: '<number>'; inherits: false; initial-value: 1; }
+
+/* A janela do widget muda de tamanho (repouso / captura rapida). O palco ocupa a
+   janela inteira e ancora a bolinha no canto de baixo-direita: em qualquer
+   tamanho ela fica a 52px da borda direita e 52px da de baixo, entao a janela
+   cresce pra cima e pra esquerda SEM a bolinha sair do lugar na tela. */
 .stage {
-  width: 104px;
-  height: 104px;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 0 24px 24px 0;
+
+  /* Curva-mola de entrada, gerada da fisica de um oscilador amortecido: passa
+     1% do ponto e assenta. Entrar e decisao, sair e obediencia — por isso a
+     saida e uma curva seca, sem volta. */
+  --mola: linear(0, .0235, .0826, .1637, .2561, .3522, .4466, .5357, .6173, .69, .7535, .8079, .8536, .8914, .922, .9465, .9656, .9802, .9911, .9989, 1.0043, 1.0079, 1.0099, 1.0109, 1.0111, 1.0107, 1.01);
+  --saida: cubic-bezier(0.4, 0, 1, 1);
+  --chegada: cubic-bezier(.16, 1, .3, 1);
+  /* Curva SO do container que cresce. A `--chegada` e agressiva demais aqui:
+     ela cobre 65% do percurso nos primeiros 15% do tempo, e o painel parecia
+     estourar em vez de crescer. Esta cobre 39% no mesmo ponto — da pra VER a
+     bolinha virando painel, que e o proposito da animacao. Medido, nao chutado. */
+  --morf: cubic-bezier(.33, 1, .68, 1);
+}
+/* NAO reintroduza um recuo diferente por tamanho de janela.
+   Existia aqui um `.stageBig { padding-right: 40px }`, herdado do trilho antigo
+   (que era centrado na bolinha e precisava de folga a direita). Com ele, abrir a
+   caixa mudava o recuo NA HORA — mas a janela so cresce um ou dois quadros
+   depois, porque redimensionar e uma ida ao lado nativo. Nesse intervalo a
+   bolinha pulava 16px pra esquerda e voltava. Era o "hover mudando de lugar".
+   A regra que vale: a bolinha mora SEMPRE a 52px da direita e 52px de baixo, em
+   qualquer tamanho de janela. Assim o CSS nao tem nada a dizer quando a janela
+   muda, e o unico movimento e o da janela — que ja e atomico. */
+
+/* A cena e a caixa da bolinha (56x56). A caixa rapida e o aviso se posicionam
+   por ela, nunca pela janela — e o que mantem o desenho igual nos dois tamanhos. */
+.cena {
   position: relative;
+  z-index: 2;            /* a bolinha passa POR CIMA do painel: ela e a marca dele */
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform .44s var(--chegada);
 }
 
+/* ═══ A BOLINHA VIRA O PAINEL ══════════════════════════════════════════════
+   Abrir nao move nada pela tela: a bolinha CRESCE e vira o painel. O circulo de
+   56px se abre ate o retangulo de 340x300, no proprio lugar.
+
+   Antes disso, a bolinha sumia e a marca branca atravessava a tela na diagonal
+   ate o cabecalho. Eram dois objetos fazendo duas coisas diferentes ao mesmo
+   tempo, e o olho tinha que escolher qual seguir. Um container que se abre e uma
+   coisa so, e por isso le mais facil.
+
+   Nao ha `transform` aqui: quem cresce e o painel, pela sua propria mascara
+   (ver `@keyframes abre`). A bolinha so se apaga por baixo dele. */
+.cenaOculta .orb {
+  opacity: 0;
+  pointer-events: none;
+  cursor: default;
+}
+
+/* ═══ A BOLINHA ════════════════════════════════════════════════════════════
+   Tecnica: camadas em `screen` sobre preto. Em screen, PRETO nao muda nada e
+   sobreposicoes SOMAM luz — o nucleo branco EMERGE do encontro das camadas, nao
+   e pintado (pintado vira disco leitoso). Todo fade termina em `oklch(... / 0)`
+   da MESMA cor: `transparent` atravessa preto transparente e lava o croma no
+   meio do caminho.
+
+   A bolinha NAO reage mais ao cursor. O campo fluido (luz correndo atras do
+   mouse, corpo puxado por mola, nucleo esticando com a velocidade do gesto) foi
+   removido inteiro: escrevia posicao de gradiente a cada quadro, o que obriga o
+   navegador a REPINTAR quatro gradientes por quadro, pra sempre, numa janela que
+   fica o dia todo sobre a tela. Era caro e o movimento incomodava.
+   O que sobrou de vida e a pulsacao — e ela agora anda em `transform`. */
 .orb {
   width: 56px;
   height: 56px;
   border-radius: 50%;
   border: none;
+  padding: 0;
   cursor: pointer;
+  /* NAO PERDER: e este flex que centraliza a marca dentro da bolinha. */
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Gradiente com profundidade real: luz em cima a esquerda, sombra na borda
-     inferior e um aro interno claro. O radial chapado de antes dava aquele ar
-     de adesivo — cor sem volume. */
-  background:
-    radial-gradient(circle at 34% 26%, rgba(255, 255, 255, .38), rgba(255, 255, 255, 0) 46%),
-    radial-gradient(circle at 50% 118%, #a8301c, rgba(168, 48, 28, 0) 62%),
-    linear-gradient(160deg, #f4855f 0%, #e35c37 46%, #c4402a 100%);
-  box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, .45),
-    inset 0 -2px 5px rgba(120, 26, 14, .55),
-    0 8px 22px rgba(210, 74, 44, .45),
-    0 2px 6px rgba(0, 0, 0, .5);
-  transition: transform .15s var(--ease-out);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #070103;
+  box-shadow: inset 0 0 0 1px rgb(255 150 105 / .28), 0 12px 26px rgb(0 0 0 / .5);
+  scale: var(--esc, 1);
+  /* Fundo e sombra andam junto com a viagem pro cabecalho (a bolinha se apaga
+     no caminho). `scale` so serve ao aperto e ao pulso de captura. */
+  /* A opacidade NAO tem transicao de proposito. A `.brasa` dentro do painel e
+     desenhada no mesmo lugar e com as mesmas cores desta bolinha, entao a troca
+     entre as duas e um corte seco e invisivel. Com fade, as duas apareceriam
+     somadas por um instante e a costura ficava visivel. */
+  transition: scale .16s var(--saida);
 }
-.orb:hover { transform: scale(1.06); }
-.orb:active { transform: scale(.96); }
+/* Sem realce no hover, de proposito: passar o mouse nao e uma acao. O cursor de
+   mao ja diz que da pra clicar. O aperto continua respondendo, porque ai sim
+   houve intencao. */
+.orb:active { --esc: .96; }
+.cenaOculta .orb:active { --esc: 1; }
 
-.mark {
-  color: #fff;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .35));
+/* As quatro camadas de luz.
+   PULSACAO POR `transform`, nao por raio de gradiente. Mexer no raio muda a
+   imagem de fundo, e imagem de fundo que muda precisa ser RASTERIZADA de novo a
+   cada quadro — quatro gradientes radiais, 60 vezes por segundo, sem parar.
+   Em `transform` o gradiente e desenhado UMA vez e depois so escalado, que e
+   trabalho de placa de video. Mesma aparencia, custo perto de zero.
+   Cada camada gira em torno do PROPRIO centro de luz (transform-origin igual a
+   posicao do gradiente), senao crescer tambem deslocaria o desenho. */
+.luz1, .luz2, .luz3, .luz4 {
+  position: absolute;
+  /* `inset: -25%` da a folga que a camada precisa pra ESCORREGAR atras do cursor
+     sem que a borda dela apareca. A caixa fica 1.5x maior que a bolinha, e por
+     isso TODA porcentagem aqui dentro (posicao, raio, eixo) esta convertida:
+     um ponto que era `f` da bolinha vira `(f + .25) / 1.5` da camada, e um raio
+     que era `R` vira `R / 1.5`. Mexeu num, converta os tres. */
+  inset: -25%;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  will-change: translate, scale;
+  transition: opacity .3s var(--chegada);
 }
+/* AMBIENTE: banho largo que atravessa a bola inteira e ENCOSTA no corpo de
+   fogo. Quando esta camada terminava antes de o corpo comecar, sobrava uma
+   faixa morta horizontal no meio da bola. */
+.luz4 {
+  background: radial-gradient(74.67% 61.33% at 50% 48.67% in oklch,
+    oklch(.40 .12 34 / .44) 0%, oklch(.27 .10 30 / .20) 48%, oklch(.13 .05 28 / 0) 90%);
+  transform-origin: 50% 48.67%;
+  animation: pulso4 9.3s ease-in-out infinite;
+}
+/* CORPO DE FOGO: mora a 78% da altura, nao a 100%. Na borda, metade da luz era
+   cortada pelo circulo e o que sobrava lia como horizonte — a bola parecia um
+   nascer do sol, nao uma brasa dentro de uma esfera. */
+.luz1 {
+  background: radial-gradient(49.33% 42.67% at 50% 68.67% in oklch,
+    oklch(.74 .21 45) 0%, oklch(.54 .20 37 / .76) 42%, oklch(.22 .10 30 / 0) 86%);
+  transform-origin: 50% 68.67%;
+  animation: pulso1 6.4s ease-in-out infinite;
+}
+/* Segunda luz: repousa desencontrada da primeira, pro desenho nao ficar simetrico. */
+.luz2 {
+  background: radial-gradient(38.67% 36% at 40.67% 64% in oklch,
+    oklch(.70 .21 26) 0%, oklch(.24 .12 26 / 0) 82%);
+  transform-origin: 40.67% 64%;
+  animation: pulso2 8.1s ease-in-out infinite;
+}
+/* O NUCLEO: L alta e C baixa. Onde soma com as outras sob screen, estoura em
+   branco sozinho. O croma ja vem alto na cor — antes havia um `filter:
+   saturate()` aqui, e filtro e mais uma passada de desenho por quadro. */
+.luz3 {
+  background: radial-gradient(25.33% 21.33% at 50% 66.67% in oklch,
+    oklch(.97 .05 62) 0%, oklch(.80 .22 50 / .70) 36%, oklch(.24 .10 40 / 0) 78%);
+  transform-origin: 50% 66.67%;
+  animation: pulso3 5.1s ease-in-out infinite;
+}
+/* Periodos que nao sao multiplos entre si (6,4 / 8,1 / 5,1 / 9,3): o encontro
+   deles so se repete depois de MUITO tempo, entao o respiro nunca cai no mesmo
+   desenho. E o que faz parecer organico em vez de loop. */
+/* `scale:` (propriedade separada), NUNCA `transform: scale()`. O laco de quadro
+   escreve `translate` na mesma camada; se os dois morassem em `transform`, a
+   animacao de CSS ganharia e o arrasto da luz simplesmente nao apareceria. */
+@keyframes pulso1 { 0%, 100% { scale: .94 } 50% { scale: 1.10 } }
+@keyframes pulso2 { 0%, 100% { scale: 1.08 } 50% { scale: .92 } }
+@keyframes pulso3 { 0%, 100% { scale: .90 } 50% { scale: 1.14 } }
+@keyframes pulso4 { 0%, 100% { scale: .90 } 50% { scale: 1.14 } }
+
+/* Grao: opacidade de 1 degrau de 8 bits, em `overlay`. Sem ele o gradiente
+   escuro mostra faixas, que e o que denuncia o barato. Estatico. */
+.grao {
+  position: absolute;
+  inset: 0;
+  opacity: .07;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  transition: opacity .3s var(--chegada);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+/* A marca respira: escala muda menos de 5%. Voce nao ve o movimento; sente que
+   nao esta congelado. Uma animacao so, em transform, num desenho de 26px. */
+.mark {
+  position: relative;
+  z-index: 3;
+  color: #fff;
+  filter: drop-shadow(0 1px 3px rgb(0 0 0 / .55));
+  animation: respiro 4.2s ease-in-out infinite;
+}
+@keyframes respiro { 0%, 100% { transform: scale(1) } 50% { transform: scale(1.045) } }
 
 .warn {
   background: radial-gradient(circle at 38% 32%, #e8b15a, #d98c3a);
@@ -53,10 +219,17 @@
   50%       { box-shadow: 0 6px 30px rgba(224, 64, 64, .9), 0 2px 6px rgba(0, 0, 0, .45); }
 }
 
+/* Arrastando: a bolinha vira objeto na mao — nada de reacao. */
+.arrastando .orb { --esc: 1; cursor: grabbing; }
+.arrastando .badge { opacity: 0; pointer-events: none; }
+
+/* Fica no canto de cima-direita da bolinha. Mora FORA dela de proposito: a
+   bolinha tem overflow:hidden pras camadas de luz, e o contador seria cortado. */
 .badge {
   position: absolute;
-  top: 24px;
-  right: 24px;
+  top: 0;
+  right: 0;
+  z-index: 4;
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
@@ -71,10 +244,73 @@
   border: 1px solid rgba(255, 255, 255, .18);
 }
 
+/* NAO ressuscite nada que abra ao passar o mouse.
+   Aqui ja moraram duas coisas: um trilho de tres botoes e, depois, uma caixa de
+   captura rapida. As duas cairam pelo mesmo motivo de fundo — qualquer coisa que
+   abra no hover obriga a JANELA NATIVA a crescer embaixo do cursor, e isso
+   trava, pisca e briga com o Windows pelo controle da posicao. A bolinha responde
+   ao cursor so com a luz por dentro, que e desenho e nao janela. */
+
+/* ═══ AVISO DE CAPTURA ═════════════════════════════════════════════════════
+   Nao e "copiado com sucesso": e o TIPO e o comeco do CONTEUDO. Voce confere
+   sem abrir nada. Sobe com mola (460ms), sai seco (200ms). */
+.toaster {
+  position: absolute;
+  bottom: calc(100% + 34px);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  align-items: flex-end;
+  z-index: 10;
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px 9px 10px;
+  border-radius: 14px;
+  background: rgb(22 22 26 / .9);
+  border: 1px solid rgb(255 255 255 / .1);
+  backdrop-filter: blur(20px) saturate(1.6);
+  box-shadow: 0 16px 40px rgb(0 0 0 / .5);
+  white-space: nowrap;
+  animation: toastIn .46s var(--mola) both;
+}
+.toastSaindo { animation: toastOut .2s var(--saida) both; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(14px) scale(.92) } to { opacity: 1; transform: translateY(0) scale(1) } }
+@keyframes toastOut { to { opacity: 0; transform: translateY(-6px) scale(.97) } }
+.toastIco {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: oklch(.42 .16 40);
+  color: #fff;
+}
+.toastTxt { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.toastTit { font-size: 12.5px; font-weight: 600; color: #fff; }
+.toastSub { font-size: 11px; color: #9a9aa4; max-width: 210px; overflow: hidden; text-overflow: ellipsis; }
+.toastTipo {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgb(255 255 255 / .08);
+  color: #c7c7d0;
+}
+
 /* ─── Painel expandido ─── */
 .panel {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   background: var(--surface);
   border: 1px solid var(--border2);
   border-radius: var(--r-2xl);
@@ -82,15 +318,143 @@
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 12px 40px rgba(0, 0, 0, .6);
+  /* O PAINEL E A BOLINHA CRESCIDA. A mascara comeca valendo exatamente a caixa
+     dela e se abre ate a janela inteira.
+
+     `inset(... round ...)` nos dois extremos de proposito: e a unica forma de
+     circulo e retangulo INTERPOLAREM. `circle()` e `inset()` sao funcoes
+     diferentes e o navegador nao sabe passar de uma pra outra — ele pula. Um
+     `inset` que deixa 56x56 com `round 28px` JA E um circulo, entao o mesmo
+     tipo de forma serve pros dois estados.
+
+     As contas (janela 340x300, bolinha de 56px centrada em 288,248):
+       esquerda 288-28 = 260   |   topo   248-28 = 220
+       direita  340-316 = 24   |   baixo  300-276 = 24
+     Mudou EXP_W, EXP_H ou ORB_R? refaca as quatro.
+
+     Sem `forwards`: terminada a animacao o clip volta a `none`. Isso importa por
+     dois motivos — a sombra do painel e desenhada FORA da caixa e seria cortada
+     pra sempre, e mascara presa vira bloco de contencao (ja prendeu um
+     `position: fixed` neste projeto). */
+  animation: abre .46s var(--morf);
+}
+@keyframes abre {
+  from { clip-path: inset(220px 24px 24px 260px round 28px) }
+  to   { clip-path: inset(0 0 0 0 round var(--r-2xl)) }
+}
+/* ═══ A BRASA QUE CRESCE ═══════════════════════════════════════════════════
+   Esta camada e o que faz a bolinha VIRAR o painel, em vez de o painel nascer
+   atras dela.
+
+   O erro anterior: a mascara ja revelava a SUPERFICIE do painel desde o primeiro
+   quadro. Entao o que crescia era um retangulo escuro, com a bolinha parada de
+   56px no canto — duas formas, nao uma virando a outra.
+
+   Aqui a brasa da bolinha e desenhada DENTRO do painel, exatamente na caixa dela
+   (56px, centro em 288,248 = 24px de cada borda), e cresce junto com a mascara
+   enquanto se apaga. No primeiro quadro a mascara mostra so essa caixa, e o que
+   se ve E a bolinha. No ultimo, a luz ja dissipou e sobrou a superficie.
+
+   As quatro camadas viram quatro fundos com `background-blend-mode: screen` —
+   a mesma soma de luz que na bolinha, num elemento so. Os valores TEM que ser
+   os mesmos das `.luzN`, senao a troca aparece como um piscar de cor. */
+.brasa {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 32% at 50% 75% in oklch,
+      oklch(.97 .05 62) 0%, oklch(.80 .22 50 / .70) 36%, oklch(.24 .10 40 / 0) 78%),
+    radial-gradient(58% 54% at 36% 71% in oklch,
+      oklch(.70 .21 26) 0%, oklch(.24 .12 26 / 0) 82%),
+    radial-gradient(74% 64% at 50% 78% in oklch,
+      oklch(.74 .21 45) 0%, oklch(.54 .20 37 / .76) 42%, oklch(.22 .10 30 / 0) 86%),
+    radial-gradient(112% 92% at 50% 48% in oklch,
+      oklch(.40 .12 34 / .44) 0%, oklch(.27 .10 30 / .20) 48%, oklch(.13 .05 28 / 0) 90%),
+    #070103;
+  background-blend-mode: screen, screen, screen, screen, normal;
+  box-shadow: inset 0 0 0 1px rgb(255 150 105 / .28);
+  animation: brasaCresce .46s var(--morf) both;
+}
+/* Cresce ate cobrir o canto mais distante (a diagonal de 288,248 ate 0,0 da 380
+   — 380/28 = 13,6 de escala) e se apaga antes disso: e luz que dissipa, nao um
+   circulo laranja que fica gigante. O raio some junto, senao a borda arredondada
+   aparece como uma bolha no meio da tela. */
+@keyframes brasaCresce {
+  0%   { transform: scale(1);  opacity: 1; border-radius: 50% }
+  55%  { opacity: .55 }
+  100% { transform: scale(14); opacity: 0; border-radius: 0 }
+}
+/* A marca branca do meio da bolinha. Ela NAO cresce junto: a brasa e luz que
+   dissipa, mas um simbolo esticado a 14x vira borrao. Ela se dissolve no lugar,
+   rapido, enquanto a do cabecalho aparece.
+   Centro da bolinha em (288,248) numa caixa de 340x300 = 52px de cada borda;
+   a marca tem 26px, entao 52-13 = 39px. */
+.brasaMarca {
+  position: absolute;
+  right: 39px;
+  bottom: 39px;
+  color: #fff;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 3px rgb(0 0 0 / .55));
+  animation: marcaDissolve .2s var(--saida) both;
+}
+@keyframes marcaDissolve {
+  from { opacity: 1; scale: 1 }
+  to   { opacity: 0; scale: 1.5 }
+}
+.panelSaindo .brasaMarca { animation: marcaVolta .22s var(--saida) both; }
+@keyframes marcaVolta {
+  from { opacity: 0; scale: 1.5 }
+  to   { opacity: 1; scale: 1 }
 }
 
-/* Header: chip de tipo + contador + botão fechar */
+.panelSaindo .brasa { animation: brasaEncolhe .22s var(--saida) both; }
+@keyframes brasaEncolhe {
+  from { transform: scale(6); opacity: 0; border-radius: 0 }
+  to   { transform: scale(1); opacity: 1; border-radius: 50% }
+}
+
+/* O conteudo entra atras da abertura, nao junto: primeiro o container existe,
+   depois ele tem o que mostrar. `:not(.brasa)` porque a brasa tem coreografia
+   propria — sem isso ela herdaria a entrada do conteudo e nao cresceria. */
+.panel > *:not(.brasa):not(.brasaMarca) { animation: conteudoEntra .28s var(--chegada) .22s both; }
+
+@keyframes conteudoEntra {
+  from { opacity: 0; transform: translateY(6px) }
+  to   { opacity: 1; transform: none }
+}
+
+/* Fechar e o mesmo caminho de volta: o painel encolhe ATE a bolinha, que ja
+   esta reacendendo por baixo. Mais curto que a ida — entrar e decisao, sair e
+   obediencia. */
+.panelSaindo { animation: fecha .22s var(--saida) both; }
+.panelSaindo > *:not(.brasa):not(.brasaMarca) { animation: none; opacity: 0; transition: opacity .1s linear; }
+@keyframes fecha {
+  from { clip-path: inset(0 0 0 0 round var(--r-2xl)) }
+  to   { clip-path: inset(220px 24px 24px 260px round 28px) }
+}
+
+/* Header: marca + chip de tipo + contador + fechar.
+   A marca agora e um elemento normal do cabecalho, no fluxo. Ela nao viaja mais
+   pela tela — aparece no lugar dela junto com o resto do conteudo, enquanto a
+   marca da bolinha se apaga. Por isso tambem nao ha mais recuo reservado nem
+   altura casada com nenhuma conta de animacao. */
 .header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
+  min-height: 48px;
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.headerMark {
+  color: var(--fg);
   flex-shrink: 0;
 }
 
@@ -106,8 +470,9 @@
   transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 
-/* Dot + título neutro (quando sem conteúdo) */
-.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+/* Titulo neutro (quando ainda nao ha conteudo pra classificar). O ponto rosa
+   que morava aqui saiu: a bolinha AGORA pousa neste lugar, e dois pontos
+   disputando o mesmo canto e ruido. */
 .titleNeutral { font-size: 13px; font-weight: 700; color: var(--fg); flex: 1; }
 
 /* Contador N/10 */
@@ -232,8 +597,6 @@
   font-size: 12px;
   padding: 0 10px;
 }
-
-.arrow { font-size: 14px; line-height: 1; }
 
 /* ─── Cores dos chips de tipo (mesmas do InboxPanel) ─── */
 .chip-nota    { background: rgba(74,143,217,.15);  color: #4a8fd9; }

@@ -1,12 +1,16 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import { Icon } from '../../components/Icon'
+import { getStorageMode, setStorageMode, waitlistEmail, isValidEmail, joinWaitlist } from '../../lib/online'
 import './onboarding.css'
 
-/** Onboarding de primeiro uso — 5 passos animados sobre o app real.
+/** Onboarding de primeiro uso - 6 passos animados sobre o app real.
  *  Aparece so na primeira vez (flag dott:onboarding-seen). Pode ser revisto
- *  disparando o evento 'dott:replay-onboarding' (ex.: por um menu de ajuda). */
+ *  disparando o evento 'dott:replay-onboarding' (ex.: por um menu de ajuda).
+ *  O evento 'dott:open-online' abre direto o ultimo passo (escolha de onde as
+ *  notas moram), sozinho. E por ai que as Configuracoes reusam esta tela. */
 const SEEN_KEY = 'dott:onboarding-seen'
-const TOTAL = 5
+const TOTAL = 6
+const ONLINE = TOTAL - 1
 
 function wasSeen(): boolean {
   try { return !!localStorage.getItem(SEEN_KEY) } catch { return false }
@@ -16,17 +20,28 @@ export function Onboarding() {
   const [open, setOpen] = useState(() => !wasSeen())
   const [i, setI] = useState(0)
   const [closing, setClosing] = useState(false)
+  const [soloOnline, setSoloOnline] = useState(false)
+  const [mode, setMode] = useState(getStorageMode)
+  const [email, setEmail] = useState(waitlistEmail)
+  const [door, setDoor] = useState<'idle' | 'form' | 'done'>(() => (waitlistEmail() ? 'done' : 'idle'))
 
   // Permite re-abrir o onboarding de fora (menu de ajuda futuro).
   useEffect(() => {
-    const replay = () => { setI(0); setClosing(false); setOpen(true) }
+    const replay = () => { setSoloOnline(false); setI(0); setClosing(false); setOpen(true) }
+    const online = () => { setSoloOnline(true); setI(ONLINE); setClosing(false); setOpen(true) }
     window.addEventListener('dott:replay-onboarding', replay)
-    return () => window.removeEventListener('dott:replay-onboarding', replay)
+    window.addEventListener('dott:open-online', online)
+    return () => {
+      window.removeEventListener('dott:replay-onboarding', replay)
+      window.removeEventListener('dott:open-online', online)
+    }
   }, [])
 
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
+      if (door === 'form' && e.key !== 'Escape') return
+      if (soloOnline && e.key !== 'Escape') return
       if (e.key === 'ArrowRight' || e.key === 'Enter') go(i + 1)
       else if (e.key === 'ArrowLeft') go(i - 1)
       else if (e.key === 'Escape') finish()
@@ -46,6 +61,16 @@ export function Onboarding() {
     try { localStorage.setItem(SEEN_KEY, '1') } catch { /* ignora */ }
     setClosing(true)
     setTimeout(() => { setOpen(false); setClosing(false) }, 250)
+  }
+
+  function pickLocal() { setStorageMode('local'); setMode('local'); setDoor(waitlistEmail() ? 'done' : 'idle') }
+
+  function pickCloud() { setDoor(d => (d === 'done' ? 'done' : 'form')) }
+
+  async function sendEmail() {
+    if (!isValidEmail(email)) return
+    await joinWaitlist(email)
+    setDoor('done')
   }
 
   const active = (n: number) => `ob-step${i === n ? ' is-active' : ''}`
@@ -82,11 +107,25 @@ export function Onboarding() {
               <div className="s4-card"><div className="nt">NOTA</div><div className="ln a" /><div className="ln b" /></div>
             </div>
           </div>
+          <div className={active(5)}>
+            <div className="s6">
+              <div className="s6-side">
+                <div className="s6-box is-here"><span className="s6-dot" /></div>
+                <div className="s6-cap">este computador</div>
+              </div>
+              <div className="s6-link" aria-hidden="true"><i /><i /><i /></div>
+              <div className="s6-side">
+                <div className="s6-box is-soon"><span className="s6-cloud" /></div>
+                <div className="s6-cap">seus outros aparelhos</div>
+              </div>
+            </div>
+          </div>
           <div className={active(4)}>
             <div className="s5">
               <svg viewBox="0 0 230 130">
                 <path className="edge e1" d="M55,40 L165,55" />
                 <path className="edge e2" d="M165,55 L100,100" />
+                <path className="edge e3" d="M55,40 L100,100" />
                 <circle className="node n1" cx="55" cy="40" r="11" />
                 <circle className="node n2" cx="165" cy="55" r="11" />
                 <circle className="node n3" cx="100" cy="100" r="11" />
@@ -99,7 +138,7 @@ export function Onboarding() {
           <div className={active(0)}>
             <div className="ob-kicker">Boas-vindas</div>
             <h2 className="ob-title">Bem-vindo ao Dott</h2>
-            <p className="ob-text">Seu segundo cérebro. Tire as ideias da cabeça — o Dott <b>guarda e organiza</b>, tudo offline, só na sua máquina.</p>
+            <p className="ob-text">Seu segundo cérebro. Tire as ideias da cabeça — o Dott <b>guarda e organiza</b>. Você escolhe onde elas ficam.</p>
           </div>
           <div className={active(1)}>
             <div className="ob-kicker">1 · Capturar</div>
@@ -126,18 +165,62 @@ export function Onboarding() {
           </div>
           <div className={active(4)}>
             <div className="ob-kicker">4 · Conectar</div>
-            <h2 className="ob-title">Ligue as ideias</h2>
-            <p className="ob-text">Escreva <span className="ob-kbd">[[assim]]</span> dentro de uma nota pra conectar com outra. Com o tempo, tudo vira uma <b>constelação</b> sua. Pronto — agora é com você.</p>
+            <h2 className="ob-title">As ideias se ligam sozinhas</h2>
+            <p className="ob-text">Você não marca nada. O Dott lê o que você escreveu e liga as notas que falam da mesma coisa, na sua máquina. Com o tempo, tudo vira uma <b>constelação</b> sua.</p>
+            <div className="ob-note is-tip"><span className="ob-badge">SEMPRE HONESTO</span><span>Cada ligação diz de onde veio: <b>achada</b> quando estava escrita no texto, <b>inferida</b> quando o Dott deduziu por semelhança.</span></div>
+          </div>
+          <div className={active(5)}>
+            <div className="ob-kicker">Onde suas notas moram</div>
+            <h2 className="ob-title">Você escolhe onde guardar</h2>
+            <p className="ob-text">Dá pra manter tudo só aqui, ou levar suas notas pra todo aparelho que você usa. Dá pra mudar de ideia depois, em Configurações.</p>
+
+            <div className="ob-choices">
+              <button type="button" className={`ob-choice${mode === 'local' && door !== 'form' ? ' is-on' : ''}`} onClick={pickLocal}>
+                <span className="ob-ch-head"><strong>Só neste computador</strong><i className="ob-tag">agora</i></span>
+                <span className="ob-ch-txt">Suas notas viram arquivos de texto numa pasta sua. Abre sem internet, e continuam lá mesmo sem o Dott.</span>
+              </button>
+              <button type="button" className={`ob-choice is-soon${door !== 'idle' ? ' is-on' : ''}`} onClick={pickCloud}>
+                <span className="ob-ch-head"><strong>Em todos os aparelhos</strong><i className="ob-tag is-soon">em breve</i></span>
+                <span className="ob-ch-txt">O mesmo Dott no trabalho, em casa e no celular, sempre com a última versão da nota.</span>
+              </button>
+            </div>
+
+            {door === 'form' && (
+              <div className="ob-door">
+                <p className="ob-door-txt">Essa parte ainda não está pronta. Deixa seu e-mail que eu te aviso no dia em que abrir. É o mesmo gesto de sempre: escreve e dá <b>Enter</b>.</p>
+                <div className="ob-door-row">
+                  <input
+                    className="ob-door-input"
+                    type="email"
+                    autoFocus
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); void sendEmail() } }}
+                  />
+                  <button type="button" className="ob-btn primary" disabled={!isValidEmail(email)} onClick={() => void sendEmail()}>Avise-me</button>
+                </div>
+                <p className="ob-door-fine">Só pra isso. Sem newsletter, sem cadastro, sem senha.</p>
+              </div>
+            )}
+
+            {door === 'done' && (
+              <div className="ob-note"><span className="ob-badge">NA LISTA</span><span>Anotado: <b>{email}</b>. Quando o Dott Online abrir, você fica sabendo antes.</span></div>
+            )}
           </div>
         </div>
 
         <div className="ob-foot">
-          <div className="ob-dots">
-            {Array.from({ length: TOTAL }, (_, n) => <i key={n} className={i === n ? 'on' : ''} />)}
-          </div>
-          {i > 0 && <button className="ob-btn ghost" onClick={() => go(i - 1)}>Voltar</button>}
-          {!last && <button className="ob-btn ghost" onClick={finish}>Pular</button>}
-          <button className="ob-btn primary" onClick={() => go(i + 1)}>{last ? 'Começar a usar o Dott' : 'Próximo'}</button>
+          {soloOnline ? <div className="ob-dots" /> : (
+            <div className="ob-dots">
+              {Array.from({ length: TOTAL }, (_, n) => <i key={n} className={i === n ? 'on' : ''} />)}
+            </div>
+          )}
+          {!soloOnline && i > 0 && <button className="ob-btn ghost" onClick={() => go(i - 1)}>Voltar</button>}
+          {!soloOnline && !last && <button className="ob-btn ghost" onClick={finish}>Pular</button>}
+          <button className="ob-btn primary" onClick={() => (soloOnline ? finish() : go(i + 1))}>
+            {soloOnline ? 'Fechar' : last ? 'Começar a usar o Dott' : 'Próximo'}
+          </button>
         </div>
       </div>
     </div>

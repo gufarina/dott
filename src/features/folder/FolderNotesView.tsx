@@ -11,6 +11,7 @@ export function FolderNotesView() {
   const folder = useStore(st => st.folder)
   const category = useStore(st => st.category)
   const notes = useStore(st => st.notes)
+  const graph = useStore(st => st.graph)
   const para = useStore(st => st.para)
   const setView = useStore(st => st.setView)
   const createNote = useStore(st => st.createNote)
@@ -36,7 +37,7 @@ export function FolderNotesView() {
   const newNote = () => {
     if (!folder) return
     const id = createNote(folder, 'Nova nota')
-    showToast('info', 'Nota criada', 'Comece a escrever — use [[ ]] para conectar.')
+    showToast('info', 'Nota criada', 'Escreva do seu jeito. O Dott conecta sozinho.')
     setView('editor', { note: id })
   }
 
@@ -144,8 +145,11 @@ export function FolderNotesView() {
                     : n.glyph
                       ? <span className={s.thumbGlyph}><NoteGlyph id={n.glyph} size={34} /></span>
                       : null}
-                  {n.links.length > 0 && <span className={s.badge}>{n.links.length} ↗</span>}
-                  {n.backlinks.length > 0 && <span className={`${s.badge} ${s.back}`}>← {n.backlinks.length}</span>}
+                  {(graph.byNote[n.id]?.length ?? 0) > 0 && (
+                    <span className={s.badge} title="Conexoes que o Dott achou sozinho">
+                      {graph.byNote[n.id].length} ligada{graph.byNote[n.id].length > 1 ? 's' : ''}
+                    </span>
+                  )}
 
                   {/* So aparece no hover: dar capa ou simbolo a nota. */}
                   <div className={s.hoverBar} onClick={e => e.stopPropagation()}>
