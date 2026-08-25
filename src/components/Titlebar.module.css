@@ -1,5 +1,13 @@
 .titlebar {
-  height: 28px;
+  /* A faixa do topo vai da borda da janela ate o topo dos paineis. Como a mesa
+     (.body em App.module.css) tem padding de 10px, essa faixa mede 44px, mas a
+     barra so ocupava 28px - o conteudo ficava centralizado nos 28 e sobrava a
+     folga de 10 embaixo, o que jogava marca e icones 5px acima do centro real
+     (medido: centro em 17px numa faixa cujo meio e 22px). Dai a sensacao de
+     "colado no topo".
+     A barra passa a ocupar a faixa inteira (44px) e a mesa perde o padding de
+     cima - os paineis continuam comecando exatamente no mesmo y. */
+  height: 44px;
   flex-shrink: 0;
   background: var(--desk);
   display: flex;

@@ -12,7 +12,10 @@
   flex: 1;
   display: flex;
   gap: 10px;
-  padding: 10px;
+  /* Sem padding em cima: essa folga agora pertence a barra de titulo, que
+     precisa dela pra centralizar marca e icones na faixa real do topo.
+     Ver o comentario em Titlebar.module.css. */
+  padding: 0 10px 10px;
   overflow: hidden;
   background: var(--desk);
 }

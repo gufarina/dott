@@ -19,6 +19,7 @@ import { Breadcrumb } from './components/Breadcrumb'
 import { InboxPanel } from './features/inbox/InboxPanel'
 import { PARAGrid, CategoryView } from './features/para/PARAGrid'
 import { TasksPanel } from './features/tasks/TasksPanel'
+import { TaskDetail } from './features/tasks/TaskDetail'
 import { NoteEditor } from './features/editor/NoteEditor'
 import { FolderNotesView } from './features/folder/FolderNotesView'
 import { Constellation } from './features/graph/Constellation'
@@ -220,6 +221,7 @@ export default function App() {
                   {/* canvas com pasta = notas da pasta; sem pasta = a categoria inteira */}
                   {view === 'canvas' && (folder ? <FolderNotesView /> : <CategoryView />)}
                   {view === 'editor' && <div className={s.canvasLayout}><NoteEditor /></div>}
+                  {view === 'task' && <TaskDetail />}
                 </motion.div>
               </AnimatePresence>
             </div>

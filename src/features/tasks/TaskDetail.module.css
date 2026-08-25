@@ -1,0 +1,225 @@
+.wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+/* ── Cabecalho ────────────────────────────────────────────────────────────
+   A caixa de marcar e o titulo dividem a mesma linha de base: o gesto de
+   concluir fica do lado do que vai ser concluido, nao escondido num menu. */
+.topo {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px 26px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  transition: background var(--dur-base) var(--ease-out);
+}
+.topoFeito { background: var(--surface); }
+
+.check {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-control);
+  background: transparent;
+  flex-shrink: 0;
+  cursor: pointer;
+  margin-top: 3px;
+  position: relative;
+  transition: background var(--dur-base) var(--ease-out),
+              border-color var(--dur-base) var(--ease-out),
+              transform var(--dur-micro) var(--ease-out);
+}
+.check:hover { border-color: var(--success); transform: scale(1.06); }
+.check:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.checkFeito { background: var(--success); border-color: var(--success); }
+.checkFeito::after {
+  content: '';
+  position: absolute;
+  left: 6px; top: 7px;
+  width: 11px; height: 6px;
+  border-left: 2.2px solid #fff;
+  border-bottom: 2.2px solid #fff;
+  transform: rotate(-45deg);
+}
+
+.titulo {
+  flex: 1;
+  font-family: inherit;
+  font-size: 21px;
+  font-weight: 650;
+  line-height: 1.32;
+  letter-spacing: -.01em;
+  color: var(--fg);
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 0;
+  min-height: 30px;
+  field-sizing: content;
+}
+.titulo::placeholder { color: var(--fg3); font-weight: 400; }
+.tituloFeito { color: var(--fg3); text-decoration: line-through; }
+
+.estado {
+  flex-shrink: 0;
+  margin-top: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: var(--r-full, 999px);
+  border: 1px solid transparent;
+}
+.estado-aberto   { color: var(--fg3);    border-color: var(--border2); }
+.estado-hoje     { color: var(--warn);   border-color: rgba(217,140,58,.4);  background: rgba(217,140,58,.12); }
+.estado-atrasado { color: var(--danger); border-color: rgba(224,64,64,.42);  background: rgba(224,64,64,.12); }
+.estado-feito    { color: var(--success);border-color: rgba(61,179,122,.42); background: rgba(61,179,122,.12); }
+
+/* ── Corpo ─────────────────────────────────────────────────────────────── */
+.corpo {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 26px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.campos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 900px) { .campos { grid-template-columns: 1fr; } }
+
+.campo { display: flex; flex-direction: column; gap: 7px; }
+
+.campoRotulo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--fg3);
+}
+
+.campoControle { display: flex; align-items: center; gap: 6px; }
+
+.dataInput,
+.select {
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: var(--fg);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  padding: 9px 11px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out);
+}
+.dataInput:hover, .select:hover { border-color: var(--fg3); background: var(--surface3); }
+.dataInput:focus-visible, .select:focus-visible { border-color: var(--accent); outline: 2px solid var(--focus); outline-offset: 1px; }
+.dataInput::-webkit-calendar-picker-indicator { filter: invert(.6); cursor: pointer; }
+
+.limpar {
+  width: 30px; height: 34px;
+  flex-shrink: 0;
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--fg3);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+.limpar:hover { background: var(--surface3); color: var(--fg); border-color: var(--fg3); }
+
+/* ── Atalho pra pasta ──────────────────────────────────────────────────── */
+.atalhoPasta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 13px 15px;
+  cursor: pointer;
+  transition: border-color var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out);
+}
+.atalhoPasta:hover { border-color: var(--accent); background: var(--surface3); }
+.atalhoBolinha { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.atalhoTexto { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.atalhoNome { font-size: 14px; font-weight: 650; color: var(--fg); }
+.atalhoMeta { font-size: 12px; color: var(--fg3); }
+.atalhoSeta { color: var(--fg3); transform: rotate(180deg); flex-shrink: 0; }
+
+/* ── Anotacao ──────────────────────────────────────────────────────────── */
+.bloco { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
+
+.blocoRotulo {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--fg3);
+}
+
+.anotacao {
+  flex: 1;
+  min-height: 150px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--fg);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  outline: none;
+  resize: vertical;
+  transition: border-color var(--dur-micro) var(--ease-out);
+}
+.anotacao:focus { border-color: var(--accent); }
+.anotacao::placeholder { color: var(--fg3); }
+
+/* ── Rodape ────────────────────────────────────────────────────────────── */
+.rodape { display: flex; justify-content: flex-end; padding-top: 4px; }
+
+.excluir {
+  display: flex; align-items: center; gap: 7px;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  color: var(--fg3);
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+.excluir:hover { background: rgba(224,64,64,.14); color: var(--danger); border-color: rgba(224,64,64,.45); }
+
+.vazio {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  color: var(--fg3); font-size: 14px;
+}
+.btnVoltar {
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  color: #fff; background: var(--accent);
+  border: none; border-radius: var(--r-sm); padding: 9px 16px; cursor: pointer;
+}

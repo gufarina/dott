@@ -16,6 +16,10 @@ export function FolderNotesView() {
   const setView = useStore(st => st.setView)
   const createNote = useStore(st => st.createNote)
   const createFolder = useStore(st => st.createFolder)
+  const tasks = useStore(st => st.tasks)
+  const addTask = useStore(st => st.addTask)
+  const addGroup = useStore(st => st.addGroup)
+  const toggleTask = useStore(st => st.toggleTask)
   const setFolderCover = useStore(st => st.setFolderCover)
   const setNoteCover = useStore(st => st.setNoteCover)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -26,8 +30,16 @@ export function FolderNotesView() {
   const [seletorSimbolo, setSeletorSimbolo] = useState<string | null>(null)
   const [novaPasta, setNovaPasta] = useState(false)
   const [nomePasta, setNomePasta] = useState('')
+  const [novaTarefa, setNovaTarefa] = useState(false)
+  const [textoTarefa, setTextoTarefa] = useState('')
 
   const folderNotes = notes.filter(n => n.folderId === folder)
+  /** Tarefas desta pasta, achatadas dos grupos e com o grupo junto. */
+  const folderTasks = tasks.flatMap(g => g.items
+    .filter(t => t.folderId === folder)
+    .map(t => ({ ...t, grupo: g })))
+  const tarefasAbertas = folderTasks.filter(t => !t.done).length
+  const tarefasFeitas = folderTasks.length - tarefasAbertas
   const folderObj = category && folder
     ? para[category]?.folders.find(f => f.id === folder)
     : undefined
@@ -39,6 +51,21 @@ export function FolderNotesView() {
     const id = createNote(folder, 'Nova nota')
     showToast('info', 'Nota criada', 'Escreva do seu jeito. O Dott conecta sozinho.')
     setView('editor', { note: id })
+  }
+
+  /** Cria a tarefa JA amarrada nesta pasta. Se nao houver nenhuma lista ainda,
+   *  cria uma com o nome da propria pasta - assim a tarefa nunca fica orfa. */
+  const criarTarefa = () => {
+    const texto = textoTarefa.trim()
+    if (!texto || !folder) return
+    const nomeLista = folderObj?.name ?? 'Tarefas'
+    // A lista espelha a pasta: se ja existe uma com esse nome, usa; senao cria.
+    // Cair em tasks[0] jogaria a tarefa de "Habitos" dentro de "Comece aqui".
+    const grupoId = tasks.find(g => g.name === nomeLista)?.id ?? addGroup(nomeLista)
+    if (!grupoId) return
+    addTask(grupoId, texto, folder)
+    setTextoTarefa('')
+    showToast('info', 'Tarefa criada', `Em "${nomeLista}", na pasta e na lista de tarefas.`)
   }
 
   const criarPasta = () => {
@@ -93,16 +120,48 @@ export function FolderNotesView() {
         <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={onFile} />
       </div>
 
-      {/* Barra de acoes: UM botao por item, cada um com icone e rotulo. */}
+      {/* Barra de acoes: UM botao por item, cada um com icone e rotulo.
+          A pasta guarda NOTA e TAREFA - por isso os dois nascem aqui. */}
       <div className={s.toolbar}>
-        <span className={s.count}>{folderNotes.length} nota{folderNotes.length === 1 ? '' : 's'}</span>
+        <span className={s.count}>
+          {folderNotes.length} nota{folderNotes.length === 1 ? '' : 's'}
+          {folderTasks.length > 0 && (
+            <> · {tarefasAbertas} de {folderTasks.length} tarefa{folderTasks.length === 1 ? '' : 's'} aberta{tarefasAbertas === 1 ? '' : 's'}</>
+          )}
+        </span>
         <button className={s.btnNew} onClick={newNote} title="Criar uma nota nesta pasta">
           <Icon name="nota" size={14} /> Nova nota
         </button>
-        <button className={s.btnNewAlt} onClick={() => setNovaPasta(v => !v)} title="Criar outra pasta nesta categoria">
+        <button className={s.btnNewAlt} onClick={() => { setNovaTarefa(v => !v); setNovaPasta(false) }} title="Criar uma tarefa nesta pasta">
+          <Icon name="tarefa" size={14} /> Nova tarefa
+        </button>
+        <button className={s.btnNewAlt} onClick={() => { setNovaPasta(v => !v); setNovaTarefa(false) }} title="Criar outra pasta nesta categoria">
           <Icon name="pasta" size={14} /> Nova pasta
         </button>
       </div>
+
+      {novaTarefa && (
+        <div className={s.newFolderRow}>
+          <Icon name="tarefa" size={14} className={s.newFolderIcon} />
+          <input
+            className={s.newFolderInput}
+            placeholder={`O que precisa ser feito em ${folderObj?.name ?? 'nesta pasta'}?`}
+            value={textoTarefa}
+            autoFocus
+            onChange={e => setTextoTarefa(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter') criarTarefa()
+              if (e.key === 'Escape') { setNovaTarefa(false); setTextoTarefa('') }
+            }}
+          />
+          <button className={s.newFolderOk} onClick={criarTarefa} title="Criar tarefa">
+            <Icon name="mais" size={14} />
+          </button>
+          <button className={s.newFolderCancel} onClick={() => { setNovaTarefa(false); setTextoTarefa('') }} title="Fechar">
+            <Icon name="fechar" size={13} />
+          </button>
+        </div>
+      )}
 
       {novaPasta && (
         <div className={s.newFolderRow}>
@@ -128,12 +187,60 @@ export function FolderNotesView() {
       )}
 
       <div className={s.body}>
+        {/* As tarefas da pasta vem ANTES das notas: sao o que tem prazo. */}
+        {folderTasks.length > 0 && (
+          <section className={s.secaoTarefas}>
+            <div className={s.secaoTitulo}>
+              <Icon name="tarefa" size={13} />
+              Tarefas desta pasta
+              <span className={s.secaoContagem}>{tarefasFeitas}/{folderTasks.length}</span>
+            </div>
+            <div className={s.listaTarefas}>
+              {folderTasks.map(t => (
+                <div key={t.id} className={s.linhaTarefa}>
+                  <button
+                    className={`${s.tarefaCheck} ${t.done ? s.tarefaFeita : ''}`}
+                    onClick={() => toggleTask(t.id)}
+                    title={t.done ? 'Reabrir' : 'Concluir'}
+                    aria-label={t.done ? 'Reabrir tarefa' : 'Concluir tarefa'}
+                  />
+                  <button
+                    className={s.tarefaCorpo}
+                    onClick={() => setView('task', { task: t.id })}
+                    title="Abrir a tarefa"
+                  >
+                    <span className={`${s.tarefaTexto} ${t.done ? s.tarefaTextoFeito : ''}`}>{t.text}</span>
+                    <span className={s.tarefaMeta}>
+                      <span className={s.tarefaGrupo}>
+                        <span className={s.tarefaPonto} style={{ background: t.grupo.color }} />
+                        {t.grupo.name}
+                      </span>
+                      {t.deadline && (
+                        <span className={`${s.tarefaPrazo} ${t.over ? s.prazoAtrasado : t.urgent ? s.prazoHoje : ''}`}>
+                          {t.over ? 'atrasado' : t.urgent ? 'hoje' : t.deadline.slice(5).replace('-', '/')}
+                        </span>
+                      )}
+                    </span>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {folderNotes.length === 0 ? (
           <div className={s.empty}>
-            <p>Nenhuma nota nesta pasta ainda.</p>
-            <button className={s.btnNewBig} onClick={newNote}>
-              <Icon name="nota" size={15} /> Criar primeira nota
-            </button>
+            <p>{folderTasks.length > 0 ? 'Nenhuma nota nesta pasta ainda.' : 'Esta pasta está vazia.'}</p>
+            <div className={s.emptyAcoes}>
+              <button className={s.btnNewBig} onClick={newNote}>
+                <Icon name="nota" size={15} /> Criar primeira nota
+              </button>
+              {folderTasks.length === 0 && (
+                <button className={s.btnNewBigAlt} onClick={() => setNovaTarefa(true)}>
+                  <Icon name="tarefa" size={15} /> Criar primeira tarefa
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           <div className={s.grid}>

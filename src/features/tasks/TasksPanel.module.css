@@ -101,8 +101,8 @@
 .item {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 7px 8px;
+  gap: 9px;
+  padding: 8px;
   border-radius: var(--r-sm);
   transition: background var(--dur-micro) var(--ease-out);
 }
@@ -112,12 +112,16 @@
   width: 16px; height: 16px;
   border-radius: 6px;
   border: 1.5px solid var(--border-control);
+  background: transparent;
+  padding: 0;
   flex-shrink: 0;
   margin-top: 1px;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
 }
+.check:hover { border-color: var(--success); }
+.check:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .check.done { background: var(--success); border-color: var(--success); }
 /* Marca desenhada, nao glifo de texto: glifo muda de forma por fonte e nao
    tem peso de traco consistente com o resto dos icones. */
@@ -129,16 +133,40 @@
   transform: rotate(-45deg) translate(1px, -1px);
 }
 
-.text { flex: 1; font-size: 13px; color: var(--fg); line-height: 1.45; }
+/* O corpo da tarefa e um botao: clicar abre a tarefa (onde moram prazo, pasta,
+   lista e anotacao). Duplo-clique continua editando o titulo no lugar. */
+.corpoTarefa {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 4px; align-items: flex-start;
+  font-family: inherit; text-align: left;
+  background: transparent; border: none; padding: 0; cursor: pointer;
+}
+.corpoTarefa:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--r-xs); }
+
+.text { font-size: 13px; color: var(--fg); line-height: 1.45; }
+
+.tarefaMeta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+/* De onde a tarefa veio: a pasta do PARA, com a cor do quadrante. */
+.pastaChip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10.5px; font-weight: 600; color: var(--fg3);
+  background: var(--surface3); border-radius: var(--r-xs);
+  padding: 2px 7px; max-width: 150px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pastaPonto { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.temNota { color: var(--fg3); display: inline-flex; }
 .text.done { text-decoration: line-through; color: var(--fg3); }
 
 .deadline {
-  font-size: 11px;
-  padding: 2px 6px;
+  font-size: 10.5px;
+  padding: 2px 7px;
   border-radius: var(--r-xs);
   flex-shrink: 0;
   font-weight: 600;
-  margin-top: 2px;
+  color: var(--fg3);
+  background: var(--surface3);
 }
 .urgent { background: rgba(217,140,58,.15); color: var(--warn); }
 .over   { background: rgba(224,64,64,.15);  color: var(--danger); }
@@ -180,30 +208,61 @@
 .groupDel:hover { background: rgba(224,64,64,.15); color: var(--danger); }
 
 /* Botão de prazo (calendário) + input de data escondido por cima */
-.dateBtn {
-  position: relative; flex-shrink: 0; cursor: pointer;
-  opacity: 0; margin-top: 1px; line-height: 1;
-  color: var(--fg3);
-  display: flex; align-items: center; justify-content: center;
-  transition: opacity var(--dur-micro) var(--ease-out);
-}
-.item:hover .dateBtn { opacity: .6; }
-.dateBtn:hover { opacity: 1; }
-.dateInput {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  opacity: 0; cursor: pointer; border: none;
+/* ── Acoes da linha ────────────────────────────────────────────────────────
+   Antes: o prazo era um icone solto (sem caixa, sem area de clique, opacidade
+   .6) e o excluir era um botao de 18px com fundo no hover. Dois pesos e duas
+   areas de toque diferentes lado a lado - dai a sensacao de desbalanceio.
+   Agora os dois sao o MESMO botao de 26px, mesma caixa e mesmo raio; o que
+   muda e so a cor do hover, que e o que diz o que a acao faz. */
+.acoes {
+  display: flex; align-items: center; gap: 2px;
+  flex-shrink: 0; margin-top: -2px;
 }
 
-/* Excluir tarefa — aparece no hover da linha */
-.taskDel {
-  width: 18px; height: 18px; border: none; background: transparent;
-  color: var(--fg3); cursor: pointer; border-radius: var(--r-xs);
-  line-height: 1; opacity: 0; flex-shrink: 0; margin-top: 1px;
+.acaoBtn {
+  position: relative;
+  width: 26px; height: 26px;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  border-radius: var(--r-xs);
+  background: transparent;
+  color: var(--fg3);
+  cursor: pointer;
+  padding: 0;
   display: flex; align-items: center; justify-content: center;
-  transition: opacity var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+  opacity: 0;
+  transition: opacity var(--dur-micro) var(--ease-out),
+              background var(--dur-micro) var(--ease-out),
+              color var(--dur-micro) var(--ease-out),
+              border-color var(--dur-micro) var(--ease-out);
 }
-.item:hover .taskDel { opacity: 1; }
-.taskDel:hover { background: rgba(224,64,64,.15); color: var(--danger); }
+.item:hover .acaoBtn { opacity: .75; }
+.acaoBtn:hover,
+.acaoBtn:focus-visible {
+  opacity: 1;
+  background: var(--surface3);
+  color: var(--fg);
+  border-color: var(--border2);
+}
+.acaoBtn:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+/* Prazo definido: o botao fica aceso mesmo sem hover - a linha precisa dizer
+   que tem prazo mesmo quando o cursor esta longe. */
+.acaoAtiva { opacity: 1 !important; color: var(--accent); }
+.acaoAtiva:hover { background: var(--accent-s); color: var(--accent); border-color: var(--accent); }
+
+/* Destruir e vermelho SO no hover: em repouso nao pode competir com o resto. */
+.acaoPerigo:hover,
+.acaoPerigo:focus-visible {
+  background: rgba(224,64,64,.15);
+  color: var(--danger);
+  border-color: rgba(224,64,64,.4);
+}
+
+.dateInput {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  opacity: 0; cursor: pointer; border: none; padding: 0;
+}
 
 /* Edição inline da tarefa */
 .editInput {
@@ -212,21 +271,59 @@
   border-radius: var(--r-xs); padding: 2px 6px; outline: none;
 }
 
-/* Adicionar tarefa / grupo */
+/* ── Adicionar tarefa ──────────────────────────────────────────────────────
+   Semiotica: o sinal de criar e o "+", nunca a caixa-com-check (essa significa
+   ESTADO de tarefa, e usa-la pra criar e erro de categoria - a linha lia como
+   uma tarefa ja concluida chamada "tarefa").
+   O "+" ocupa a MESMA posicao e o MESMO tamanho da caixa de marcar das linhas
+   de cima, entao a fileira inteira se le como um lugar vazio esperando virar
+   tarefa. Em repouso e discreto; no hover ganha superficie e o "+" acende. */
 .addTask {
-  width: 100%; text-align: left; font-family: inherit; font-size: 12.5px;
-  color: var(--fg3); background: transparent; border: none; cursor: pointer;
-  padding: 6px 9px; border-radius: var(--r-sm); margin-top: 2px;
-  display: flex; align-items: center; gap: 7px;
-  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+  width: 100%; text-align: left; font-family: inherit; font-size: 13px;
+  color: var(--fg3); background: transparent;
+  border: 1px solid transparent; cursor: pointer;
+  padding: 7px 8px; border-radius: var(--r-sm); margin-top: 2px;
+  display: flex; align-items: center; gap: 8px;
+  transition: background var(--dur-micro) var(--ease-out),
+              color var(--dur-micro) var(--ease-out),
+              border-color var(--dur-micro) var(--ease-out);
 }
-.addTask:hover { background: var(--surface2); color: var(--fg2); }
+.addTask:hover { background: var(--surface2); color: var(--fg2); border-color: var(--border); }
+.addTask:hover .addMais { border-color: var(--accent); color: var(--accent); }
+.addTask:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+/* O "+" na casa da caixa de marcar: mesma medida, mesmo raio, tracejado -
+   "ainda nao existe". */
+.addMais {
+  width: 16px; height: 16px; flex-shrink: 0;
+  border-radius: 6px;
+  border: 1.5px dashed var(--border-control);
+  color: var(--fg3);
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+
+.addRow {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 2px; padding: 6px 8px;
+  background: var(--surface2);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-sm);
+}
+.addRow .addMais { border-style: solid; border-color: var(--accent); color: var(--accent); }
 .addInput {
-  width: 100%; font-family: inherit; font-size: 13px; color: var(--fg);
-  background: var(--surface2); border: 1px solid var(--border-control);
-  border-radius: var(--r-sm); padding: 7px 9px; margin-top: 2px; outline: none;
+  flex: 1; min-width: 0;
+  font-family: inherit; font-size: 13px; color: var(--fg);
+  background: transparent; border: none; padding: 1px 0; outline: none;
 }
-.addInput:focus { border-color: var(--accent); }
+.addInput::placeholder { color: var(--fg3); }
+.addDica {
+  flex-shrink: 0;
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--fg3); background: var(--surface3);
+  border: 1px solid var(--border2); border-radius: 5px;
+  padding: 1px 5px; line-height: 1.5;
+}
 
 .addGroup {
   width: 100%; font-family: inherit; font-size: 12.5px; font-weight: 600;
@@ -248,7 +345,6 @@
    existe hover — eles ficariam INALCANCAVEIS. Aqui viram sempre visiveis.
    Prazo, excluir grupo e excluir tarefa. */
 @media (hover: none) {
-  .dateBtn { opacity: 1; }
+  .acaoBtn { opacity: 1; }
   .groupDel { opacity: 1; }
-  .taskDel { opacity: 1; }
 }

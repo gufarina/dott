@@ -9,11 +9,18 @@ export function Breadcrumb() {
   const para = useStore(st => st.para)
   const navigateBack = useStore(st => st.navigateBack)
   const setView = useStore(st => st.setView)
+  const taskId = useStore(st => st.task)
+  const tasks = useStore(st => st.tasks)
 
   if (view === 'board') return null
 
   const quad = category ? para[category] : null
   const folderObj = folder && quad ? quad.folders.find(f => f.id === folder) : null
+  /** Na tela da tarefa o caminho termina nela, com o titulo encurtado. */
+  const tarefa = view === 'task' ? tasks.flatMap(g => g.items).find(t => t.id === taskId) : null
+  const tituloCurto = tarefa
+    ? (tarefa.text.length > 42 ? tarefa.text.slice(0, 40).trim() + '…' : tarefa.text)
+    : null
 
   return (
     <div className={s.breadcrumb}>
@@ -38,7 +45,19 @@ export function Breadcrumb() {
       {folderObj && (
         <>
           <span className={s.sep}>›</span>
-          <span className={`${s.item} ${s.active}`}>{folderObj.name}</span>
+          <span
+            className={`${s.item} ${tarefa ? '' : s.active}`}
+            onClick={tarefa ? () => setView('canvas', { category: category!, folder: folder! }) : undefined}
+            title={tarefa ? `Voltar para ${folderObj.name}` : undefined}
+          >
+            {folderObj.name}
+          </span>
+        </>
+      )}
+      {tituloCurto && (
+        <>
+          <span className={s.sep}>›</span>
+          <span className={`${s.item} ${s.active}`} title={tarefa!.text}>{tituloCurto}</span>
         </>
       )}
     </div>

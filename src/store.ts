@@ -26,7 +26,7 @@ function deriveTitle(content: string): string {
   return clean.length > 60 ? clean.slice(0, 58).trim() + '…' : (clean || 'Sem título')
 }
 
-export type View = 'board' | 'canvas' | 'editor' | 'graph'
+export type View = 'board' | 'canvas' | 'editor' | 'graph' | 'task'
 export type Theme = 'dark' | 'light'
 export type CardType = 'NOTA' | 'CODIGO' | 'SHELL' | 'URL' | 'IDEIA' | 'AUDIO' | 'VIDEO' | 'IMAGEM' | 'ARQUIVO' | 'LINK' | 'PROMPT' | 'TAREFA' | 'CONTATO'
 
@@ -44,7 +44,9 @@ export interface Folder {
   name: string
   bg: string
   notes: number
+  /** Tarefas CONCLUIDAS nesta pasta. Derivado, nunca escrito a mao. */
   tasks: number
+  /** Tarefas TOTAIS nesta pasta. Derivado, nunca escrito a mao. */
   total: number
   stagnant: boolean
   cover?: string
@@ -65,6 +67,10 @@ export interface TaskItem {
   deadline?: string | null
   over?: boolean
   urgent?: boolean
+  /** Pasta do PARA a que esta tarefa pertence. Sem pasta = tarefa solta. */
+  folderId?: string
+  /** Anotacao livre da tarefa: o detalhe que nao cabe no titulo. */
+  notes?: string
 }
 
 export interface TaskGroup {
@@ -100,6 +106,8 @@ interface AppState {
   category: string | null
   folder: string | null
   note: string | null
+  /** Tarefa aberta na tela de detalhe (view 'task'). */
+  task: string | null
   theme: Theme
   filterPrazo: boolean
   showCompleted: boolean
@@ -116,23 +124,29 @@ interface AppState {
   /** true durante o boot (carregando o vault); controla a tela de loading */
   booting: boolean
 
-  setView: (view: View, data?: { category?: string; folder?: string; note?: string }) => void
+  setView: (view: View, data?: { category?: string; folder?: string; note?: string; task?: string }) => void
   navigateBack: () => void
   toggleTheme: () => void
   toggleFilter: (type?: 'prazo' | 'completed') => void
   setLeftTab: (tab: 'inbox' | 'tags') => void
   captureCard: (content: string) => void
   toggleTask: (id: string) => void
-  /** Cria uma tarefa num grupo */
-  addTask: (groupId: string, text: string) => void
+  /** Cria uma tarefa num grupo, opcionalmente ja amarrada a uma pasta */
+  addTask: (groupId: string, text: string, folderId?: string) => string
   /** Edita o texto de uma tarefa */
   editTask: (id: string, text: string) => void
   /** Remove uma tarefa */
   deleteTask: (id: string) => void
   /** Define/limpa o prazo (YYYY-MM-DD) de uma tarefa */
   setTaskDeadline: (id: string, deadline: string | null) => void
-  /** Cria um grupo de tarefas */
-  addGroup: (name: string) => void
+  /** Amarra (ou solta, com null) a tarefa numa pasta do PARA */
+  setTaskFolder: (id: string, folderId: string | null) => void
+  /** Anotacao livre da tarefa */
+  setTaskNotes: (id: string, notes: string) => void
+  /** Move a tarefa para outro grupo */
+  setTaskGroup: (id: string, groupId: string) => void
+  /** Cria um grupo de tarefas. Devolve o id. */
+  addGroup: (name: string) => string
   /** Remove um grupo de tarefas (e suas tarefas) */
   deleteGroup: (id: string) => void
   createFolder: (categoryId: string, name: string) => void
@@ -165,7 +179,7 @@ const INITIAL_PARA: Record<string, Quadrant> = {
     id: 'projects', label: 'Projetos', color: 'var(--q-p)',
     suggestions: ['Trabalho', 'Pessoal', 'Produto', 'Lancamento', 'Migracao'],
     folders: [
-      { id: 'start', name: 'Comece aqui', bg: 'oklch(24% 0.08 20)', notes: 5, tasks: 3, total: 3, stagnant: false },
+      { id: 'start', name: 'Comece aqui', bg: 'oklch(24% 0.08 20)', notes: 0, tasks: 0, total: 0, stagnant: false },
       { id: 'primeiro', name: 'Meu primeiro projeto', bg: 'oklch(22% 0.07 295)', notes: 0, tasks: 0, total: 0, stagnant: false },
     ]
   },
@@ -228,17 +242,54 @@ function deriveTags(notes: Note[]): Tag[] {
 /** Contagem de notas por pasta, derivada das notas reais.
  *  Sem isso a pasta guardava o numero do seed pra sempre — e o card que voce
  *  acabou de soltar nela nao aparecia em lugar nenhum, parecendo que o drop falhou. */
+/** Reconta o que cada pasta tem: notas E tarefas.
+ *
+ *  Ate 25/08/2026 esta funcao so recontava NOTAS, mas o card da pasta ja
+ *  desenhava "3 tarefas" e uma barra de progresso - numeros que vinham do seed
+ *  e nunca mudavam. Era um numero que mentia. Agora os tres sao derivados do
+ *  estado real, entao envelhecer virou impossivel. */
 function recountFolders(
   para: Record<string, Quadrant>,
   notes: Note[],
+  groups: TaskGroup[] = [],
 ): Record<string, Quadrant> {
-  const perFolder = new Map<string, number>()
-  for (const n of notes) if (n.folderId) perFolder.set(n.folderId, (perFolder.get(n.folderId) ?? 0) + 1)
+  const notasPor = new Map<string, number>()
+  for (const n of notes) if (n.folderId) notasPor.set(n.folderId, (notasPor.get(n.folderId) ?? 0) + 1)
+
+  const totalPor = new Map<string, number>()
+  const feitasPor = new Map<string, number>()
+  for (const g of groups) {
+    for (const t of g.items) {
+      if (!t.folderId) continue
+      totalPor.set(t.folderId, (totalPor.get(t.folderId) ?? 0) + 1)
+      if (t.done) feitasPor.set(t.folderId, (feitasPor.get(t.folderId) ?? 0) + 1)
+    }
+  }
+
   const next: Record<string, Quadrant> = {}
   for (const [qid, q] of Object.entries(para)) {
-    next[qid] = { ...q, folders: q.folders.map(f => ({ ...f, notes: perFolder.get(f.id) ?? 0 })) }
+    next[qid] = {
+      ...q,
+      folders: q.folders.map(f => ({
+        ...f,
+        notes: notasPor.get(f.id) ?? 0,
+        tasks: feitasPor.get(f.id) ?? 0,
+        total: totalPor.get(f.id) ?? 0,
+      })),
+    }
   }
   return next
+}
+
+/** Recontagem para uso nas acoes: mesma conta do recountFolders, sem gravar.
+ *  Os contadores de pasta sao DERIVADOS - gravar seria criar a chance deles
+ *  envelhecerem, que e exatamente o defeito que estavamos consertando. */
+function comContagem(
+  para: Record<string, Quadrant>,
+  notes: Note[],
+  groups: TaskGroup[],
+): Record<string, Quadrant> {
+  return recountFolders(para, notes, groups)
 }
 
 const SEED_GRAPH = graphOf(SEED_NOTES)
@@ -252,9 +303,9 @@ function loadTheme(): Theme {
 
 const SEED_TASKS: TaskGroup[] = [
   { id: 'g1', name: 'Comece aqui', color: '#e05a38', items: [
-    { id: 't1', done: false, text: 'Ler a nota de boas-vindas' },
-    { id: 't2', done: false, text: 'Capturar 3 pensamentos pelo widget' },
-    { id: 't3', done: false, text: 'Criar sua primeira pasta' },
+    { id: 't1', done: false, text: 'Ler a nota de boas-vindas', folderId: 'start' },
+    { id: 't2', done: false, text: 'Capturar 3 pensamentos pelo widget', folderId: 'start' },
+    { id: 't3', done: false, text: 'Criar sua primeira pasta', folderId: 'start' },
   ]},
   { id: 'g2', name: 'Explorar o Dott', color: '#4a8fd9', items: [
     { id: 't4', done: false, text: 'Abrir a Constelação e ver suas notas ligadas' },
@@ -276,6 +327,7 @@ export const useStore = create<AppState>((set, get) => ({
   category: null,
   folder: null,
   note: null,
+  task: null,
   theme: loadTheme(),
   filterPrazo: false,
   showCompleted: false,
@@ -297,25 +349,33 @@ export const useStore = create<AppState>((set, get) => ({
 
   setView: (view, data = {}) => set(s => {
     // When going to board, clear all context to avoid stale breadcrumb state
-    if (view === 'board') return { view, category: null, folder: null, note: null }
+    if (view === 'board') return { view, category: null, folder: null, note: null, task: null }
     // When going to canvas, clear note but keep category/folder from data or previous
     if (view === 'canvas') return {
       view,
       category: data.category !== undefined ? data.category! : s.category,
       folder: data.folder !== undefined ? data.folder! : s.folder,
       note: null,
+      task: null,
     }
     return {
       view,
       category: data.category !== undefined ? data.category! : s.category,
       folder: data.folder !== undefined ? data.folder! : s.folder,
       note: data.note !== undefined ? data.note! : s.note,
+      task: data.task !== undefined ? data.task! : s.task,
     }
   }),
 
   /** Volta UM degrau: editor -> pasta -> categoria -> board. */
   navigateBack: () => {
     const { view, folder, category } = get()
+    // Tarefa aberta: volta pra pasta dela quando tem pasta, senao pro board.
+    if (view === 'task') {
+      if (folder && category) get().setView('canvas', { category, folder })
+      else get().setView('board')
+      return
+    }
     if (view === 'editor') { get().setView('canvas'); return }
     // Dentro de uma pasta, o degrau de cima e a categoria (nao o board).
     if (view === 'canvas' && folder && category) {
@@ -388,18 +448,22 @@ export const useStore = create<AppState>((set, get) => ({
       items: g.items.map(t => t.id === id ? { ...t, done: !t.done } : t)
     }))
     saveTasksFile(tasks)
-    return { tasks }
+    return { tasks, para: comContagem(s.para, s.notes, tasks) }
   }),
 
-  addTask: (groupId, text) => set(s => {
+  addTask: (groupId, text, folderId) => {
     const t = text.trim()
-    if (!t) return s
-    const tasks = s.tasks.map(g => g.id === groupId
-      ? { ...g, items: [...g.items, { id: uid('t'), done: false, text: t }] }
-      : g)
-    saveTasksFile(tasks)
-    return { tasks }
-  }),
+    if (!t) return ''
+    const id = uid('t')
+    set(s => {
+      const tasks = s.tasks.map(g => g.id === groupId
+        ? { ...g, items: [...g.items, { id, done: false, text: t, folderId }] }
+        : g)
+      saveTasksFile(tasks)
+      return { tasks, para: comContagem(s.para, s.notes, tasks) }
+    })
+    return id
+  },
 
   editTask: (id, text) => set(s => {
     const t = text.trim()
@@ -414,7 +478,7 @@ export const useStore = create<AppState>((set, get) => ({
   deleteTask: (id) => set(s => {
     const tasks = s.tasks.map(g => ({ ...g, items: g.items.filter(it => it.id !== id) }))
     saveTasksFile(tasks)
-    return { tasks }
+    return { tasks, para: comContagem(s.para, s.notes, tasks) }
   }),
 
   setTaskDeadline: (id, deadline) => set(s => {
@@ -426,19 +490,54 @@ export const useStore = create<AppState>((set, get) => ({
     return { tasks }
   }),
 
-  addGroup: (name) => set(s => {
-    const n = name.trim()
-    if (!n) return s
-    const colors = ['#e05a38', '#4a8fd9', '#9b6cdb', '#3db37a', '#d98c3a', '#3db3b3']
-    const tasks = [...s.tasks, { id: uid('g'), name: n, color: colors[s.tasks.length % colors.length], items: [] }]
+  setTaskFolder: (id, folderId) => set(s => {
+    const tasks = s.tasks.map(g => ({
+      ...g,
+      items: g.items.map(it => it.id === id ? { ...it, folderId: folderId ?? undefined } : it),
+    }))
+    saveTasksFile(tasks)
+    return { tasks, para: comContagem(s.para, s.notes, tasks) }
+  }),
+
+  setTaskNotes: (id, notes) => set(s => {
+    const tasks = s.tasks.map(g => ({
+      ...g,
+      items: g.items.map(it => it.id === id ? { ...it, notes } : it),
+    }))
     saveTasksFile(tasks)
     return { tasks }
   }),
 
+  setTaskGroup: (id, groupId) => set(s => {
+    let movida: TaskItem | undefined
+    const semEla = s.tasks.map(g => {
+      const achou = g.items.find(it => it.id === id)
+      if (achou) movida = achou
+      return { ...g, items: g.items.filter(it => it.id !== id) }
+    })
+    if (!movida) return s
+    const tasks = semEla.map(g => g.id === groupId ? { ...g, items: [...g.items, movida!] } : g)
+    saveTasksFile(tasks)
+    return { tasks }
+  }),
+
+  addGroup: (name) => {
+    const n = name.trim()
+    if (!n) return ''
+    const id = uid('g')
+    set(s => {
+      const colors = ['#e05a38', '#4a8fd9', '#9b6cdb', '#3db37a', '#d98c3a', '#3db3b3']
+      const tasks = [...s.tasks, { id, name: n, color: colors[s.tasks.length % colors.length], items: [] }]
+      saveTasksFile(tasks)
+      return { tasks }
+    })
+    return id
+  },
+
   deleteGroup: (id) => set(s => {
     const tasks = s.tasks.filter(g => g.id !== id)
     saveTasksFile(tasks)
-    return { tasks }
+    return { tasks, para: comContagem(s.para, s.notes, tasks) }
   }),
 
   createFolder: (categoryId, name) => {
@@ -505,7 +604,7 @@ export const useStore = create<AppState>((set, get) => ({
     }
     set(s => {
       const notes = [...s.notes, note]
-      const para = recountFolders(s.para, notes)
+      const para = recountFolders(s.para, notes, s.tasks)
       saveFolders(para)
       return { notes, para }
     })
@@ -552,7 +651,7 @@ export const useStore = create<AppState>((set, get) => ({
     }
     set(s => {
       const notes = s.notes.filter(n => n.id !== id)
-      const para = recountFolders(s.para, notes)
+      const para = recountFolders(s.para, notes, s.tasks)
       saveFolders(para)
       return { notes, para, graph: graphOf(notes), tags: deriveTags(notes) }
     })
@@ -582,7 +681,7 @@ export const useStore = create<AppState>((set, get) => ({
     if (!loaded || loaded.length === 0) {
       // Primeiro uso: grava os exemplos no vault nativo.
       for (const n of get().notes) await saveNoteToVault(n)
-      const seeded = recountFolders(get().para, get().notes)
+      const seeded = recountFolders(get().para, get().notes, get().tasks)
       set({ para: seeded, graph: graphOf(get().notes), tags: deriveTags(get().notes) })
       saveFolders(seeded)
       return
@@ -594,7 +693,7 @@ export const useStore = create<AppState>((set, get) => ({
     }))
     // Pastas e tags sao DERIVADAS das notas reais — nunca do que estava salvo,
     // senao o numero da pasta e a lista de tags envelhecem e mentem.
-    const para = recountFolders(get().para, withBl)
+    const para = recountFolders(get().para, withBl, get().tasks)
     // O grafo nasce aqui, do acervo REAL do usuario, sem nenhuma marcacao manual.
     set({ notes: withBl, graph: graphOf(withBl), para, tags: deriveTags(withBl) })
     saveFolders(para)
