@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <b><a href="https://github.com/gufarina/dott/releases/latest/download/Dott_1.0.0_x64-setup.exe">Baixar para Windows (3,4 MB)</a></b>
+  <b><a href="https://github.com/gufarina/dott/releases/latest/download/Dott_0.2.0_x64-setup.exe">Baixar para Windows (3,4 MB)</a></b>
   &nbsp;&middot;&nbsp;
   <a href="https://github.com/gufarina/dott/releases">Todas as versões</a>
   &nbsp;&middot;&nbsp;
@@ -108,7 +108,7 @@ Enquanto a segunda não chega, nada sai da sua máquina: não existe conta para 
 
 ## Instalar
 
-1. [Baixe o instalador](https://github.com/gufarina/dott/releases/latest/download/Dott_1.0.0_x64-setup.exe) (3,4 MB).
+1. [Baixe o instalador](https://github.com/gufarina/dott/releases/latest/download/Dott_0.2.0_x64-setup.exe) (3,4 MB).
 2. Na primeira vez, o Windows mostra um aviso de **"editor desconhecido"**. Clique em **Mais informações** e depois em **Executar assim mesmo**.
 3. A instalação não pede senha de administrador e não pede permissão de rede.
 4. Abra o Dott e aperte `Ctrl` + `Shift` + `Espaço`.
