@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/img/header.png" alt="Dott: anote antes de decidir onde anotar. Windows 10 e 11, instalador de 3,4 MB, sem conta, sem nuvem, sem IA." width="100%">
+  <img src="docs/img/header.png" alt="Dott: anote antes de decidir onde anotar. Windows 10 e 11, instalador de 3,4 MB, sem conta, sem cadastro." width="100%">
 </p>
 
 <p align="center">
@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <sub>Beta aberto &middot; de graça &middot; sem cadastro &middot; suas notas ficam na sua máquina</sub>
+  <sub>Beta aberto &middot; de graça &middot; sem cadastro &middot; suas notas são arquivos seus</sub>
 </p>
 
 ---
@@ -53,38 +53,58 @@ Você não precisa organizar. Você precisa esvaziar.
 Projetos, Áreas, Recursos e Arquivo. Elas já vêm prontas, então não há o que configurar e não há o que abandonar. A pergunta que decide é sempre a mesma: isso tem fim, ou é para sempre?
 
 <p align="center">
-  <img src="docs/img/app-inbox-e-para-visao-geral.png" alt="O Dott aberto: Caixa de Entrada à esquerda, as quatro gavetas no centro, tarefas à direita" width="100%">
+  <img src="docs/img/app-inbox-e-para.png" alt="O Dott aberto: Caixa de Entrada à esquerda, as quatro gavetas no centro, tarefas à direita" width="100%">
 </p>
 
-### 4. Cabe coisa séria aqui dentro
+### 4. As notas se ligam sozinhas
 
-Nem tudo que você precisa guardar tem tamanho de recado. No Dott uma nota tem o tamanho que precisar, em texto puro, com o formato que você quiser.
+Aqui está a parte que nenhum caderno faz.
 
-Quando uma nota fala de outra, você amarra as duas escrevendo o nome dela entre colchetes duplos. O Dott desenha essas ligações numa tela só, e você vê os fios entre coisas que pareciam soltas. Para achar qualquer coisa depois, `Ctrl` + `K` e o começo da palavra.
+Você escreve do seu jeito, sem marcar nada, sem aprender sintaxe nenhuma. O Dott lê o que você escreveu e liga as notas que têm a ver umas com as outras. A anotação da reunião encontra o orçamento daquele cliente sem que nenhuma das duas cite a outra, porque as duas falam das mesmas coisas.
 
-<p align="center">
-  <img src="docs/img/app-nota-aberta-wikilink.png" alt="Uma nota aberta, com uma ligação em colchetes duplos" width="49%">
-  <img src="docs/img/app-constelacao-notas.png" alt="A constelação: cada ponto é uma nota, e os fios entre eles são as ligações" width="49%">
-</p>
-
-<p align="center">
-  <img src="docs/img/app-busca-marcenaria.png" alt="Busca global com Ctrl + K, achando notas, pastas e itens da caixa" width="100%">
-</p>
-
-## Onde os seus dados estão
-
-Promessa de privacidade é fácil de escrever e impossível de conferir. Então aqui não é promessa.
-
-O Dott não tem, dentro dele, nenhum pedaço de programa que saiba conversar com a internet. Não foi desligado: nunca foi colocado. Não existe servidor para onde mandar, não existe conta para criar, não existe login para fazer.
+E ele nunca esconde de onde veio a ligação:
 
 | | |
 |---|---|
-| **Sem nuvem** | Tudo numa pasta do seu computador. |
-| **Sem conta** | Baixou, abriu, escreveu. |
-| **Sem modelo de IA** | Nenhum algoritmo lê suas notas, porque não tem nenhum aqui dentro. |
-| **Sem sincronização** | Backup manual para uma pasta sua, quando você mandar. |
+| **Achada** | Estava escrito no seu texto: você citou o nome da outra nota, ou as duas carregam a mesma etiqueta. |
+| **Inferida** | O Dott deduziu por semelhança, porque as duas repetem as mesmas palavras raras. |
 
-Suas notas são arquivos de texto numa pasta do seu computador. Você pode abrir cada uma delas em qualquer editor, hoje ou daqui a dez anos, mesmo que o Dott tenha deixado de existir.
+Se não houver parentesco de verdade, a nota fica sozinha mesmo. O Dott prefere ficar quieto a inventar uma conexão que não existe.
+
+<p align="center">
+  <img src="docs/img/app-nota-conectada.png" alt="Uma nota aberta com o bloco Conectadas automaticamente no rodapé, mostrando o motivo de cada ligação" width="100%">
+</p>
+
+Na **Constelação** você vê o mapa inteiro. Cada ponto é uma nota, cada cor é um assunto que o Dott encontrou sozinho, e a linha entre dois pontos é uma ligação: cheia quando foi achada no texto, tracejada quando foi inferida.
+
+<p align="center">
+  <img src="docs/img/app-constelacao-temas.png" alt="A Constelação: notas agrupadas por assunto, cada grupo com sua cor, e a lista de temas ao lado" width="100%">
+</p>
+
+Isso tudo roda dentro do seu computador, em alguns milésimos de segundo, sem internet e sem inteligência artificial. Não é um modelo lendo suas notas: é contagem de palavras, feita na sua máquina, e por isso é instantâneo e é de graça para sempre.
+
+### 5. Achar depois é `Ctrl` + `K`
+
+O começo da palavra já basta. A busca acha notas, pastas e itens da caixa de entrada.
+
+<p align="center">
+  <img src="docs/img/app-busca.png" alt="Busca global com Ctrl + K, achando notas e pastas pelo começo da palavra" width="100%">
+</p>
+
+## Onde as suas notas moram
+
+Você escolhe. Hoje existe uma opção pronta e outra a caminho.
+
+<p align="center">
+  <img src="docs/img/app-onde-suas-notas-moram.png" alt="A tela de escolha: só neste computador, disponível agora, ou em todos os aparelhos, em breve" width="100%">
+</p>
+
+| | |
+|---|---|
+| **Só neste computador** | Disponível agora. Suas notas viram arquivos de texto numa pasta sua. Abrem em qualquer editor, hoje ou daqui a dez anos, mesmo que o Dott tenha deixado de existir. |
+| **Em todos os aparelhos** | Em breve. Ainda estamos construindo. Dentro do app, na engrenagem, você deixa seu e-mail e é avisado no dia em que abrir. |
+
+Enquanto a segunda não chega, nada sai da sua máquina: não existe conta para criar, não existe login para fazer, e nenhum modelo de inteligência artificial lê o que você escreve.
 
 ## Instalar
 
@@ -93,28 +113,34 @@ Suas notas são arquivos de texto numa pasta do seu computador. Você pode abrir
 3. A instalação não pede senha de administrador e não pede permissão de rede.
 4. Abra o Dott e aperte `Ctrl` + `Shift` + `Espaço`.
 
-Se o seu Windows ainda não tiver o componente que o Dott usa para desenhar a tela (o WebView2, que o Windows 11 já traz), o instalador baixa esse componente na hora. É a única vez que o Dott precisa de internet.
+Se o seu Windows ainda não tiver o componente que o Dott usa para desenhar a tela (o WebView2, que o Windows 11 já traz), o instalador baixa esse componente na hora.
 
 **Requisitos:** Windows 10 ou 11, 64 bits.
 
 ## A letra que não é miúda
 
-Quatro coisas que o Dott não faz. Melhor ler aqui do que descobrir depois de instalar.
+Quatro coisas que o Dott ainda não faz. Melhor ler aqui do que descobrir depois de instalar.
 
-- **Não sincroniza entre computadores.** O que você escreve no computador do escritório fica no computador do escritório.
+- **Ainda não sincroniza entre computadores.** O que você escreve no computador do escritório fica no computador do escritório. Está sendo construído, e dá para entrar na lista de espera dentro do app.
 - **Não tem versão de celular.** A ideia que chegou na rua ainda precisa esperar você sentar.
 - **Não roda em Mac nem em Linux.** Só Windows 10 e 11, por enquanto.
-- **O backup é você que manda fazer.** Ele copia tudo para uma pasta em Documentos, quando você clica. Nada acontece sozinho, e nada sobe para lugar nenhum.
+- **O backup é você que manda fazer.** Ele copia tudo para uma pasta em Documentos, quando você clica. Nada acontece sozinho.
 
-Se alguma dessas quatro for essencial para você, este não é o programa. Sem ressentimento.
+Se alguma dessas quatro for essencial para você hoje, este não é o programa. Sem ressentimento.
 
 ## Perguntas diretas
 
 **É de graça mesmo?**<br>
 É. Não tem preço, não tem plano, não tem cadastro e não tem cartão.
 
+**Preciso ficar marcando as ligações entre as notas?**<br>
+Não. Não existe nada para marcar. Você escreve, e o Dott liga. Se você citar o nome de outra nota no meio do texto, ele entende na hora, mas isso é consequência de escrever normal, não uma regra que você precisa lembrar.
+
+**Isso é inteligência artificial lendo minhas notas?**<br>
+Não. É contagem de palavras rodando na sua máquina, com regra fixa escrita à mão. Não existe modelo aqui dentro, nada sai do seu computador para ser processado em lugar nenhum.
+
 **Preciso de internet para usar?**<br>
-Uma vez só, na instalação, e só se faltar o WebView2. Depois disso funciona no avião, com o roteador desligado, sozinho.
+Não. Só na instalação, e só se faltar o WebView2. Depois disso funciona no avião, com o roteador desligado, sozinho.
 
 **Onde ficam as minhas notas?**<br>
 Em `%APPDATA%\com.studiofarina.dott`. Dentro do Dott, na engrenagem, tem um botão que abre essa pasta.
