@@ -9,7 +9,7 @@
       "source_file": "vite.config.ts",
       "source_location": "L1",
       "id": "vite_config_ts",
-      "community": 40,
+      "community": 41,
       "norm_label": "vite.config.ts"
     },
     {
@@ -45,7 +45,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\App.tsx",
       "source_location": "L1",
       "id": "c_users_lite_os_projetos_dott_warmfox_src_app_tsx",
-      "community": 0,
+      "community": 8,
       "norm_label": "app.tsx"
     },
     {
@@ -54,7 +54,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\App.tsx",
       "source_location": "L57",
       "id": "app_detectaralvo",
-      "community": 0,
+      "community": 8,
       "norm_label": "detectaralvo()"
     },
     {
@@ -63,7 +63,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\App.tsx",
       "source_location": "L79",
       "id": "app_onwindowdragenter",
-      "community": 0,
+      "community": 8,
       "norm_label": "onwindowdragenter()"
     },
     {
@@ -72,7 +72,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\App.tsx",
       "source_location": "L86",
       "id": "app_onwindowdragleave",
-      "community": 0,
+      "community": 8,
       "norm_label": "onwindowdragleave()"
     },
     {
@@ -81,7 +81,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\App.tsx",
       "source_location": "L94",
       "id": "app_onwindowdragover",
-      "community": 0,
+      "community": 8,
       "norm_label": "onwindowdragover()"
     },
     {
@@ -99,7 +99,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\App.tsx",
       "source_location": "L136",
       "id": "app_handler",
-      "community": 0,
+      "community": 8,
       "norm_label": "handler()"
     },
     {
@@ -108,7 +108,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\App.tsx",
       "source_location": "L146",
       "id": "app_ondragstart",
-      "community": 0,
+      "community": 8,
       "norm_label": "ondragstart()"
     },
     {
@@ -117,7 +117,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\App.tsx",
       "source_location": "L155",
       "id": "app_ondragover",
-      "community": 0,
+      "community": 8,
       "norm_label": "ondragover()"
     },
     {
@@ -126,25 +126,25 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\App.tsx",
       "source_location": "L163",
       "id": "app_ondragend",
-      "community": 0,
+      "community": 8,
       "norm_label": "ondragend()"
     },
     {
       "label": "main.tsx",
       "file_type": "code",
-      "source_file": "src\\main.tsx",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\main.tsx",
       "source_location": "L1",
-      "id": "src_main_tsx",
-      "community": 27,
+      "id": "c_users_lite_os_projetos_dott_warmfox_src_main_tsx",
+      "community": 28,
       "norm_label": "main.tsx"
     },
     {
       "label": "currentLabel()",
       "file_type": "code",
-      "source_file": "src\\main.tsx",
-      "source_location": "L27",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\main.tsx",
+      "source_location": "L39",
       "id": "main_currentlabel",
-      "community": 27,
+      "community": 28,
       "norm_label": "currentlabel()"
     },
     {
@@ -243,7 +243,7 @@
       "source_file": "src\\vite-env.d.ts",
       "source_location": "L1",
       "id": "src_vite_env_d_ts",
-      "community": 41,
+      "community": 42,
       "norm_label": "vite-env.d.ts"
     },
     {
@@ -252,7 +252,7 @@
       "source_file": "src\\components\\BootLoader.tsx",
       "source_location": "L1",
       "id": "src_components_bootloader_tsx",
-      "community": 28,
+      "community": 29,
       "norm_label": "bootloader.tsx"
     },
     {
@@ -261,7 +261,7 @@
       "source_file": "src\\components\\BootLoader.tsx",
       "source_location": "L17",
       "id": "bootloader_bootloader",
-      "community": 28,
+      "community": 29,
       "norm_label": "bootloader()"
     },
     {
@@ -270,7 +270,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\components\\Breadcrumb.tsx",
       "source_location": "L1",
       "id": "c_users_lite_os_projetos_dott_warmfox_src_components_breadcrumb_tsx",
-      "community": 29,
+      "community": 30,
       "norm_label": "breadcrumb.tsx"
     },
     {
@@ -279,7 +279,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\components\\Breadcrumb.tsx",
       "source_location": "L5",
       "id": "breadcrumb_breadcrumb",
-      "community": 29,
+      "community": 30,
       "norm_label": "breadcrumb()"
     },
     {
@@ -288,7 +288,7 @@
       "source_file": "src\\components\\CardTypeIcon.tsx",
       "source_location": "L1",
       "id": "src_components_cardtypeicon_tsx",
-      "community": 30,
+      "community": 31,
       "norm_label": "cardtypeicon.tsx"
     },
     {
@@ -297,7 +297,7 @@
       "source_file": "src\\components\\CardTypeIcon.tsx",
       "source_location": "L41",
       "id": "cardtypeicon_cardtypeicon",
-      "community": 30,
+      "community": 31,
       "norm_label": "cardtypeicon()"
     },
     {
@@ -306,7 +306,7 @@
       "source_file": "src\\components\\DottMark.tsx",
       "source_location": "L1",
       "id": "src_components_dottmark_tsx",
-      "community": 31,
+      "community": 32,
       "norm_label": "dottmark.tsx"
     },
     {
@@ -315,7 +315,7 @@
       "source_file": "src\\components\\DottMark.tsx",
       "source_location": "L17",
       "id": "dottmark_dottmark",
-      "community": 31,
+      "community": 32,
       "norm_label": "dottmark()"
     },
     {
@@ -324,7 +324,7 @@
       "source_file": "src\\components\\GlyphPicker.tsx",
       "source_location": "L1",
       "id": "src_components_glyphpicker_tsx",
-      "community": 42,
+      "community": 43,
       "norm_label": "glyphpicker.tsx"
     },
     {
@@ -333,7 +333,7 @@
       "source_file": "src\\components\\Icon.tsx",
       "source_location": "L1",
       "id": "src_components_icon_tsx",
-      "community": 32,
+      "community": 33,
       "norm_label": "icon.tsx"
     },
     {
@@ -342,8 +342,35 @@
       "source_file": "src\\components\\Icon.tsx",
       "source_location": "L67",
       "id": "icon_icon",
-      "community": 32,
+      "community": 33,
       "norm_label": "icon()"
+    },
+    {
+      "label": "Modal.tsx",
+      "file_type": "code",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\components\\Modal.tsx",
+      "source_location": "L1",
+      "id": "c_users_lite_os_projetos_dott_warmfox_src_components_modal_tsx",
+      "community": 21,
+      "norm_label": "modal.tsx"
+    },
+    {
+      "label": "Modal()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\components\\Modal.tsx",
+      "source_location": "L20",
+      "id": "modal_modal",
+      "community": 21,
+      "norm_label": "modal()"
+    },
+    {
+      "label": "ModalHint()",
+      "file_type": "code",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\components\\Modal.tsx",
+      "source_location": "L56",
+      "id": "modal_modalhint",
+      "community": 21,
+      "norm_label": "modalhint()"
     },
     {
       "label": "ModalPortal.tsx",
@@ -351,7 +378,7 @@
       "source_file": "src\\components\\ModalPortal.tsx",
       "source_location": "L1",
       "id": "src_components_modalportal_tsx",
-      "community": 33,
+      "community": 34,
       "norm_label": "modalportal.tsx"
     },
     {
@@ -360,7 +387,7 @@
       "source_file": "src\\components\\ModalPortal.tsx",
       "source_location": "L17",
       "id": "modalportal_modalportal",
-      "community": 33,
+      "community": 34,
       "norm_label": "modalportal()"
     },
     {
@@ -369,7 +396,7 @@
       "source_file": "src\\components\\NoteGlyphs.tsx",
       "source_location": "L1",
       "id": "src_components_noteglyphs_tsx",
-      "community": 8,
+      "community": 9,
       "norm_label": "noteglyphs.tsx"
     },
     {
@@ -378,7 +405,7 @@
       "source_file": "src\\components\\NoteGlyphs.tsx",
       "source_location": "L89",
       "id": "noteglyphs_noteglyph",
-      "community": 8,
+      "community": 9,
       "norm_label": "noteglyph()"
     },
     {
@@ -387,7 +414,7 @@
       "source_file": "src\\components\\NoteGlyphs.tsx",
       "source_location": "L111",
       "id": "noteglyphs_isglyphid",
-      "community": 8,
+      "community": 9,
       "norm_label": "isglyphid()"
     },
     {
@@ -396,7 +423,7 @@
       "source_file": "src\\components\\SearchModal.tsx",
       "source_location": "L1",
       "id": "src_components_searchmodal_tsx",
-      "community": 34,
+      "community": 35,
       "norm_label": "searchmodal.tsx"
     },
     {
@@ -405,7 +432,7 @@
       "source_file": "src\\components\\SearchModal.tsx",
       "source_location": "L20",
       "id": "searchmodal_searchmodal",
-      "community": 34,
+      "community": 35,
       "norm_label": "searchmodal()"
     },
     {
@@ -459,7 +486,7 @@
       "source_file": "src\\components\\Titlebar.tsx",
       "source_location": "L1",
       "id": "src_components_titlebar_tsx",
-      "community": 35,
+      "community": 36,
       "norm_label": "titlebar.tsx"
     },
     {
@@ -468,7 +495,7 @@
       "source_file": "src\\components\\Titlebar.tsx",
       "source_location": "L7",
       "id": "titlebar_titlebar",
-      "community": 35,
+      "community": 36,
       "norm_label": "titlebar()"
     },
     {
@@ -504,7 +531,7 @@
       "source_file": "src\\features\\editor\\ImageViewer.tsx",
       "source_location": "L1",
       "id": "src_features_editor_imageviewer_tsx",
-      "community": 36,
+      "community": 37,
       "norm_label": "imageviewer.tsx"
     },
     {
@@ -513,7 +540,7 @@
       "source_file": "src\\features\\editor\\ImageViewer.tsx",
       "source_location": "L15",
       "id": "imageviewer_imageviewer",
-      "community": 36,
+      "community": 37,
       "norm_label": "imageviewer()"
     },
     {
@@ -522,7 +549,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\editor\\MarkdownView.tsx",
       "source_location": "L1",
       "id": "c_users_lite_os_projetos_dott_warmfox_src_features_editor_markdownview_tsx",
-      "community": 21,
+      "community": 22,
       "norm_label": "markdownview.tsx"
     },
     {
@@ -531,7 +558,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\editor\\MarkdownView.tsx",
       "source_location": "L8",
       "id": "markdownview_semcolchetes",
-      "community": 21,
+      "community": 22,
       "norm_label": "semcolchetes()"
     },
     {
@@ -540,7 +567,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\editor\\MarkdownView.tsx",
       "source_location": "L14",
       "id": "markdownview_markdownview",
-      "community": 21,
+      "community": 22,
       "norm_label": "markdownview()"
     },
     {
@@ -549,7 +576,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\editor\\NoteEditor.tsx",
       "source_location": "L1",
       "id": "c_users_lite_os_projetos_dott_warmfox_src_features_editor_noteeditor_tsx",
-      "community": 12,
+      "community": 13,
       "norm_label": "noteeditor.tsx"
     },
     {
@@ -558,7 +585,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\editor\\NoteEditor.tsx",
       "source_location": "L16",
       "id": "noteeditor_parseimageonly",
-      "community": 12,
+      "community": 13,
       "norm_label": "parseimageonly()"
     },
     {
@@ -567,7 +594,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\editor\\NoteEditor.tsx",
       "source_location": "L86",
       "id": "noteeditor_onchange",
-      "community": 12,
+      "community": 13,
       "norm_label": "onchange()"
     },
     {
@@ -576,7 +603,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\editor\\NoteEditor.tsx",
       "source_location": "L96",
       "id": "noteeditor_savetitle",
-      "community": 12,
+      "community": 13,
       "norm_label": "savetitle()"
     },
     {
@@ -585,7 +612,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\editor\\NoteEditor.tsx",
       "source_location": "L100",
       "id": "noteeditor_togglemode",
-      "community": 12,
+      "community": 13,
       "norm_label": "togglemode()"
     },
     {
@@ -601,7 +628,7 @@
       "label": "openNote()",
       "file_type": "code",
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\folder\\FolderNotesView.tsx",
-      "source_location": "L46",
+      "source_location": "L48",
       "id": "foldernotesview_opennote",
       "community": 0,
       "norm_label": "opennote()"
@@ -610,7 +637,7 @@
       "label": "newNote()",
       "file_type": "code",
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\folder\\FolderNotesView.tsx",
-      "source_location": "L48",
+      "source_location": "L50",
       "id": "foldernotesview_newnote",
       "community": 0,
       "norm_label": "newnote()"
@@ -619,7 +646,7 @@
       "label": "criarTarefa()",
       "file_type": "code",
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\folder\\FolderNotesView.tsx",
-      "source_location": "L57",
+      "source_location": "L59",
       "id": "foldernotesview_criartarefa",
       "community": 0,
       "norm_label": "criartarefa()"
@@ -628,7 +655,7 @@
       "label": "criarPasta()",
       "file_type": "code",
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\folder\\FolderNotesView.tsx",
-      "source_location": "L68",
+      "source_location": "L72",
       "id": "foldernotesview_criarpasta",
       "community": 0,
       "norm_label": "criarpasta()"
@@ -637,7 +664,7 @@
       "label": "pickCover()",
       "file_type": "code",
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\folder\\FolderNotesView.tsx",
-      "source_location": "L77",
+      "source_location": "L81",
       "id": "foldernotesview_pickcover",
       "community": 0,
       "norm_label": "pickcover()"
@@ -646,7 +673,7 @@
       "label": "onFile()",
       "file_type": "code",
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\folder\\FolderNotesView.tsx",
-      "source_location": "L82",
+      "source_location": "L86",
       "id": "foldernotesview_onfile",
       "community": 0,
       "norm_label": "onfile()"
@@ -655,7 +682,7 @@
       "label": "onNoteFile()",
       "file_type": "code",
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\folder\\FolderNotesView.tsx",
-      "source_location": "L93",
+      "source_location": "L97",
       "id": "foldernotesview_onnotefile",
       "community": 0,
       "norm_label": "onnotefile()"
@@ -666,7 +693,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\graph\\Constellation.tsx",
       "source_location": "L1",
       "id": "c_users_lite_os_projetos_dott_warmfox_src_features_graph_constellation_tsx",
-      "community": 37,
+      "community": 38,
       "norm_label": "constellation.tsx"
     },
     {
@@ -675,23 +702,23 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\graph\\Constellation.tsx",
       "source_location": "L14",
       "id": "constellation_constellation",
-      "community": 37,
+      "community": 38,
       "norm_label": "constellation()"
     },
     {
       "label": "InboxPanel.tsx",
       "file_type": "code",
-      "source_file": "src\\features\\inbox\\InboxPanel.tsx",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\inbox\\InboxPanel.tsx",
       "source_location": "L1",
-      "id": "src_features_inbox_inboxpanel_tsx",
+      "id": "c_users_lite_os_projetos_dott_warmfox_src_features_inbox_inboxpanel_tsx",
       "community": 0,
       "norm_label": "inboxpanel.tsx"
     },
     {
       "label": "DraggableCard()",
       "file_type": "code",
-      "source_file": "src\\features\\inbox\\InboxPanel.tsx",
-      "source_location": "L13",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\inbox\\InboxPanel.tsx",
+      "source_location": "L14",
       "id": "inboxpanel_draggablecard",
       "community": 0,
       "norm_label": "draggablecard()"
@@ -699,8 +726,8 @@
     {
       "label": "capturarImagem()",
       "file_type": "code",
-      "source_file": "src\\features\\inbox\\InboxPanel.tsx",
-      "source_location": "L96",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\inbox\\InboxPanel.tsx",
+      "source_location": "L97",
       "id": "inboxpanel_capturarimagem",
       "community": 0,
       "norm_label": "capturarimagem()"
@@ -708,8 +735,8 @@
     {
       "label": "aoSoltarArquivo()",
       "file_type": "code",
-      "source_file": "src\\features\\inbox\\InboxPanel.tsx",
-      "source_location": "L104",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\inbox\\InboxPanel.tsx",
+      "source_location": "L105",
       "id": "inboxpanel_aosoltararquivo",
       "community": 0,
       "norm_label": "aosoltararquivo()"
@@ -717,8 +744,8 @@
     {
       "label": "capture()",
       "file_type": "code",
-      "source_file": "src\\features\\inbox\\InboxPanel.tsx",
-      "source_location": "L112",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\inbox\\InboxPanel.tsx",
+      "source_location": "L113",
       "id": "inboxpanel_capture",
       "community": 0,
       "norm_label": "capture()"
@@ -726,8 +753,8 @@
     {
       "label": "doProcess()",
       "file_type": "code",
-      "source_file": "src\\features\\inbox\\InboxPanel.tsx",
-      "source_location": "L121",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\inbox\\InboxPanel.tsx",
+      "source_location": "L122",
       "id": "inboxpanel_doprocess",
       "community": 0,
       "norm_label": "doprocess()"
@@ -735,8 +762,8 @@
     {
       "label": "abrirTarefa()",
       "file_type": "code",
-      "source_file": "src\\features\\inbox\\InboxPanel.tsx",
-      "source_location": "L135",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\inbox\\InboxPanel.tsx",
+      "source_location": "L136",
       "id": "inboxpanel_abrirtarefa",
       "community": 0,
       "norm_label": "abrirtarefa()"
@@ -744,8 +771,8 @@
     {
       "label": "confirmarTarefa()",
       "file_type": "code",
-      "source_file": "src\\features\\inbox\\InboxPanel.tsx",
-      "source_location": "L142",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\inbox\\InboxPanel.tsx",
+      "source_location": "L143",
       "id": "inboxpanel_confirmartarefa",
       "community": 0,
       "norm_label": "confirmartarefa()"
@@ -855,7 +882,7 @@
       "source_file": "src\\features\\para\\PARAGrid.tsx",
       "source_location": "L1",
       "id": "src_features_para_paragrid_tsx",
-      "community": 22,
+      "community": 23,
       "norm_label": "paragrid.tsx"
     },
     {
@@ -864,7 +891,7 @@
       "source_file": "src\\features\\para\\PARAGrid.tsx",
       "source_location": "L26",
       "id": "paragrid_maxnotes",
-      "community": 22,
+      "community": 23,
       "norm_label": "maxnotes()"
     },
     {
@@ -873,7 +900,7 @@
       "source_file": "src\\features\\para\\PARAGrid.tsx",
       "source_location": "L32",
       "id": "paragrid_foldercard",
-      "community": 22,
+      "community": 23,
       "norm_label": "foldercard()"
     },
     {
@@ -882,7 +909,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\tasks\\TaskDetail.tsx",
       "source_location": "L1",
       "id": "c_users_lite_os_projetos_dott_warmfox_src_features_tasks_taskdetail_tsx",
-      "community": 14,
+      "community": 0,
       "norm_label": "taskdetail.tsx"
     },
     {
@@ -891,7 +918,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\tasks\\TaskDetail.tsx",
       "source_location": "L59",
       "id": "taskdetail_salvartitulo",
-      "community": 14,
+      "community": 0,
       "norm_label": "salvartitulo()"
     },
     {
@@ -900,7 +927,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\tasks\\TaskDetail.tsx",
       "source_location": "L65",
       "id": "taskdetail_escreveranotacao",
-      "community": 14,
+      "community": 0,
       "norm_label": "escreveranotacao()"
     },
     {
@@ -909,7 +936,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\tasks\\TaskDetail.tsx",
       "source_location": "L71",
       "id": "taskdetail_excluir",
-      "community": 14,
+      "community": 0,
       "norm_label": "excluir()"
     },
     {
@@ -918,7 +945,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\tasks\\TasksPanel.tsx",
       "source_location": "L1",
       "id": "c_users_lite_os_projetos_dott_warmfox_src_features_tasks_taskspanel_tsx",
-      "community": 10,
+      "community": 11,
       "norm_label": "taskspanel.tsx"
     },
     {
@@ -927,7 +954,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\tasks\\TasksPanel.tsx",
       "source_location": "L22",
       "id": "taskspanel_pastade",
-      "community": 10,
+      "community": 11,
       "norm_label": "pastade()"
     },
     {
@@ -936,7 +963,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\tasks\\TasksPanel.tsx",
       "source_location": "L33",
       "id": "taskspanel_abrirtarefa",
-      "community": 10,
+      "community": 11,
       "norm_label": "abrirtarefa()"
     },
     {
@@ -945,7 +972,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\tasks\\TasksPanel.tsx",
       "source_location": "L48",
       "id": "taskspanel_submittask",
-      "community": 10,
+      "community": 11,
       "norm_label": "submittask()"
     },
     {
@@ -954,7 +981,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\tasks\\TasksPanel.tsx",
       "source_location": "L53",
       "id": "taskspanel_submitgroup",
-      "community": 10,
+      "community": 11,
       "norm_label": "submitgroup()"
     },
     {
@@ -963,7 +990,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\tasks\\TasksPanel.tsx",
       "source_location": "L57",
       "id": "taskspanel_startedit",
-      "community": 10,
+      "community": 11,
       "norm_label": "startedit()"
     },
     {
@@ -972,7 +999,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\tasks\\TasksPanel.tsx",
       "source_location": "L58",
       "id": "taskspanel_commitedit",
-      "community": 10,
+      "community": 11,
       "norm_label": "commitedit()"
     },
     {
@@ -1179,7 +1206,7 @@
       "source_file": "src\\lib\\inboxService.ts",
       "source_location": "L1",
       "id": "src_lib_inboxservice_ts",
-      "community": 13,
+      "community": 14,
       "norm_label": "inboxservice.ts"
     },
     {
@@ -1188,7 +1215,7 @@
       "source_file": "src\\lib\\inboxService.ts",
       "source_location": "L9",
       "id": "inboxservice_loadinbox",
-      "community": 13,
+      "community": 14,
       "norm_label": "loadinbox()"
     },
     {
@@ -1197,7 +1224,7 @@
       "source_file": "src\\lib\\inboxService.ts",
       "source_location": "L13",
       "id": "inboxservice_setinbox",
-      "community": 13,
+      "community": 14,
       "norm_label": "setinbox()"
     },
     {
@@ -1206,7 +1233,7 @@
       "source_file": "src\\lib\\inboxService.ts",
       "source_location": "L17",
       "id": "inboxservice_removeinbox",
-      "community": 13,
+      "community": 14,
       "norm_label": "removeinbox()"
     },
     {
@@ -1215,7 +1242,7 @@
       "source_file": "src\\lib\\inboxService.ts",
       "source_location": "L21",
       "id": "inboxservice_addinbox",
-      "community": 13,
+      "community": 14,
       "norm_label": "addinbox()"
     },
     {
@@ -1323,7 +1350,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\lib\\notesService.ts",
       "source_location": "L1",
       "id": "c_users_lite_os_projetos_dott_warmfox_src_lib_notesservice_ts",
-      "community": 8,
+      "community": 9,
       "norm_label": "notesservice.ts"
     },
     {
@@ -1332,7 +1359,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\lib\\notesService.ts",
       "source_location": "L26",
       "id": "notesservice_tonote",
-      "community": 8,
+      "community": 9,
       "norm_label": "tonote()"
     },
     {
@@ -1341,7 +1368,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\lib\\notesService.ts",
       "source_location": "L41",
       "id": "notesservice_fromnote",
-      "community": 8,
+      "community": 9,
       "norm_label": "fromnote()"
     },
     {
@@ -1350,7 +1377,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\lib\\notesService.ts",
       "source_location": "L55",
       "id": "notesservice_loadvault",
-      "community": 8,
+      "community": 9,
       "norm_label": "loadvault()"
     },
     {
@@ -1359,7 +1386,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\lib\\notesService.ts",
       "source_location": "L62",
       "id": "notesservice_savenotetovault",
-      "community": 8,
+      "community": 9,
       "norm_label": "savenotetovault()"
     },
     {
@@ -1368,7 +1395,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\lib\\notesService.ts",
       "source_location": "L71",
       "id": "notesservice_deletenotefromvault",
-      "community": 8,
+      "community": 9,
       "norm_label": "deletenotefromvault()"
     },
     {
@@ -1431,7 +1458,7 @@
       "source_file": "src\\lib\\search.ts",
       "source_location": "L1",
       "id": "src_lib_search_ts",
-      "community": 23,
+      "community": 24,
       "norm_label": "search.ts"
     },
     {
@@ -1440,7 +1467,7 @@
       "source_file": "src\\lib\\search.ts",
       "source_location": "L21",
       "id": "search_createindex",
-      "community": 23,
+      "community": 24,
       "norm_label": "createindex()"
     },
     {
@@ -1449,7 +1476,7 @@
       "source_file": "src\\lib\\search.ts",
       "source_location": "L25",
       "id": "search_searchnotes",
-      "community": 23,
+      "community": 24,
       "norm_label": "searchnotes()"
     },
     {
@@ -1458,7 +1485,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\lib\\seedNotes.ts",
       "source_location": "L1",
       "id": "c_users_lite_os_projetos_dott_warmfox_src_lib_seednotes_ts",
-      "community": 43,
+      "community": 44,
       "norm_label": "seednotes.ts"
     },
     {
@@ -1467,7 +1494,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\lib\\tags.ts",
       "source_location": "L1",
       "id": "c_users_lite_os_projetos_dott_warmfox_src_lib_tags_ts",
-      "community": 24,
+      "community": 25,
       "norm_label": "tags.ts"
     },
     {
@@ -1476,7 +1503,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\lib\\tags.ts",
       "source_location": "L11",
       "id": "tags_extracttags",
-      "community": 24,
+      "community": 25,
       "norm_label": "extracttags()"
     },
     {
@@ -1485,7 +1512,7 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\lib\\tags.ts",
       "source_location": "L22",
       "id": "tags_normalizetitle",
-      "community": 24,
+      "community": 25,
       "norm_label": "normalizetitle()"
     },
     {
@@ -1494,7 +1521,7 @@
       "source_file": "src\\lib\\tasksService.ts",
       "source_location": "L1",
       "id": "src_lib_tasksservice_ts",
-      "community": 25,
+      "community": 26,
       "norm_label": "tasksservice.ts"
     },
     {
@@ -1503,7 +1530,7 @@
       "source_file": "src\\lib\\tasksService.ts",
       "source_location": "L7",
       "id": "tasksservice_loadtasks",
-      "community": 25,
+      "community": 26,
       "norm_label": "loadtasks()"
     },
     {
@@ -1512,7 +1539,7 @@
       "source_file": "src\\lib\\tasksService.ts",
       "source_location": "L14",
       "id": "tasksservice_savetasks",
-      "community": 25,
+      "community": 26,
       "norm_label": "savetasks()"
     },
     {
@@ -1746,7 +1773,7 @@
       "source_file": "src-tauri\\build.rs",
       "source_location": "L1",
       "id": "src_tauri_build_rs",
-      "community": 38,
+      "community": 39,
       "norm_label": "build.rs"
     },
     {
@@ -1755,7 +1782,7 @@
       "source_file": "src-tauri\\build.rs",
       "source_location": "L1",
       "id": "build_main",
-      "community": 38,
+      "community": 39,
       "norm_label": "main()"
     },
     {
@@ -1764,7 +1791,7 @@
       "source_file": "src-tauri\\installer\\gen-installer-art.ps1",
       "source_location": "L1",
       "id": "src_tauri_installer_gen_installer_art_ps1",
-      "community": 11,
+      "community": 12,
       "norm_label": "gen-installer-art.ps1"
     },
     {
@@ -1773,7 +1800,7 @@
       "source_file": "src-tauri\\installer\\gen-installer-art.ps1",
       "source_location": "L11",
       "id": "gen_installer_art_colorfrom",
-      "community": 11,
+      "community": 12,
       "norm_label": "colorfrom()"
     },
     {
@@ -1782,7 +1809,7 @@
       "source_file": "src-tauri\\installer\\gen-installer-art.ps1",
       "source_location": "L23",
       "id": "gen_installer_art_new_bmp",
-      "community": 11,
+      "community": 12,
       "norm_label": "new-bmp()"
     },
     {
@@ -1791,7 +1818,7 @@
       "source_file": "src-tauri\\installer\\gen-installer-art.ps1",
       "source_location": "L36",
       "id": "gen_installer_art_draw_glow",
-      "community": 11,
+      "community": 12,
       "norm_label": "draw-glow()"
     },
     {
@@ -1800,7 +1827,7 @@
       "source_file": "src-tauri\\installer\\gen-installer-art.ps1",
       "source_location": "L48",
       "id": "gen_installer_art_draw_orb",
-      "community": 11,
+      "community": 12,
       "norm_label": "draw-orb()"
     },
     {
@@ -1809,7 +1836,7 @@
       "source_file": "src-tauri\\installer\\gen-installer-art.ps1",
       "source_location": "L61",
       "id": "gen_installer_art_font",
-      "community": 11,
+      "community": 12,
       "norm_label": "font()"
     },
     {
@@ -1854,7 +1881,7 @@
       "source_file": "src-tauri\\src\\backup.rs",
       "source_location": "L1",
       "id": "src_tauri_src_backup_rs",
-      "community": 9,
+      "community": 10,
       "norm_label": "backup.rs"
     },
     {
@@ -1863,7 +1890,7 @@
       "source_file": "src-tauri\\src\\backup.rs",
       "source_location": "L9",
       "id": "backup_data_dir",
-      "community": 9,
+      "community": 10,
       "norm_label": "data_dir()"
     },
     {
@@ -1872,7 +1899,7 @@
       "source_file": "src-tauri\\src\\backup.rs",
       "source_location": "L15",
       "id": "backup_backups_root",
-      "community": 9,
+      "community": 10,
       "norm_label": "backups_root()"
     },
     {
@@ -1881,7 +1908,7 @@
       "source_file": "src-tauri\\src\\backup.rs",
       "source_location": "L23",
       "id": "backup_copy_dir",
-      "community": 9,
+      "community": 10,
       "norm_label": "copy_dir()"
     },
     {
@@ -1890,7 +1917,7 @@
       "source_file": "src-tauri\\src\\backup.rs",
       "source_location": "L41",
       "id": "backup_backup_now",
-      "community": 9,
+      "community": 10,
       "norm_label": "backup_now()"
     },
     {
@@ -1899,7 +1926,7 @@
       "source_file": "src-tauri\\src\\backup.rs",
       "source_location": "L59",
       "id": "backup_backups_folder",
-      "community": 9,
+      "community": 10,
       "norm_label": "backups_folder()"
     },
     {
@@ -1908,7 +1935,7 @@
       "source_file": "src-tauri\\src\\backup.rs",
       "source_location": "L67",
       "id": "backup_backups_list",
-      "community": 9,
+      "community": 10,
       "norm_label": "backups_list()"
     },
     {
@@ -1917,7 +1944,7 @@
       "source_file": "src-tauri\\src\\backup.rs",
       "source_location": "L83",
       "id": "backup_backup_restore",
-      "community": 9,
+      "community": 10,
       "norm_label": "backup_restore()"
     },
     {
@@ -2232,7 +2259,7 @@
       "source_file": "src-tauri\\src\\widget_geo.rs",
       "source_location": "L1",
       "id": "src_tauri_src_widget_geo_rs",
-      "community": 39,
+      "community": 40,
       "norm_label": "widget_geo.rs"
     },
     {
@@ -2241,7 +2268,7 @@
       "source_file": "src-tauri\\src\\widget_geo.rs",
       "source_location": "L17",
       "id": "widget_geo_widget_set_geometry",
-      "community": 39,
+      "community": 40,
       "norm_label": "widget_set_geometry()"
     },
     {
@@ -2253,7 +2280,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 44,
+      "community": 45,
       "norm_label": "readme.md - template tauri+react+typescript",
       "id": "readme_tauri_template"
     },
@@ -2266,7 +2293,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 45,
+      "community": 46,
       "norm_label": "landing/lp-dott-lancamento-2026-08-09.html - lp mesma copy, revisao de 09/08",
       "id": "lp_dott_lancamento_08_09"
     },
@@ -2331,7 +2358,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 46,
+      "community": 47,
       "norm_label": "dott widget - painel de nota aberto (digitando)",
       "id": "widget_painel_aberto_digitando"
     },
@@ -2344,7 +2371,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 26,
+      "community": 27,
       "norm_label": "widget dott - estado de repouso (tema preto)",
       "id": "widget-repouso-preto_widget_dark_resting_state"
     },
@@ -2357,7 +2384,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 26,
+      "community": 27,
       "norm_label": "icone chama/olho laranja-vermelho (logo do widget)",
       "id": "widget-repouso-preto_flame_eye_icon"
     },
@@ -2370,7 +2397,7 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "community": 26,
+      "community": 27,
       "norm_label": "badge de contador numerico (valor 6)",
       "id": "widget-repouso-preto_badge_counter"
     }
@@ -2559,12 +2586,12 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src\\main.tsx",
-      "source_location": "L27",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\main.tsx",
+      "source_location": "L39",
       "weight": 1.0,
-      "_src": "src_main_tsx",
+      "_src": "c_users_lite_os_projetos_dott_warmfox_src_main_tsx",
       "_tgt": "main_currentlabel",
-      "source": "src_main_tsx",
+      "source": "c_users_lite_os_projetos_dott_warmfox_src_main_tsx",
       "target": "main_currentlabel",
       "confidence_score": 1.0
     },
@@ -2758,6 +2785,30 @@
       "_tgt": "icon_icon",
       "source": "src_components_icon_tsx",
       "target": "icon_icon",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\components\\Modal.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_src": "c_users_lite_os_projetos_dott_warmfox_src_components_modal_tsx",
+      "_tgt": "modal_modal",
+      "source": "c_users_lite_os_projetos_dott_warmfox_src_components_modal_tsx",
+      "target": "modal_modal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\components\\Modal.tsx",
+      "source_location": "L56",
+      "weight": 1.0,
+      "_src": "c_users_lite_os_projetos_dott_warmfox_src_components_modal_tsx",
+      "_tgt": "modal_modalhint",
+      "source": "c_users_lite_os_projetos_dott_warmfox_src_components_modal_tsx",
+      "target": "modal_modalhint",
       "confidence_score": 1.0
     },
     {
@@ -2995,8 +3046,8 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\folder\\FolderNotesView.tsx",
       "source_location": "L65",
       "weight": 1.0,
-      "_src": "foldernotesview_criartarefa",
-      "_tgt": "toast_showtoast",
+      "_src": "toast_showtoast",
+      "_tgt": "foldernotesview_criartarefa",
       "source": "toast_showtoast",
       "target": "foldernotesview_criartarefa"
     },
@@ -3091,8 +3142,8 @@
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\tasks\\TaskDetail.tsx",
       "source_location": "L73",
       "weight": 1.0,
-      "_src": "taskdetail_excluir",
-      "_tgt": "toast_showtoast",
+      "_src": "toast_showtoast",
+      "_tgt": "taskdetail_excluir",
       "source": "toast_showtoast",
       "target": "taskdetail_excluir"
     },
@@ -3220,7 +3271,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\folder\\FolderNotesView.tsx",
-      "source_location": "L46",
+      "source_location": "L48",
       "weight": 1.0,
       "_src": "c_users_lite_os_projetos_dott_warmfox_src_features_folder_foldernotesview_tsx",
       "_tgt": "foldernotesview_opennote",
@@ -3232,7 +3283,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\folder\\FolderNotesView.tsx",
-      "source_location": "L48",
+      "source_location": "L50",
       "weight": 1.0,
       "_src": "c_users_lite_os_projetos_dott_warmfox_src_features_folder_foldernotesview_tsx",
       "_tgt": "foldernotesview_newnote",
@@ -3244,7 +3295,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\folder\\FolderNotesView.tsx",
-      "source_location": "L57",
+      "source_location": "L59",
       "weight": 1.0,
       "_src": "c_users_lite_os_projetos_dott_warmfox_src_features_folder_foldernotesview_tsx",
       "_tgt": "foldernotesview_criartarefa",
@@ -3256,7 +3307,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\folder\\FolderNotesView.tsx",
-      "source_location": "L68",
+      "source_location": "L72",
       "weight": 1.0,
       "_src": "c_users_lite_os_projetos_dott_warmfox_src_features_folder_foldernotesview_tsx",
       "_tgt": "foldernotesview_criarpasta",
@@ -3268,7 +3319,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\folder\\FolderNotesView.tsx",
-      "source_location": "L77",
+      "source_location": "L81",
       "weight": 1.0,
       "_src": "c_users_lite_os_projetos_dott_warmfox_src_features_folder_foldernotesview_tsx",
       "_tgt": "foldernotesview_pickcover",
@@ -3280,7 +3331,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\folder\\FolderNotesView.tsx",
-      "source_location": "L82",
+      "source_location": "L86",
       "weight": 1.0,
       "_src": "c_users_lite_os_projetos_dott_warmfox_src_features_folder_foldernotesview_tsx",
       "_tgt": "foldernotesview_onfile",
@@ -3292,7 +3343,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\folder\\FolderNotesView.tsx",
-      "source_location": "L93",
+      "source_location": "L97",
       "weight": 1.0,
       "_src": "c_users_lite_os_projetos_dott_warmfox_src_features_folder_foldernotesview_tsx",
       "_tgt": "foldernotesview_onnotefile",
@@ -3339,92 +3390,92 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src\\features\\inbox\\InboxPanel.tsx",
-      "source_location": "L13",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\inbox\\InboxPanel.tsx",
+      "source_location": "L14",
       "weight": 1.0,
-      "_src": "src_features_inbox_inboxpanel_tsx",
+      "_src": "c_users_lite_os_projetos_dott_warmfox_src_features_inbox_inboxpanel_tsx",
       "_tgt": "inboxpanel_draggablecard",
-      "source": "src_features_inbox_inboxpanel_tsx",
+      "source": "c_users_lite_os_projetos_dott_warmfox_src_features_inbox_inboxpanel_tsx",
       "target": "inboxpanel_draggablecard",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src\\features\\inbox\\InboxPanel.tsx",
-      "source_location": "L96",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\inbox\\InboxPanel.tsx",
+      "source_location": "L97",
       "weight": 1.0,
-      "_src": "src_features_inbox_inboxpanel_tsx",
+      "_src": "c_users_lite_os_projetos_dott_warmfox_src_features_inbox_inboxpanel_tsx",
       "_tgt": "inboxpanel_capturarimagem",
-      "source": "src_features_inbox_inboxpanel_tsx",
+      "source": "c_users_lite_os_projetos_dott_warmfox_src_features_inbox_inboxpanel_tsx",
       "target": "inboxpanel_capturarimagem",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src\\features\\inbox\\InboxPanel.tsx",
-      "source_location": "L104",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\inbox\\InboxPanel.tsx",
+      "source_location": "L105",
       "weight": 1.0,
-      "_src": "src_features_inbox_inboxpanel_tsx",
+      "_src": "c_users_lite_os_projetos_dott_warmfox_src_features_inbox_inboxpanel_tsx",
       "_tgt": "inboxpanel_aosoltararquivo",
-      "source": "src_features_inbox_inboxpanel_tsx",
+      "source": "c_users_lite_os_projetos_dott_warmfox_src_features_inbox_inboxpanel_tsx",
       "target": "inboxpanel_aosoltararquivo",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src\\features\\inbox\\InboxPanel.tsx",
-      "source_location": "L112",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\inbox\\InboxPanel.tsx",
+      "source_location": "L113",
       "weight": 1.0,
-      "_src": "src_features_inbox_inboxpanel_tsx",
+      "_src": "c_users_lite_os_projetos_dott_warmfox_src_features_inbox_inboxpanel_tsx",
       "_tgt": "inboxpanel_capture",
-      "source": "src_features_inbox_inboxpanel_tsx",
+      "source": "c_users_lite_os_projetos_dott_warmfox_src_features_inbox_inboxpanel_tsx",
       "target": "inboxpanel_capture",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src\\features\\inbox\\InboxPanel.tsx",
-      "source_location": "L121",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\inbox\\InboxPanel.tsx",
+      "source_location": "L122",
       "weight": 1.0,
-      "_src": "src_features_inbox_inboxpanel_tsx",
+      "_src": "c_users_lite_os_projetos_dott_warmfox_src_features_inbox_inboxpanel_tsx",
       "_tgt": "inboxpanel_doprocess",
-      "source": "src_features_inbox_inboxpanel_tsx",
+      "source": "c_users_lite_os_projetos_dott_warmfox_src_features_inbox_inboxpanel_tsx",
       "target": "inboxpanel_doprocess",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src\\features\\inbox\\InboxPanel.tsx",
-      "source_location": "L135",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\inbox\\InboxPanel.tsx",
+      "source_location": "L136",
       "weight": 1.0,
-      "_src": "src_features_inbox_inboxpanel_tsx",
+      "_src": "c_users_lite_os_projetos_dott_warmfox_src_features_inbox_inboxpanel_tsx",
       "_tgt": "inboxpanel_abrirtarefa",
-      "source": "src_features_inbox_inboxpanel_tsx",
+      "source": "c_users_lite_os_projetos_dott_warmfox_src_features_inbox_inboxpanel_tsx",
       "target": "inboxpanel_abrirtarefa",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "src\\features\\inbox\\InboxPanel.tsx",
-      "source_location": "L142",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\inbox\\InboxPanel.tsx",
+      "source_location": "L143",
       "weight": 1.0,
-      "_src": "src_features_inbox_inboxpanel_tsx",
+      "_src": "c_users_lite_os_projetos_dott_warmfox_src_features_inbox_inboxpanel_tsx",
       "_tgt": "inboxpanel_confirmartarefa",
-      "source": "src_features_inbox_inboxpanel_tsx",
+      "source": "c_users_lite_os_projetos_dott_warmfox_src_features_inbox_inboxpanel_tsx",
       "target": "inboxpanel_confirmartarefa",
       "confidence_score": 1.0
     },
     {
       "relation": "calls",
       "confidence": "EXTRACTED",
-      "source_file": "src\\features\\inbox\\InboxPanel.tsx",
-      "source_location": "L109",
+      "source_file": "C:\\Users\\Lite OS\\Projetos\\dott-warmfox\\src\\features\\inbox\\InboxPanel.tsx",
+      "source_location": "L110",
       "weight": 1.0,
       "_src": "inboxpanel_aosoltararquivo",
       "_tgt": "inboxpanel_capturarimagem",

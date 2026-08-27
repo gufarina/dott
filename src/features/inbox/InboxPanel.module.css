@@ -14,13 +14,22 @@
   transition: color var(--dur-base) var(--ease-out);
   letter-spacing: .01em;
 }
-.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+/* border-image nao aceita fundo multi-camada nem blend mode - usa a
+   reducao linear, nao a brasa completa (ver tokens.css). */
+.tab.active { color: var(--accent); border-image: var(--dott-gradient-linear) 1; }
 .tab:hover:not(.active) { color: var(--fg); }
+/* Badge de contagem: gradiente da marca, com parcimonia (um dos poucos
+   lugares que o levam pra dentro do app). 18px e pequeno demais pra receita
+   vigente (nucleo ancorado abaixo da linha de texto - exige 44px+): usa a
+   reducao linear, nao a brasa completa (ver tokens.css). Centralizacao por
+   flex, nao por line-height igual a altura — o metodo antigo e o que
+   deixava texto de pill "mais perto da base" em fontes diferentes. */
 .badge {
-  background: var(--accent); color: #fff;
-  font-size: 11px; font-weight: 600;
-  border-radius: 10px; padding: 0 6px; line-height: 18px;
-  min-width: 18px; text-align: center;
+  background: var(--dott-gradient-linear);
+  color: #fff;
+  font-size: var(--text-3xs); font-weight: 600; line-height: 1;
+  border-radius: var(--r-full); padding: 0 6px; height: 18px; min-width: 18px;
+  display: inline-flex; align-items: center; justify-content: center;
 }
 .collapse {
   margin-left: auto;
@@ -58,16 +67,22 @@
   display: flex; align-items: center; gap: 6px;
   margin-bottom: 8px;
 }
+/* Pill/badge unico do app: receita "caption-uppercase" da baseline —
+   ver --pill-* em tokens.css. Nunca redeclarar os numeros aqui. */
 .captureChip {
-  font-size: 10px; font-weight: 600; letter-spacing: .02em;
-  border-radius: var(--r-xs); padding: 3px 7px;
-  line-height: 1;
-  display: inline-flex; align-items: center; gap: 4px;
+  font-size: var(--pill-font-size); font-weight: var(--pill-font-weight);
+  letter-spacing: var(--pill-letter-spacing); text-transform: uppercase;
+  line-height: var(--pill-line-height); padding: var(--pill-padding);
+  border-radius: var(--r-full);
+  display: inline-flex; align-items: center; gap: 3px;
   transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 .captureChipNeutral {
-  font-size: 10px; font-weight: 600; letter-spacing: .02em;
-  border-radius: var(--r-xs); padding: 3px 7px; line-height: 1;
+  font-size: var(--pill-font-size); font-weight: var(--pill-font-weight);
+  letter-spacing: var(--pill-letter-spacing); text-transform: uppercase;
+  line-height: var(--pill-line-height); padding: var(--pill-padding);
+  border-radius: var(--r-full);
+  display: inline-flex; align-items: center;
   background: var(--surface3); color: var(--fg3);
 }
 .captureCounter {
@@ -146,17 +161,31 @@
 .capturePalpiteQuad { color: var(--fg3); }
 .captureInput::placeholder { color: var(--fg3); }
 .captureInput:disabled { opacity: .5; cursor: not-allowed; }
+/* NAO subiu pra 44px de proposito (TASK-306, sinalizado ao coordenador em
+   vez de decidido sozinho): este botao vive dentro de `.captureAcoes`, a
+   faixa mais apertada do Quick Capture - o hot path de no-friction do
+   produto (ver desktop-frameworks.md, "Hot path critico: abertura do
+   Quick Capture"), ao lado de um icone de 28px, com padding de 4-6px ao
+   redor. Engordar pra 44px alongaria essa faixa e destoaria do icone
+   vizinho bem no fluxo que tem que ser o mais enxuto do app. Como 28px
+   tambem e baixo demais pra receita vigente (nucleo abaixo da linha de
+   texto exige 44px+), usa a reducao linear aqui, igual ao badge. */
 .btnCapture {
   flex-shrink: 0; margin-left: auto; height: 28px; padding: 0 11px;
-  background: var(--accent); border: 1px solid var(--accent);
-  border-radius: var(--r-md); color: #fff;
+  background: var(--dott-gradient-linear);
+  border: none;
+  border-radius: var(--r-btn); color: #fff;
   font-size: 13px; font-weight: 600; cursor: pointer;
   white-space: nowrap;
   display: flex; align-items: center; justify-content: center;
   transition: opacity var(--dur-base) var(--ease-out);
 }
 .btnCapture:hover:not(:disabled) { opacity: .88; }
-.btnCapture:disabled { cursor: not-allowed; opacity: .45; }
+/* Desabilitado nao carrega a marca: opacity na brasa vira lama marrom. */
+.btnCapture:disabled {
+  cursor: not-allowed; opacity: 1;
+  background: var(--surface3); background-blend-mode: normal; color: var(--fg3);
+}
 .btnCaptureFull {
   background: var(--surface3); border-color: var(--border2);
   color: var(--fg3); font-size: 13px; font-weight: 600;
@@ -179,10 +208,11 @@
 /* O tipo e METADADO: 11px/700 competia com o proprio texto da nota.
    Agora 10px/600, tracking menor e caixa normal — presente, nao gritando. */
 .cardType {
-  font-size: 10px; font-weight: 600; letter-spacing: .01em;
-  text-transform: none;
-  border-radius: var(--r-xs); padding: 2.5px 6px 2.5px 5px;
-  flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; line-height: 1;
+  font-size: var(--pill-font-size); font-weight: var(--pill-font-weight);
+  letter-spacing: var(--pill-letter-spacing); text-transform: uppercase;
+  line-height: var(--pill-line-height); padding: var(--pill-padding);
+  border-radius: var(--r-full);
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 3px;
 }
 .cardTime {
   color: var(--fg3); font-size: 10.5px; margin-left: auto;
@@ -330,7 +360,7 @@
 .processBody { padding: 10px; overflow-y: auto; }
 .processGroup { margin-bottom: 10px; }
 .processGroupLabel {
-  font-size: 11px; font-weight: 700; color: var(--fg3);
+  font-size: 11px; font-weight: 600; color: var(--fg3);
   letter-spacing: .04em; text-transform: uppercase;
   padding: 4px 8px;
 }
@@ -356,8 +386,11 @@
   border: 1px solid var(--border);
 }
 .previewTipo {
-  font-size: 10px; font-weight: 700; letter-spacing: .04em;
-  padding: 3px 6px; border-radius: var(--r-xs); flex-shrink: 0; line-height: 1;
+  font-size: var(--pill-font-size); font-weight: var(--pill-font-weight);
+  letter-spacing: var(--pill-letter-spacing); text-transform: uppercase;
+  line-height: var(--pill-line-height); padding: var(--pill-padding);
+  border-radius: var(--r-full);
+  flex-shrink: 0; display: inline-flex; align-items: center;
 }
 .previewTexto {
   font-size: 12.5px; line-height: 1.4; color: var(--fg2);
@@ -386,10 +419,11 @@
 .acaoPerigo:hover svg,
 .acaoPerigo:hover .acaoTitulo { color: var(--danger); }
 
-/* Rotulo do quadrante dentro da lista completa */
+/* Rotulo do quadrante dentro da lista completa — nao e pill (sem fundo/raio
+   proprio, e um separador de grupo), mas segue peso/tracking da receita. */
 .processQuad {
-  font-size: 10px; font-weight: 700; color: var(--fg3);
-  letter-spacing: .05em; text-transform: uppercase;
+  font-size: var(--pill-font-size); font-weight: var(--pill-font-weight); color: var(--fg3);
+  letter-spacing: var(--pill-letter-spacing); text-transform: uppercase;
   padding: 6px 8px 3px;
 }
 
@@ -410,7 +444,7 @@
 .sugestaoIcone { color: var(--accent); display: flex; flex-shrink: 0; }
 .sugestaoTexto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .sugestaoTitulo {
-  font-size: 13px; font-weight: 700; color: var(--fg);
+  font-size: 13px; font-weight: 600; color: var(--fg);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .sugestaoMotivo {
@@ -418,67 +452,9 @@
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .sugestaoTag {
-  font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  font-size: var(--pill-font-size); font-weight: var(--pill-font-weight); letter-spacing: var(--pill-letter-spacing); text-transform: uppercase;
   color: var(--accent); flex-shrink: 0;
 }
-
-/* ─── Virar tarefa ─── */
-.taskModal {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: var(--r-3xl);
-  --sq-r: var(--r-3xl);
-  -webkit-mask-image: paint(squircle); mask-image: paint(squircle);
-  box-shadow: var(--shadow);
-  width: 420px; max-width: calc(100vw - 32px);
-  display: flex; flex-direction: column;
-  overflow: hidden;
-  animation: modalIn .17s ease both;
-}
-.taskHint {
-  padding: 12px 16px 0;
-  font-size: 12px; color: var(--fg3); line-height: 1.45;
-}
-.taskField {
-  display: flex; align-items: center; gap: 9px;
-  margin: 12px 16px 0;
-  padding: 0 11px;
-  height: 38px;
-  border-radius: var(--r-md);
-  border: 1px solid var(--border-control);
-  background: var(--surface2);
-  transition: border-color var(--dur-base) var(--ease-out);
-}
-.taskField:focus-within { border-color: var(--accent); }
-.taskFieldIcon { color: var(--fg3); flex-shrink: 0; }
-.taskInput {
-  flex: 1; height: 100%;
-  border: none; background: transparent; outline: none;
-  color: var(--fg); font-size: 13.5px; font-family: inherit;
-}
-.taskFooter {
-  display: flex; justify-content: flex-end; gap: 8px;
-  padding: 14px 16px 16px;
-}
-.taskCancel {
-  height: 32px; padding: 0 14px;
-  border-radius: var(--r-md);
-  border: 1px solid var(--border2); background: transparent;
-  color: var(--fg2); font-size: 13px; font-weight: 600;
-  cursor: pointer; font-family: inherit;
-  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
-}
-.taskCancel:hover { background: var(--surface3); color: var(--fg); }
-.taskOk {
-  height: 32px; padding: 0 14px;
-  display: flex; align-items: center; gap: 7px;
-  border-radius: var(--r-md);
-  border: 1px solid var(--accent); background: var(--accent);
-  color: #fff; font-size: 13px; font-weight: 600;
-  cursor: pointer; font-family: inherit;
-  transition: opacity var(--dur-micro) var(--ease-out);
-}
-.taskOk:hover { opacity: .88; }
 
 /* ── Tela sem hover (toque) ────────────────────────────────────────────────
    Regra do emilkowalski/skills: hover precisa de `@media (hover: hover)`.

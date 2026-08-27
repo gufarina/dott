@@ -15,8 +15,10 @@
   transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out); }
 .ob-overlay .ob-skip-x:hover{ background:var(--surface3); color:var(--fg); }
 
-.ob-overlay .ob-card{ width:min(540px,92vw); background:var(--surface); border:1px solid var(--border2);
-  border-radius:var(--r-3xl); box-shadow:var(--shadow); overflow:hidden;
+/* Sem sombra: card estatico, nao superficie flutuante tipo Modal — profundidade
+   so por hairline + contraste de superficie (ver DESIGN.md). */
+.ob-overlay .ob-card{ width:min(540px,92vw); background:var(--surface); border:1px solid var(--hairline);
+  border-radius:var(--r-card); overflow:hidden;
   animation:obCardIn var(--dur-long,300ms) var(--ease-spring) both; }
 @keyframes obCardIn{ from{opacity:0; transform:scale(.96) translateY(8px)} to{opacity:1; transform:none} }
 
@@ -24,15 +26,15 @@
   background:radial-gradient(120% 100% at 50% 0%, var(--surface2), var(--surface));
   border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:center; }
 .ob-overlay .ob-content{ padding:22px 28px 18px; }
-.ob-overlay .ob-kicker{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:9px; }
-.ob-overlay .ob-title{ font-size:23px; font-weight:800; letter-spacing:-.02em; line-height:1.15; margin-bottom:9px; }
+.ob-overlay .ob-kicker{ font-size:var(--pill-font-size); font-weight:var(--pill-font-weight); letter-spacing:var(--pill-letter-spacing); text-transform:uppercase; color:var(--accent); margin-bottom:9px; }
+.ob-overlay .ob-title{ font-size:var(--text-2xl); font-weight:700; letter-spacing:-.02em; line-height:1.15; margin-bottom:9px; }
 .ob-overlay .ob-text{ font-size:14.5px; line-height:1.5; color:var(--fg2); }
 .ob-overlay .ob-text b{ color:var(--fg); font-weight:600; }
 .ob-overlay .ob-kbd{ font-family:var(--font-mono); font-size:12.5px; background:var(--surface3); border:1px solid var(--border2); border-radius:6px; padding:1px 7px; color:var(--fg); white-space:nowrap; }
 .ob-overlay .ob-note{ margin-top:13px; display:flex; gap:9px; align-items:flex-start; font-size:12.5px; line-height:1.45; color:var(--fg3);
   background:var(--accent-s); border:1px solid rgba(224,90,56,.22); border-radius:var(--r-md); padding:9px 11px; }
 .ob-overlay .ob-note.is-tip{ background:var(--surface2); border-color:var(--border2); color:var(--fg2); }
-.ob-overlay .ob-badge{ font-size:9.5px; font-weight:800; letter-spacing:.06em; color:var(--accent); border:1px solid var(--accent); border-radius:var(--r-sm); padding:1px 5px; flex:none; margin-top:1px; }
+.ob-overlay .ob-badge{ font-size:var(--pill-font-size); font-weight:var(--pill-font-weight); letter-spacing:var(--pill-letter-spacing); text-transform:uppercase; line-height:var(--pill-line-height); color:var(--accent); border:1px solid var(--accent); border-radius:var(--r-full); padding:var(--pill-padding); flex:none; display:inline-flex; align-items:center; }
 .ob-overlay .ob-note.is-tip .ob-badge{ color:var(--fg3); border-color:var(--border2); }
 .ob-overlay .ob-paralist{ margin-top:14px; display:grid; gap:7px; }
 .ob-overlay .ob-pl{ display:flex; gap:10px; align-items:baseline; font-size:13px; }
@@ -45,10 +47,15 @@
 .ob-overlay .ob-dots{ display:flex; gap:6px; flex:1; }
 .ob-overlay .ob-dots i{ width:6px; height:6px; border-radius:var(--r-full); background:var(--border2); transition: background var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out); }
 .ob-overlay .ob-dots i.on{ width:20px; background:var(--accent); }
-.ob-overlay .ob-btn{ font-family:inherit; font-size:13.5px; font-weight:600; border-radius:var(--r-md); padding:8px 15px; cursor:pointer; border:1px solid transparent; background:transparent; color:var(--fg3); transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out); }
+/* height:44px (era so padding, ~32px) - a receita vigente de --dott-gradient
+   (opcao 3, CEO) ancora o nucleo abaixo da linha de texto e exige essa
+   altura. Ghost sobe junto por ser a mesma classe base - nunca leva o gradiente. */
+.ob-overlay .ob-btn{ height:44px; font-family:inherit; font-size:13.5px; font-weight:600; border-radius:var(--r-md); padding:0 15px; cursor:pointer; border:1px solid transparent; background:transparent; color:var(--fg3); display:inline-flex; align-items:center; justify-content:center; transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out); }
 .ob-overlay .ob-btn:hover{ color:var(--fg); background:var(--surface3); }
-.ob-overlay .ob-btn.primary{ background:var(--accent); color:#fff; border-color:var(--accent); box-shadow:0 2px 10px rgba(224,90,56,.3); }
-.ob-overlay .ob-btn.primary:hover{ filter:brightness(1.07); background:var(--accent); }
+/* Botao primario da PRIMEIRA tela do app — e onde a marca mais deveria
+   aparecer. Gradiente da marca, sem sombra (nao e superficie flutuante). */
+.ob-overlay .ob-btn.primary{ background:var(--dott-gradient); background-blend-mode:var(--dott-gradient-blend); color:#fff; border-color:transparent; }
+.ob-overlay .ob-btn.primary:hover{ filter:brightness(1.07); }
 .ob-overlay .ob-btn.ghost{ color:var(--fg2); }
 
 .ob-overlay .ob-step{ display:none; }
@@ -58,7 +65,7 @@
 .ob-overlay .s1-orb{ position:relative; display:flex; flex-direction:column; align-items:center; gap:16px; }
 .ob-overlay .s1-dot{ width:46px; height:46px; border-radius:var(--r-full); background:var(--accent); /* brilho decorativo removido: halo sem deslocamento e enfeite, nao profundidade */ animation:obPopIn .5s var(--ease-spring) both; }
 .ob-overlay .s1-ring{ position:absolute; top:-9px; left:50%; width:64px; height:64px; margin-left:-32px; border-radius:var(--r-full); border:2px solid var(--accent); opacity:.5; animation:obRingPulse 2.2s ease-out infinite; }
-.ob-overlay .s1-word{ font-size:26px; font-weight:800; letter-spacing:-.02em; animation:obFadeUp .55s ease .18s both; }
+.ob-overlay .s1-word{ font-size:var(--text-2xl); font-weight:700; letter-spacing:-.02em; animation:obFadeUp .55s ease .18s both; }
 @keyframes obRingPulse{ 0%{transform:scale(.7);opacity:.55} 70%{opacity:0} 100%{transform:scale(1.7);opacity:0} }
 /* Nada no mundo real some e reaparece do zero: entra de 0.94, nao de 0. */
 @keyframes obPopIn{ from{transform:scale(.94); opacity:0} to{transform:scale(1); opacity:1} }
@@ -69,7 +76,7 @@
 .ob-overlay .s2-keys{ position:absolute; top:6px; left:50%; transform:translateX(-50%); display:flex; gap:6px; animation:obFadeUp .4s ease both; }
 .ob-overlay .s2-keys .k{ font-family:var(--font-mono); font-size:12px; color:var(--fg); background:var(--surface3); border:1px solid var(--border2); border-bottom-width:2px; border-radius:7px; padding:5px 9px; }
 .ob-overlay .s2-card{ position:absolute; top:0; left:50%; width:150px; margin-left:-75px; background:var(--surface2); border:1px solid var(--border2); border-radius:var(--r-md); padding:8px 10px; font-size:11.5px; color:var(--fg2); animation:obDropIn 1s var(--ease-spring) .55s both; }
-.ob-overlay .s2-card .tag{ font-size:9px; font-weight:700; color:var(--warn); background:rgba(217,140,58,.14); padding:1px 5px; border-radius:5px; }
+.ob-overlay .s2-card .tag{ font-size:var(--pill-font-size); font-weight:var(--pill-font-weight); letter-spacing:var(--pill-letter-spacing); text-transform:uppercase; line-height:var(--pill-line-height); color:var(--warn); background:rgba(217,140,58,.14); padding:var(--pill-padding); border-radius:var(--r-full); display:inline-flex; align-items:center; }
 .ob-overlay .s2-tray{ position:absolute; bottom:0; left:50%; width:190px; margin-left:-95px; height:54px; border:1.5px dashed var(--border2); border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; color:var(--fg3); font-size:11px; font-weight:600; letter-spacing:.04em; }
 @keyframes obDropIn{ 0%{top:42px; opacity:0; transform:scale(.9)} 30%{opacity:1} 100%{top:86px; opacity:1; transform:scale(1)} }
 
@@ -77,7 +84,7 @@
 .ob-overlay .s3{ display:grid; grid-template-columns:1fr 1fr; gap:9px; width:250px; }
 .ob-overlay .s3 .q{ border:1px solid var(--border2); border-radius:var(--r-md); padding:9px 11px; background:var(--surface); position:relative; overflow:hidden; opacity:0; transform:translateY(8px) scale(.96); }
 .ob-overlay .s3 .q::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--qc); }
-.ob-overlay .s3 .q h5{ font-size:12.5px; font-weight:700; margin-bottom:1px; }
+.ob-overlay .s3 .q h5{ font-size:var(--text-xs); font-weight:600; margin-bottom:1px; }
 .ob-overlay .s3 .q small{ font-size:10px; color:var(--fg3); }
 .ob-overlay .is-active .s3 .q{ animation:obQIn .45s var(--ease-spring) forwards; }
 .ob-overlay .is-active .s3 .q:nth-child(1){ animation-delay:.05s }
@@ -96,7 +103,9 @@
 .ob-overlay .s4-card{ position:absolute; top:30px; left:6px; width:66px; height:46px; background:var(--surface2); border:1px solid var(--border2); border-radius:var(--r-sm); padding:6px; overflow:hidden; animation:obDragOver 1.8s var(--ease-spring) .35s both; }
 .ob-overlay .s4-card .ln{ height:4px; border-radius:2px; background:var(--border2); margin-bottom:4px; }
 .ob-overlay .s4-card .ln.a{ width:80%; } .ob-overlay .s4-card .ln.b{ width:55%; }
-.ob-overlay .s4-card .nt{ font-size:8px; font-weight:700; color:var(--q-p); opacity:0; margin-bottom:3px; }
+/* Card de 66x46 - 11px da receita estouraria a miniatura; mantido pequeno,
+   mas peso/raio/tracking seguem a receita (ver DESIGN.md excecoes). */
+.ob-overlay .s4-card .nt{ font-size:8px; font-weight:var(--pill-font-weight); letter-spacing:var(--pill-letter-spacing); text-transform:uppercase; line-height:1; color:var(--q-p); background:rgba(224,64,64,.15); border-radius:var(--r-full); padding:1px 5px; display:inline-flex; align-items:center; opacity:0; margin-bottom:3px; }
 .ob-overlay .is-active .s4-card .nt{ animation:obNoteShow .4s ease 1.5s both; }
 @keyframes obDragOver{ 0%{left:6px; transform:rotate(0)} 55%{transform:rotate(-4deg)} 100%{left:178px; transform:rotate(0)} }
 @keyframes obNoteShow{ from{opacity:0} to{opacity:1} }
@@ -142,10 +151,10 @@
 .ob-overlay .ob-choice:hover{ border-color:var(--fg3); }
 .ob-overlay .ob-choice.is-on{ border-color:var(--accent); background:var(--accent-s); }
 .ob-overlay .ob-ch-head{ display:flex; align-items:center; gap:8px; font-size:14px; color:var(--fg); }
-.ob-overlay .ob-ch-head strong{ font-weight:650; }
+.ob-overlay .ob-ch-head strong{ font-weight:600; }
 .ob-overlay .ob-ch-txt{ font-size:12.5px; line-height:1.45; color:var(--fg3); }
-.ob-overlay .ob-tag{ font-style:normal; font-size:9.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
-  color:var(--accent); border:1px solid var(--accent); border-radius:var(--r-sm); padding:1px 5px; }
+.ob-overlay .ob-tag{ font-style:normal; font-size:var(--pill-font-size); font-weight:var(--pill-font-weight); letter-spacing:var(--pill-letter-spacing); text-transform:uppercase; line-height:var(--pill-line-height);
+  color:var(--accent); border:1px solid var(--accent); border-radius:var(--r-full); padding:var(--pill-padding); display:inline-flex; align-items:center; }
 .ob-overlay .ob-tag.is-soon{ color:var(--fg3); border-color:var(--border2); }
 
 .ob-overlay .ob-door{ margin-top:12px; border:1px solid var(--border2); border-radius:var(--r-md); padding:12px 13px; background:var(--surface);
@@ -159,6 +168,8 @@
 .ob-overlay .ob-door-input:focus{ border-color:var(--accent); }
 .ob-overlay .ob-door-input::placeholder{ color:var(--fg3); }
 .ob-overlay .ob-btn:disabled{ opacity:.45; cursor:default; }
+/* Desabilitado nao carrega a marca: opacity na brasa vira lama marrom. */
+.ob-overlay .ob-btn.primary:disabled{ background:var(--surface3); background-blend-mode:normal; color:var(--fg3); opacity:1; }
 .ob-overlay .ob-btn.primary:disabled:hover{ filter:none; }
 .ob-overlay .ob-door-fine{ margin-top:8px; font-size:11px; color:var(--fg3); }
 

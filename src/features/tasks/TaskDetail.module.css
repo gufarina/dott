@@ -51,7 +51,9 @@
   flex: 1;
   font-family: inherit;
   font-size: 21px;
-  font-weight: 650;
+  /* Desvio consciente da baseline Cursor por mandato do CEO (25/08/2026):
+     titulo em 700 — tracking negativo segura a elegancia. */
+  font-weight: 700;
   line-height: 1.32;
   letter-spacing: -.01em;
   color: var(--fg);
@@ -69,11 +71,14 @@
 .estado {
   flex-shrink: 0;
   margin-top: 5px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .04em;
+  font-size: var(--pill-font-size);
+  font-weight: var(--pill-font-weight);
+  line-height: var(--pill-line-height);
+  letter-spacing: var(--pill-letter-spacing);
   text-transform: uppercase;
-  padding: 3px 9px;
+  padding: var(--pill-padding);
+  display: inline-flex;
+  align-items: center;
   border-radius: var(--r-full, 999px);
   border: 1px solid transparent;
 }
@@ -106,7 +111,7 @@
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: .05em;
   text-transform: uppercase;
   color: var(--fg3);
@@ -164,7 +169,7 @@
 .atalhoPasta:hover { border-color: var(--accent); background: var(--surface3); }
 .atalhoBolinha { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .atalhoTexto { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.atalhoNome { font-size: 14px; font-weight: 650; color: var(--fg); }
+.atalhoNome { font-size: 14px; font-weight: 600; color: var(--fg); }
 .atalhoMeta { font-size: 12px; color: var(--fg3); }
 .atalhoSeta { color: var(--fg3); transform: rotate(180deg); flex-shrink: 0; }
 
@@ -173,7 +178,7 @@
 
 .blocoRotulo {
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: .05em;
   text-transform: uppercase;
   color: var(--fg3);

@@ -154,13 +154,16 @@
   color: var(--fg3);
 }
 .connMark {
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: .06em;
+  font-size: var(--pill-font-size);
+  font-weight: var(--pill-font-weight);
+  line-height: var(--pill-line-height);
+  letter-spacing: var(--pill-letter-spacing);
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
   border: 1px solid var(--border2);
-  border-radius: var(--r-sm);
-  padding: 1px 5px;
+  border-radius: var(--r-full);
+  padding: var(--pill-padding);
   color: var(--fg3);
   flex: none;
 }

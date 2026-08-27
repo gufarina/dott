@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Dott — opções pro botão primário</title>
+<!--
+  preview/botao-brasa-opcoes.html — pagina standalone, ZERO dependencia,
+  so pra decisao do CEO. Nao mexe em tokens.css/DESIGN.md/preview/index.html.
+  Rodada 5 (26/08/2026): as tres opcoes anteriores foram reprovadas porque
+  o gradiente ficou escondido demais pra proteger contraste. Aqui a ordem
+  inverte - o gradiente tem que aparecer a olho nu; a legibilidade do texto
+  se resolve por POSICAO, nunca abaixando a luz.
+-->
+<style>
+  @font-face {
+    font-family: 'Manrope';
+    src: url('../node_modules/@fontsource/manrope/files/manrope-latin-400-normal.woff2') format('woff2');
+    font-weight: 400; font-display: swap;
+  }
+  @font-face {
+    font-family: 'Manrope';
+    src: url('../node_modules/@fontsource/manrope/files/manrope-latin-600-normal.woff2') format('woff2');
+    font-weight: 600; font-display: swap;
+  }
+
+  :root {
+    --bg: #0d0d10; --surface: #141417; --surface2: #1a1a1e;
+    --border: #26262c; --border2: #2e2e36;
+    --fg: #e8e8ec; --fg2: #aeaec2; --fg3: #8c8ca6;
+    --font-ui: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 48px;
+    min-width: 1180px;
+  }
+
+  h1 { font-size: 22px; font-weight: 700; letter-spacing: -.01em; margin: 0 0 10px; }
+  .conflito {
+    font-size: 16px; color: var(--fg2); max-width: 78ch; margin: 0 0 40px;
+    padding: 16px 20px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px; display: flex; flex-direction: column; gap: 16px;
+  }
+  .card h2 { font-size: 15px; font-weight: 700; margin: 0; letter-spacing: -.005em; }
+  .card .desc { font-size: 13px; color: var(--fg2); line-height: 1.5; min-height: 84px; }
+
+  .stage {
+    background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px;
+    padding: 28px 20px; display: flex; flex-direction: column; align-items: center; gap: 18px;
+  }
+  .row-label { font-size: 10.5px; color: var(--fg3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: -8px; }
+
+  .btn {
+    height: 36px; padding: 0 18px;
+    display: inline-flex; align-items: center; gap: 8px;
+    border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600;
+    cursor: pointer; border: none; color: #fff;
+  }
+  .btn.size44 { height: 44px; padding: 0 20px; font-size: 14px; }
+  .btn.size52 { height: 52px; padding: 0 22px; font-size: 14px; }
+
+  /* ── Opção 1 — varredura diagonal: profundo onde o texto começa (canto
+     superior-esquerdo), quase branco no canto oposto. Texto encostado à
+     esquerda, sentado na metade profunda da rampa. Botão mais largo que o
+     texto de propósito — é esse excesso de largura que dá espaço pro
+     gradiente aparecer inteiro. ── */
+  .btn.opt1 {
+    justify-content: flex-start;
+    min-width: 240px;
+    background: linear-gradient(135deg,
+      oklch(.42 .19 28) 0%, oklch(.42 .19 28) 55%,
+      oklch(.80 .22 50) 80%, oklch(.97 .05 62) 100%);
+  }
+
+  /* ── Opção 2 — nascer lateral: profundo à esquerda (onde o texto mora),
+     o terço direito inteiro é núcleo quente sólido — não um pontinho. ── */
+  .btn.opt2 {
+    justify-content: flex-start;
+    min-width: 230px;
+    background: linear-gradient(90deg,
+      oklch(.42 .19 28) 0%, oklch(.42 .19 28) 60%,
+      oklch(.97 .05 62) 88%, oklch(.97 .05 62) 100%);
+  }
+
+  /* ── Opção 3 — brasa embaixo: a receita de 3 camadas do widget (fogo +
+     ambiente + base preta), com o núcleo e o corpo de fogo empurrados pra
+     BEM abaixo da linha do texto. So funciona com o botão mais alto — é a
+     altura extra que abre espaço pra luz, ninguem rebaixou o nucleo. ── */
+  .btn.opt3 {
+    justify-content: center;
+    background:
+      radial-gradient(45% 30% at 50% 90% in oklch,
+        oklch(.97 .05 62) 0%, oklch(.80 .22 50 / .70) 36%, oklch(.24 .10 40 / 0) 78%),
+      radial-gradient(60% 50% at 50% 95% in oklch,
+        oklch(.74 .21 45) 0%, oklch(.54 .20 37 / .76) 42%, oklch(.22 .10 30 / 0) 86%),
+      radial-gradient(112% 92% at 50% 48% in oklch,
+        oklch(.40 .12 34 / .44) 0%, oklch(.27 .10 30 / .20) 48%, oklch(.13 .05 28 / 0) 90%),
+      #070103;
+    background-blend-mode: screen, screen, screen, normal;
+  }
+
+  .contraste {
+    font-size: 12px; color: var(--fg2); border-top: 1px solid var(--border); padding-top: 12px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .contraste b { color: var(--fg); }
+  .contraste .ok { color: #3db37a; font-weight: 700; }
+</style>
+</head>
+<body>
+
+  <h1>Botão primário — três jeitos de deixar o gradiente óbvio</h1>
+  <p class="conflito">
+    O gradiente tem que aparecer a olho nu, sem precisar ampliar. As três
+    opções abaixo são todas quentes e fortes de verdade — a diferença entre
+    elas é só ONDE o calor mora dentro da caixa, pra não brigar com o texto.
+  </p>
+
+  <div class="grid">
+
+    <div class="card">
+      <h2>1 — Varredura diagonal</h2>
+      <div class="desc">
+        Rampa de canto a canto: vermelho profundo onde o texto começa,
+        quase branco no canto oposto — a mesma forma que já existia no
+        swatch antigo, só que preservada de verdade. O botão fica mais
+        largo que o texto pra sobrar espaço pro branco aparecer inteiro.
+      </div>
+      <div class="stage">
+        <span class="row-label">36px (real)</span>
+        <button class="btn opt1">Criar tarefa</button>
+        <span class="row-label">44px (demonstração)</span>
+        <button class="btn opt1 size44">Criar tarefa</button>
+      </div>
+      <div class="contraste">
+        <div>Contraste sob o texto (fica na metade profunda, cor sólida): <b>≈8,3:1</b> <span class="ok">passa</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2 — Nascer lateral</h2>
+      <div class="desc">
+        Vermelho profundo à esquerda onde o texto mora; o terço direito
+        inteiro do botão é núcleo quase branco sólido — um bloco de luz de
+        verdade, não uma migalha escondida no canto.
+      </div>
+      <div class="stage">
+        <span class="row-label">36px (real)</span>
+        <button class="btn opt2">Criar tarefa</button>
+        <span class="row-label">44px (demonstração)</span>
+        <button class="btn opt2 size44">Criar tarefa</button>
+      </div>
+      <div class="contraste">
+        <div>Contraste sob o texto (fica no vermelho profundo, cor sólida): <b>≈8,3:1</b> <span class="ok">passa</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3 — Brasa embaixo, botão mais alto</h2>
+      <div class="desc">
+        A receita de verdade do widget (núcleo quase branco + corpo de
+        fogo + ambiente, sobre preto) — ninguém rebaixou a luz. O que muda
+        é a régua: o botão cresce pra caber a brasa abaixo da linha do
+        texto, como na esfera. Não existe versão de 36px desta opção — é
+        exatamente esse o ponto dela.
+      </div>
+      <div class="stage">
+        <span class="row-label">44px</span>
+        <button class="btn opt3 size44">Criar tarefa</button>
+        <span class="row-label">52px</span>
+        <button class="btn opt3 size52">Criar tarefa</button>
+      </div>
+      <div class="contraste">
+        <div>Contraste sob o texto em 44px: <b>≈9,0:1</b> <span class="ok">passa</span></div>
+        <div>Contraste sob o texto em 52px: <b>≈10,9:1</b> <span class="ok">passa</span></div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

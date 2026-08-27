@@ -1,11 +1,11 @@
-# Graph Report - C:\Users\Lite OS\Projetos\dott-warmfox  (2026-08-25)
+# Graph Report - C:\Users\Lite OS\Projetos\dott-warmfox  (2026-08-26)
 
 ## Corpus Check
-- 53 files · ~119,769 words
+- 54 files · ~127,126 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 259 nodes · 306 edges · 47 communities detected
+- 262 nodes · 308 edges · 48 communities detected
 - Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 36 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -57,6 +57,7 @@
 - [[_COMMUNITY_Community 44|Community 44]]
 - [[_COMMUNITY_Community 45|Community 45]]
 - [[_COMMUNITY_Community 46|Community 46]]
+- [[_COMMUNITY_Community 47|Community 47]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `showToast()` - 19 edges
@@ -71,22 +72,22 @@
 10. `onWindowDrop()` - 4 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `excluir()` --calls--> `showToast()`  [INFERRED]
-  C:\Users\Lite OS\Projetos\dott-warmfox\src\features\tasks\TaskDetail.tsx → src\components\Toast.tsx
-- `abrirTarefa()` --calls--> `suggestTask()`  [INFERRED]
-  src\features\inbox\InboxPanel.tsx → src\lib\interpret.ts
 - `onDragEnd()` --calls--> `showToast()`  [INFERRED]
   C:\Users\Lite OS\Projetos\dott-warmfox\src\App.tsx → src\components\Toast.tsx
+- `abrirTarefa()` --calls--> `suggestTask()`  [INFERRED]
+  C:\Users\Lite OS\Projetos\dott-warmfox\src\features\inbox\InboxPanel.tsx → src\lib\interpret.ts
 - `graphOf()` --calls--> `buildGraph()`  [INFERRED]
   C:\Users\Lite OS\Projetos\dott-warmfox\src\store.ts → C:\Users\Lite OS\Projetos\dott-warmfox\src\lib\graphify.ts
 - `doBackup()` --calls--> `showToast()`  [INFERRED]
+  C:\Users\Lite OS\Projetos\dott-warmfox\src\components\Settings.tsx → src\components\Toast.tsx
+- `doRestore()` --calls--> `showToast()`  [INFERRED]
   C:\Users\Lite OS\Projetos\dott-warmfox\src\components\Settings.tsx → src\components\Toast.tsx
 
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.08
-Nodes (18): onDragEnd(), onWindowDrop(), imageFromEvent(), saveImageFile(), criarPasta(), criarTarefa(), newNote(), onFile() (+10 more)
+Cohesion: 0.09
+Nodes (18): onWindowDrop(), imageFromEvent(), saveImageFile(), criarPasta(), criarTarefa(), newNote(), onFile(), onNoteFile() (+10 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.11
@@ -117,32 +118,32 @@ Cohesion: 0.31
 Nodes (8): FrontMatter, parse_note(), serialize_note(), vault_delete(), vault_dir(), vault_load(), vault_save(), VaultNote
 
 ### Community 8 - "Community 8"
+Cohesion: 0.22
+Nodes (1): onDragEnd()
+
+### Community 9 - "Community 9"
 Cohesion: 0.25
 Nodes (4): isGlyphId(), fromNote(), saveNoteToVault(), toNote()
 
-### Community 9 - "Community 9"
+### Community 10 - "Community 10"
 Cohesion: 0.57
 Nodes (7): backup_now(), backup_restore(), backups_folder(), backups_list(), backups_root(), copy_dir(), data_dir()
 
-### Community 10 - "Community 10"
+### Community 11 - "Community 11"
 Cohesion: 0.33
 Nodes (2): abrirTarefa(), pastaDe()
 
-### Community 11 - "Community 11"
+### Community 12 - "Community 12"
 Cohesion: 0.47
 Nodes (3): ColorFrom(), Draw-Glow(), Draw-Orb()
-
-### Community 12 - "Community 12"
-Cohesion: 0.4
-Nodes (0): 
 
 ### Community 13 - "Community 13"
 Cohesion: 0.4
 Nodes (0): 
 
 ### Community 14 - "Community 14"
-Cohesion: 0.5
-Nodes (1): excluir()
+Cohesion: 0.4
+Nodes (0): 
 
 ### Community 15 - "Community 15"
 Cohesion: 0.83
@@ -173,12 +174,12 @@ Cohesion: 0.67
 Nodes (0): 
 
 ### Community 22 - "Community 22"
-Cohesion: 1.0
-Nodes (2): FolderCard(), maxNotes()
-
-### Community 23 - "Community 23"
 Cohesion: 0.67
 Nodes (0): 
+
+### Community 23 - "Community 23"
+Cohesion: 1.0
+Nodes (2): FolderCard(), maxNotes()
 
 ### Community 24 - "Community 24"
 Cohesion: 0.67
@@ -190,11 +191,11 @@ Nodes (0):
 
 ### Community 26 - "Community 26"
 Cohesion: 0.67
-Nodes (3): Badge de Contador Numerico (valor 6), Icone Chama/Olho Laranja-Vermelho (logo do widget), Widget Dott - Estado de Repouso (Tema Preto)
+Nodes (0): 
 
 ### Community 27 - "Community 27"
-Cohesion: 1.0
-Nodes (0): 
+Cohesion: 0.67
+Nodes (3): Badge de Contador Numerico (valor 6), Icone Chama/Olho Laranja-Vermelho (logo do widget), Widget Dott - Estado de Repouso (Tema Preto)
 
 ### Community 28 - "Community 28"
 Cohesion: 1.0
@@ -262,69 +263,73 @@ Nodes (0):
 
 ### Community 44 - "Community 44"
 Cohesion: 1.0
-Nodes (1): README.md - template Tauri+React+TypeScript
+Nodes (0): 
 
 ### Community 45 - "Community 45"
 Cohesion: 1.0
-Nodes (1): landing/lp-dott-lancamento-2026-08-09.html - LP mesma copy, revisao de 09/08
+Nodes (1): README.md - template Tauri+React+TypeScript
 
 ### Community 46 - "Community 46"
+Cohesion: 1.0
+Nodes (1): landing/lp-dott-lancamento-2026-08-09.html - LP mesma copy, revisao de 09/08
+
+### Community 47 - "Community 47"
 Cohesion: 1.0
 Nodes (1): Dott Widget - Painel de Nota Aberto (digitando)
 
 ## Knowledge Gaps
 - **11 isolated node(s):** `InboxCard`, `VaultNote`, `FrontMatter`, `README.md - template Tauri+React+TypeScript`, `landing/lp-dott-lancamento-2026-08-09.html - LP mesma copy, revisao de 09/08` (+6 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 27`** (2 nodes): `currentLabel()`, `main.tsx`
+- **Thin community `Community 28`** (2 nodes): `main.tsx`, `currentLabel()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 28`** (2 nodes): `BootLoader()`, `BootLoader.tsx`
+- **Thin community `Community 29`** (2 nodes): `BootLoader()`, `BootLoader.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 29`** (2 nodes): `Breadcrumb()`, `Breadcrumb.tsx`
+- **Thin community `Community 30`** (2 nodes): `Breadcrumb()`, `Breadcrumb.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 30`** (2 nodes): `CardTypeIcon()`, `CardTypeIcon.tsx`
+- **Thin community `Community 31`** (2 nodes): `CardTypeIcon()`, `CardTypeIcon.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 31`** (2 nodes): `DottMark()`, `DottMark.tsx`
+- **Thin community `Community 32`** (2 nodes): `DottMark()`, `DottMark.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 32`** (2 nodes): `Icon()`, `Icon.tsx`
+- **Thin community `Community 33`** (2 nodes): `Icon()`, `Icon.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 33`** (2 nodes): `ModalPortal()`, `ModalPortal.tsx`
+- **Thin community `Community 34`** (2 nodes): `ModalPortal()`, `ModalPortal.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 34`** (2 nodes): `SearchModal()`, `SearchModal.tsx`
+- **Thin community `Community 35`** (2 nodes): `SearchModal()`, `SearchModal.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 35`** (2 nodes): `Titlebar.tsx`, `Titlebar()`
+- **Thin community `Community 36`** (2 nodes): `Titlebar.tsx`, `Titlebar()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 36`** (2 nodes): `ImageViewer()`, `ImageViewer.tsx`
+- **Thin community `Community 37`** (2 nodes): `ImageViewer()`, `ImageViewer.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 37`** (2 nodes): `Constellation.tsx`, `Constellation()`
+- **Thin community `Community 38`** (2 nodes): `Constellation.tsx`, `Constellation()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 38`** (2 nodes): `main()`, `build.rs`
+- **Thin community `Community 39`** (2 nodes): `main()`, `build.rs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 39`** (2 nodes): `widget_geo.rs`, `widget_set_geometry()`
+- **Thin community `Community 40`** (2 nodes): `widget_geo.rs`, `widget_set_geometry()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 40`** (1 nodes): `vite.config.ts`
+- **Thin community `Community 41`** (1 nodes): `vite.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 41`** (1 nodes): `vite-env.d.ts`
+- **Thin community `Community 42`** (1 nodes): `vite-env.d.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 42`** (1 nodes): `GlyphPicker.tsx`
+- **Thin community `Community 43`** (1 nodes): `GlyphPicker.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 43`** (1 nodes): `seedNotes.ts`
+- **Thin community `Community 44`** (1 nodes): `seedNotes.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 44`** (1 nodes): `README.md - template Tauri+React+TypeScript`
+- **Thin community `Community 45`** (1 nodes): `README.md - template Tauri+React+TypeScript`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 45`** (1 nodes): `landing/lp-dott-lancamento-2026-08-09.html - LP mesma copy, revisao de 09/08`
+- **Thin community `Community 46`** (1 nodes): `landing/lp-dott-lancamento-2026-08-09.html - LP mesma copy, revisao de 09/08`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 46`** (1 nodes): `Dott Widget - Painel de Nota Aberto (digitando)`
+- **Thin community `Community 47`** (1 nodes): `Dott Widget - Painel de Nota Aberto (digitando)`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `showToast()` connect `Community 0` to `Community 8`, `Community 1`, `Community 5`, `Community 14`?**
-  _High betweenness centrality (0.105) - this node is a cross-community bridge._
+- **Why does `showToast()` connect `Community 0` to `Community 8`, `Community 9`, `Community 5`, `Community 1`?**
+  _High betweenness centrality (0.102) - this node is a cross-community bridge._
 - **Why does `capture()` connect `Community 1` to `Community 0`?**
-  _High betweenness centrality (0.058) - this node is a cross-community bridge._
+  _High betweenness centrality (0.056) - this node is a cross-community bridge._
 - **Why does `abrirTarefa()` connect `Community 0` to `Community 6`?**
-  _High betweenness centrality (0.029) - this node is a cross-community bridge._
+  _High betweenness centrality (0.028) - this node is a cross-community bridge._
 - **Are the 17 inferred relationships involving `showToast()` (e.g. with `onWindowDrop()` and `onDragEnd()`) actually correct?**
   _`showToast()` has 17 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 5 inferred relationships involving `saveImageFile()` (e.g. with `onWindowDrop()` and `onFile()`) actually correct?**
@@ -332,4 +337,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `InboxCard`, `VaultNote`, `FrontMatter` to the rest of the system?**
   _11 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09 - nodes in this community are weakly interconnected._

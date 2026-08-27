@@ -32,7 +32,7 @@
   padding: 14px 16px 10px;
   flex-shrink: 0;
 }
-.title { font-size: 14px; font-weight: 700; color: var(--fg); flex: 1; }
+.title { font-size: var(--text-sm); font-weight: 700; color: var(--fg); flex: 1; }
 .close {
   width: 24px;
   height: 24px;

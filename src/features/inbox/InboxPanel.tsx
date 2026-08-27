@@ -7,6 +7,7 @@ import { detectType } from '../../lib/detectType'
 import { suggestTask, suggestFolder } from '../../lib/interpret'
 import { Icon } from '../../components/Icon'
 import { ModalPortal } from '../../components/ModalPortal'
+import { Modal, ModalHint, ModalField, ModalInput, ModalFooter, ModalButton } from '../../components/Modal'
 import { CardTypeIcon } from '../../components/CardTypeIcon'
 import s from './InboxPanel.module.css'
 
@@ -181,7 +182,7 @@ export function InboxPanel() {
             <div className={s.captureMeta}>
               {detection ? (
                 <span className={`${s.captureChip} ${s['type-' + TYPE_CLASS[detection.type as CardType]]}`}>
-                  <CardTypeIcon type={detection.type as CardType} size={10} />
+                  <CardTypeIcon type={detection.type as CardType} size={9} />
                   {detection.label}
                 </span>
               ) : (
@@ -281,7 +282,7 @@ export function InboxPanel() {
               <DraggableCard key={c.id} id={c.id} onClick={() => setProcessing(c.id)}>
                 <div className={s.cardHeader}>
                   <span className={`${s.cardType} ${s['type-' + TYPE_CLASS[c.type]]}`}>
-                    <CardTypeIcon type={c.type} />{c.type}
+                    <CardTypeIcon type={c.type} size={9} />{c.type}
                   </span>
                   <span className={s.cardTime}>{relTime(c.ts, c.time)}</span>
                   <button
@@ -419,40 +420,26 @@ export function InboxPanel() {
       })()}
 
       {virandoTarefa && (
-        <ModalPortal>
-        <div className={s.overlay} onClick={e => e.target === e.currentTarget && setVirandoTarefa(null)}>
-          <div className={s.taskModal}>
-            <div className={s.processHeader}>
-              <span>Virar tarefa</span>
-              <button className={s.processClose} onClick={() => setVirandoTarefa(null)} title="Fechar">
-                <Icon name="fechar" size={13} />
-              </button>
-            </div>
-            <p className={s.taskHint}>
-              Li o card e montei a tarefa. Ajuste como quiser antes de criar.
-            </p>
-            <div className={s.taskField}>
-              <Icon name="tarefa" size={14} className={s.taskFieldIcon} />
-              <input
-                className={s.taskInput}
-                value={virandoTarefa.texto}
-                autoFocus
-                onChange={e => setVirandoTarefa({ ...virandoTarefa, texto: e.target.value })}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') confirmarTarefa()
-                  if (e.key === 'Escape') setVirandoTarefa(null)
-                }}
-              />
-            </div>
-            <div className={s.taskFooter}>
-              <button className={s.taskCancel} onClick={() => setVirandoTarefa(null)}>Cancelar</button>
-              <button className={s.taskOk} onClick={confirmarTarefa}>
-                <Icon name="tarefa" size={13} /> Criar tarefa
-              </button>
-            </div>
-          </div>
-        </div>
-        </ModalPortal>
+        <Modal title="Virar tarefa" onClose={() => setVirandoTarefa(null)}>
+          <ModalHint>Li o card e montei a tarefa. Ajuste como quiser antes de criar.</ModalHint>
+          <ModalField label="Tarefa">
+            <ModalInput
+              value={virandoTarefa.texto}
+              autoFocus
+              onChange={e => setVirandoTarefa({ ...virandoTarefa, texto: e.target.value })}
+              onKeyDown={e => {
+                if (e.key === 'Enter') confirmarTarefa()
+                if (e.key === 'Escape') setVirandoTarefa(null)
+              }}
+            />
+          </ModalField>
+          <ModalFooter>
+            <ModalButton variant="ghost" onClick={() => setVirandoTarefa(null)}>Cancelar</ModalButton>
+            <ModalButton variant="primary" onClick={confirmarTarefa}>
+              <Icon name="tarefa" size={13} /> Criar tarefa
+            </ModalButton>
+          </ModalFooter>
+        </Modal>
       )}
     </>
   )

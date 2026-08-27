@@ -3,6 +3,7 @@ import { useStore } from '../../store'
 import { saveImageFile } from '../../lib/attachments'
 import { showToast } from '../../components/Toast'
 import { Icon } from '../../components/Icon'
+import { Modal, ModalField, ModalInput, ModalFooter, ModalButton } from '../../components/Modal'
 import { GlyphPicker } from '../../components/GlyphPicker'
 import { NoteGlyph } from '../../components/NoteGlyphs'
 import s from './FolderNotesView.module.css'
@@ -132,58 +133,52 @@ export function FolderNotesView() {
         <button className={s.btnNew} onClick={newNote} title="Criar uma nota nesta pasta">
           <Icon name="nota" size={14} /> Nova nota
         </button>
-        <button className={s.btnNewAlt} onClick={() => { setNovaTarefa(v => !v); setNovaPasta(false) }} title="Criar uma tarefa nesta pasta">
+        <button className={s.btnNewAlt} onClick={() => setNovaTarefa(true)} title="Criar uma tarefa nesta pasta">
           <Icon name="tarefa" size={14} /> Nova tarefa
         </button>
-        <button className={s.btnNewAlt} onClick={() => { setNovaPasta(v => !v); setNovaTarefa(false) }} title="Criar outra pasta nesta categoria">
+        <button className={s.btnNewAlt} onClick={() => setNovaPasta(true)} title="Criar outra pasta nesta categoria">
           <Icon name="pasta" size={14} /> Nova pasta
         </button>
       </div>
 
       {novaTarefa && (
-        <div className={s.newFolderRow}>
-          <Icon name="tarefa" size={14} className={s.newFolderIcon} />
-          <input
-            className={s.newFolderInput}
-            placeholder={`O que precisa ser feito em ${folderObj?.name ?? 'nesta pasta'}?`}
-            value={textoTarefa}
-            autoFocus
-            onChange={e => setTextoTarefa(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter') criarTarefa()
-              if (e.key === 'Escape') { setNovaTarefa(false); setTextoTarefa('') }
-            }}
-          />
-          <button className={s.newFolderOk} onClick={criarTarefa} title="Criar tarefa">
-            <Icon name="mais" size={14} />
-          </button>
-          <button className={s.newFolderCancel} onClick={() => { setNovaTarefa(false); setTextoTarefa('') }} title="Fechar">
-            <Icon name="fechar" size={13} />
-          </button>
-        </div>
+        <Modal title="Nova tarefa" onClose={() => { setNovaTarefa(false); setTextoTarefa('') }}>
+          <ModalField label={`Em ${folderObj?.name ?? 'nesta pasta'}`}>
+            <ModalInput
+              placeholder="O que precisa ser feito?"
+              value={textoTarefa}
+              autoFocus
+              onChange={e => setTextoTarefa(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') criarTarefa() }}
+            />
+          </ModalField>
+          <ModalFooter>
+            <ModalButton variant="ghost" onClick={() => { setNovaTarefa(false); setTextoTarefa('') }}>Cancelar</ModalButton>
+            <ModalButton variant="primary" onClick={criarTarefa}>
+              <Icon name="tarefa" size={13} /> Criar tarefa
+            </ModalButton>
+          </ModalFooter>
+        </Modal>
       )}
 
       {novaPasta && (
-        <div className={s.newFolderRow}>
-          <Icon name="pasta" size={14} className={s.newFolderIcon} />
-          <input
-            className={s.newFolderInput}
-            placeholder={`Nome da pasta em ${category ? para[category]?.label ?? '' : ''}...`}
-            value={nomePasta}
-            autoFocus
-            onChange={e => setNomePasta(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter') criarPasta()
-              if (e.key === 'Escape') { setNovaPasta(false); setNomePasta('') }
-            }}
-          />
-          <button className={s.newFolderOk} onClick={criarPasta} title="Criar pasta">
-            <Icon name="mais" size={14} />
-          </button>
-          <button className={s.newFolderCancel} onClick={() => { setNovaPasta(false); setNomePasta('') }} title="Cancelar">
-            <Icon name="fechar" size={13} />
-          </button>
-        </div>
+        <Modal title="Nova pasta" onClose={() => { setNovaPasta(false); setNomePasta('') }}>
+          <ModalField label={`Em ${category ? para[category]?.label ?? '' : ''}`}>
+            <ModalInput
+              placeholder="Nome da pasta"
+              value={nomePasta}
+              autoFocus
+              onChange={e => setNomePasta(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') criarPasta() }}
+            />
+          </ModalField>
+          <ModalFooter>
+            <ModalButton variant="ghost" onClick={() => { setNovaPasta(false); setNomePasta('') }}>Cancelar</ModalButton>
+            <ModalButton variant="primary" onClick={criarPasta}>
+              <Icon name="pasta" size={13} /> Criar pasta
+            </ModalButton>
+          </ModalFooter>
+        </Modal>
       )}
 
       <div className={s.body}>

@@ -96,7 +96,7 @@
 
 .painelLabel {
   font-size: 10.5px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: .06em;
   text-transform: uppercase;
   color: var(--fg3);
@@ -162,14 +162,20 @@
   color: var(--fg3);
 }
 
+/* Mesma pill ACHADA/INFERIDA de NoteEditor.module.css .connMark — achada
+   fora da lista medida pelo coordenador, mas e o mesmo defeito (pill fora
+   da receita), corrigida na mesma varredura. */
 .marca {
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: .06em;
+  font-size: var(--pill-font-size);
+  font-weight: var(--pill-font-weight);
+  letter-spacing: var(--pill-letter-spacing);
+  line-height: var(--pill-line-height);
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
   border: 1px solid var(--border2);
-  border-radius: var(--r-sm);
-  padding: 1px 5px;
+  border-radius: var(--r-full);
+  padding: var(--pill-padding);
   color: var(--fg3);
   flex: none;
 }

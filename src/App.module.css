@@ -82,7 +82,10 @@
   flex-direction: column;
 }
 
-/* Card fantasma seguindo o cursor durante o drag */
+/* Card fantasma seguindo o cursor durante o drag — excecao registrada de
+   sombra: e superficie FLUTUANTE (solta do fluxo, acompanha o ponteiro por
+   cima de tudo), mesma categoria de modal/popover/toast. Sem a sombra ele
+   se confunde com o que esta por baixo enquanto arrasta. */
 .dragGhost {
   display: flex;
   flex-direction: column;
@@ -106,7 +109,7 @@
 .dragGhostAlvo {
   margin-top: 2px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: .02em;
   color: var(--fg3);
   white-space: nowrap;
@@ -116,7 +119,7 @@
 .dragGhostArmado .dragGhostAlvo { color: var(--accent); }
 .dragGhostType {
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: .04em;
   color: var(--accent);
 }

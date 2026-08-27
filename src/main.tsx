@@ -3,6 +3,18 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { Widget } from "./widget/Widget";
 import "./styles/fonts.css";
+// Manrope (UI: titulo, botao, label, navegacao) e Merriweather (corpo de
+// leitura da nota, .md-view em markdown.css) via @fontsource — pacote NPM,
+// nunca link de CDN (o app roda sem rede por dentro). PENDENCIA: os pacotes
+// abaixo ainda nao estao instalados (`npm i @fontsource/manrope
+// @fontsource/merriweather`); ate la o build falha nestes dois imports.
+import "@fontsource/manrope/400.css";
+import "@fontsource/manrope/500.css";
+import "@fontsource/manrope/600.css";
+import "@fontsource/manrope/700.css";
+import "@fontsource/merriweather/400.css";
+import "@fontsource/merriweather/400-italic.css";
+import "@fontsource/merriweather/700.css";
 import "./styles/tokens.css";
 import "./styles/reset.css";
 
