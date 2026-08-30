@@ -1,7 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Dott",
-  "version": "0.2.17",
+  "mainBinaryName": "Dott",
+  "version": "0.2.18",
   "identifier": "com.studiofarina.dott",
   "build": {
     "beforeDevCommand": "npm run dev",

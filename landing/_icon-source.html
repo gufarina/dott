@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Dott - fonte do icone do app</title>
+<style>
+/* TASK-393: acender a brasa DENTRO do simbolo (anel + ponto), nao atras dele.
+   Fundo, formato e proporcao da marca ficam iguais ao icone de hoje
+   (src-tauri/icons/128x128@2x.png): quadrado de cantos arredondados, quase
+   preto, marca centralizada ocupando a maior parte do quadrado. */
+*{ margin:0; padding:0; box-sizing:border-box; }
+html,body{ background:transparent; }
+
+/* Palco: exatamente 1024x1024, nada mais na pagina. */
+.icone{
+  width:1024px;
+  height:1024px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  /* Mesmo breu usado no resto da marca (Widget.module.css .orb usa #070103;
+     landing/_header-github.html define --breu:#070103). Reuso, nao invencao. */
+  background:#070103;
+  /* Cantos arredondados como o icone atual (proporcao medida no PNG de hoje). */
+  border-radius:225px;
+}
+
+/* Marca ocupa ~84% do lado do quadrado, mesma leitura visual do icone atual
+   (ring quase encostando na borda, com uma folga pequena e uniforme). */
+.icone svg{
+  width:860px;
+  height:860px;
+  display:block;
+  overflow:visible;
+}
+</style>
+</head>
+<body>
+
+<div class="icone">
+  <!--
+    Marca: viewBox 0 0 24 24, IDENTICA a src/components/DottMark.tsx.
+    NAO MUDEI: proporcao do anel (r=8.8, stroke-width 2.6, linecap round),
+    o path exato do arco (com a abertura), o raio do ponto (4.4) nem o centro
+    compartilhado (12,12). Nao acrescentei elemento nenhum.
+
+    O QUE MUDOU: stroke do anel e fill do ponto deixam de ser "currentColor"
+    (marca chapada) e passam a usar o MESMO radialGradient, em
+    gradientUnits="userSpaceOnUse" no espaco de coordenadas 0..24 do proprio
+    path. Por serem o mesmo gradiente na mesma grade de coordenadas, a luz
+    atravessa anel e ponto como se fosse uma unica fonte - nao dois brilhos
+    separados.
+
+    POSICAO DO NUCLEO: centro do gradiente em (12, 15.5) - 3.5 unidades
+    ABAIXO do centro da marca (12,12), caindo dentro do proprio ponto (que
+    vai de y=7.6 a y=16.4). Isso reproduz a bolinha do Widget
+    (Widget.module.css .luz3, nucleo em "50% 66.67%", ou seja abaixo do
+    centro do orb) na mesma logica: o ponto de luz mais forte fica dentro da
+    forma, puxado pra baixo, nunca no centro geometrico puro.
+
+    PROGRESSAO DE COR: a mesma progressao da bolinha (vermelho profundo ->
+    laranja -> nucleo quase branco), na mesma ordem de oklch usada em
+    Widget.module.css (.luz3, .luz1, .luz2, .luz4):
+      oklch(.97 .05 62)         -> nucleo quase branco
+      oklch(.80 .22 50)         -> laranja vivo
+      oklch(.74 .21 45)         -> laranja-avermelhado (luz1)
+      oklch(.70 .21 26) / mid   -> vermelho-laranja profundo (aprox luz2/luz1)
+      oklch(.40 .12 34)         -> vermelho profundo, quase marrom (luz4)
+
+    CONVERSAO DE NOTACAO: converti cada oklch acima pra hex (sRGB) na mao
+    (oklch -> OKLab -> linear sRGB -> gama sRGB, matriz padrao do OKLab).
+    Motivo: <radialGradient> do SVG interpola SEMPRE em sRGB/linearRGB entre
+    stops (o atributo color-interpolation nao aceita oklch) - so o CSS
+    "in oklch" dos radial-gradient() do Widget.module.css interpola em OKLCH.
+    Se eu deixasse stop-color em oklch(), cada stop isolado teria a cor
+    certa, mas a TRANSICAO entre stops sairia diferente da bolinha (e o
+    resultado dependeria de o renderizador aceitar oklch() como stop-color,
+    o que nem todo motor faz). Converter pra hex fixo e mais previsivel pro
+    renderizador que vai fotografar este arquivo, e o objetivo aqui e
+    reproduzir a MESMA progressao visual, nao o mesmo codigo de cor.
+
+    LEGIBILIDADE EM 16PX: o ponto MAIS LONGE do nucleo do gradiente (raio 15)
+    e o topo do anel, perto do fim aberto do arco - fica a ~12.3 unidades do
+    centro do gradiente (12,15.5), ou seja ~82% do raio. Por isso o ultimo
+    stop usado de fato pelo desenho e o de 82% (#9B3618, vermelho-laranja
+    profundo mas ainda bem visivel), nunca o stop de 100% (#7B2815, guardado
+    so como cauda de seguranca da curva - a geometria da marca nunca chega
+    la). Nenhum ponto do anel ou do ponto se aproxima da cor de fundo
+    (#070103): o stop mais escuro que a silhueta realmente usa fica muitas
+    vezes mais claro que o fundo, entao a volta INTEIRA do anel continua
+    lendo como forma solida contra o fundo quase preto, mesmo pequena.
+    Preferi isso a deixar o topo do anel escurecer ate quase sumir.
+
+    SEM blur, sem glow gaussiano, sem sombra: a luz e so o gradiente.
+  -->
+  <svg viewBox="0 0 24 24" fill="none">
+    <defs>
+      <radialGradient id="brasa" gradientUnits="userSpaceOnUse" cx="12" cy="15.5" r="15">
+        <stop offset="0%"   stop-color="#FFEFD4"/>
+        <stop offset="20%"  stop-color="#FF8800"/>
+        <stop offset="40%"  stop-color="#FF7407"/>
+        <stop offset="62%"  stop-color="#C82A00"/>
+        <stop offset="82%"  stop-color="#9B3618"/>
+        <stop offset="100%" stop-color="#7B2815"/>
+      </radialGradient>
+    </defs>
+    <path
+      d="M20.5 9.722A8.8 8.8 0 1 1 15.719 4.024"
+      stroke="url(#brasa)"
+      stroke-width="2.6"
+      stroke-linecap="round"
+    />
+    <circle cx="12" cy="12" r="4.4" fill="url(#brasa)"/>
+  </svg>
+</div>
+
+</body>
+</html>
