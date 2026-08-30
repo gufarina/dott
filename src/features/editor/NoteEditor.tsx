@@ -292,10 +292,19 @@ export function NoteEditor() {
   /** DEFESA (item exigido junto do conserto do DEFEITO 1): gravar nota e o
    *  ato sagrado do produto - nunca persiste um `val`/`bodyRef` que possa
    *  ter ficado pra tras. Le direto da EditorView viva (o que esta
-   *  DE FATO na tela agora); so cai pro ref quando nao ha view montada
-   *  (nota-imagem, ImageViewer). Barata: um `toString()` sobre o doc que o
-   *  CodeMirror ja mantem, nenhuma validacao de conteudo do usuario. */
-  const readLiveBody = () => editorRef.current?.view?.state.doc.toString() ?? bodyRef.current
+   *  DE FATO na tela agora); so cai pro corpo conhecido da nota quando nao
+   *  ha view montada (nota-imagem, ImageViewer). Barata: um `toString()`
+   *  sobre o doc que o CodeMirror ja mantem, nenhuma validacao de conteudo
+   *  do usuario.
+   *  REGRESSAO MEDIDA (30/08/2026): o fallback usava `bodyRef.current`, que
+   *  so e atualizado quando a NOTA troca (`useEffect` de `[note]`) - numa
+   *  nota-imagem, anotar a imagem grava direto via `saveNote` sem passar
+   *  por aqui, entao `bodyRef` fica com o corpo VELHO. A proxima acao na
+   *  mesma nota-imagem que passe por `readLiveBody` (add/remover etiqueta,
+   *  editar titulo) lia esse corpo velho e regravava a imagem ANTIGA por
+   *  cima da anotacao nova. `current?.body` vem direto do store, sempre em
+   *  dia - nunca fica pra tras. */
+  const readLiveBody = () => editorRef.current?.view?.state.doc.toString() ?? current?.body ?? bodyRef.current
 
   const onChange = useCallback((val: string) => {
     bodyRef.current = val
@@ -459,7 +468,13 @@ export function NoteEditor() {
           url={parseImageOnly(initialBody)!}
           // TASK-364: reanotar a imagem troca o corpo inteiro pela imagem
           // nova - sem isto, a linha de #etiquetas do corpo velho sumia.
-          onSave={(id, t, newBody) => saveNote(id, t, reattachTags(readLiveBody(), newBody))}
+          // REGRESSAO MEDIDA (30/08/2026): usava readLiveBody(), pensado
+          // pro editor de texto vivo - aqui NAO existe CodeMirror montado
+          // (e o ramo da ImageViewer). O corpo confiavel de uma nota-imagem
+          // e `current.body`: ela nao esta sendo digitada, entao nao ha
+          // janela de autosave pra ele ficar velho - e sempre o que o
+          // store tem agora, com a etiqueta que a TASK-364 exige preservar.
+          onSave={(id, t, newBody) => saveNote(id, t, reattachTags(current.body, newBody))}
         />
       ) : (
         <div className={s.editorWrap}>

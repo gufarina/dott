@@ -40,78 +40,101 @@ html,body{ background:transparent; }
 
 <div class="icone">
   <!--
-    Marca: viewBox 0 0 24 24, IDENTICA a src/components/DottMark.tsx.
-    NAO MUDEI: proporcao do anel (r=8.8, stroke-width 2.6, linecap round),
-    o path exato do arco (com a abertura), o raio do ponto (4.4) nem o centro
-    compartilhado (12,12). Nao acrescentei elemento nenhum.
+    REPROVADO (v1): um radialGradient so, 6 paradas, pintado direto no stroke
+    e no fill. Virou "disco leitoso" porque nucleo pintado sempre desenha um
+    disco, nao importa quantas paradas - a maciez nao vem da rampa, vem da
+    SOMA de camadas. O CEO leu bola amarela com borda, nao brasa.
 
-    O QUE MUDOU: stroke do anel e fill do ponto deixam de ser "currentColor"
-    (marca chapada) e passam a usar o MESMO radialGradient, em
-    gradientUnits="userSpaceOnUse" no espaco de coordenadas 0..24 do proprio
-    path. Por serem o mesmo gradiente na mesma grade de coordenadas, a luz
-    atravessa anel e ponto como se fosse uma unica fonte - nao dois brilhos
-    separados.
+    v2 (esta): copiei a TECNICA da bolinha real (Widget.module.css, secao
+    "A BOLINHA" - .luz1 a .luz4 - e o bloco .brasa que ja resume as quatro
+    como um so elemento com background-blend-mode:screen). Quatro
+    radialGradient separados, cada um a MESMA receita (raio, posicao, cor)
+    dali, empilhados com mix-blend-mode:screen dentro de um <g> isolado.
+    Em screen, preto nao muda nada e sobreposicao SOMA luz - o nucleo branco
+    EMERGE do encontro das camadas, nao e pintado.
 
-    POSICAO DO NUCLEO: centro do gradiente em (12, 15.5) - 3.5 unidades
-    ABAIXO do centro da marca (12,12), caindo dentro do proprio ponto (que
-    vai de y=7.6 a y=16.4). Isso reproduz a bolinha do Widget
-    (Widget.module.css .luz3, nucleo em "50% 66.67%", ou seja abaixo do
-    centro do orb) na mesma logica: o ponto de luz mais forte fica dentro da
-    forma, puxado pra baixo, nunca no centro geometrico puro.
+    CONFINAMENTO: a marca de hoje (DottMark.tsx: mesmo path do anel, mesmo
+    r=4.4 do ponto) vira uma <mask> (branco = visivel). O grupo com as
+    quatro camadas + o piso #9B3618 fica DENTRO dessa mask - a luz so existe
+    onde a silhueta do anel/ponto existe, nunca vira disco de fundo.
 
-    PROGRESSAO DE COR: a mesma progressao da bolinha (vermelho profundo ->
-    laranja -> nucleo quase branco), na mesma ordem de oklch usada em
-    Widget.module.css (.luz3, .luz1, .luz2, .luz4):
-      oklch(.97 .05 62)         -> nucleo quase branco
-      oklch(.80 .22 50)         -> laranja vivo
-      oklch(.74 .21 45)         -> laranja-avermelhado (luz1)
-      oklch(.70 .21 26) / mid   -> vermelho-laranja profundo (aprox luz2/luz1)
-      oklch(.40 .12 34)         -> vermelho profundo, quase marrom (luz4)
+    O PISO (correcao pos-1a rodada): a base do grupo mascarado NAO e mais
+    #070103. Confinar a luz na marca faz as pontas mais distantes do nucleo
+    (o topo do anel, perto da abertura) dependerem da CAUDA dos quatro
+    gradientes - e cauda e escura por desenho, entao o topo apagava contra
+    o fundo em 16px. Troquei a base por #9B3618 (vermelho-laranja profundo
+    da mesma familia, ja usado e validado como "ainda bem visivel" na v1).
+    Em `screen`, um piso nunca ESCURECE o que ja e claro (screen so soma
+    luz), entao onde as camadas chegam nada muda; onde nao chegam, a marca
+    fica nesse tom solido em vez de sumir no preto. Contraste um pouco
+    menos dramatico, anel legivel inteiro - a troca que o CEO pediu.
 
-    CONVERSAO DE NOTACAO: converti cada oklch acima pra hex (sRGB) na mao
-    (oklch -> OKLab -> linear sRGB -> gama sRGB, matriz padrao do OKLab).
-    Motivo: <radialGradient> do SVG interpola SEMPRE em sRGB/linearRGB entre
-    stops (o atributo color-interpolation nao aceita oklch) - so o CSS
-    "in oklch" dos radial-gradient() do Widget.module.css interpola em OKLCH.
-    Se eu deixasse stop-color em oklch(), cada stop isolado teria a cor
-    certa, mas a TRANSICAO entre stops sairia diferente da bolinha (e o
-    resultado dependeria de o renderizador aceitar oklch() como stop-color,
-    o que nem todo motor faz). Converter pra hex fixo e mais previsivel pro
-    renderizador que vai fotografar este arquivo, e o objetivo aqui e
-    reproduzir a MESMA progressao visual, nao o mesmo codigo de cor.
+    POSICAO: cada camada usa a MESMA posicao percentual do .brasa (ex.: nucleo
+    branco a 50%,75% do proprio quadro), so convertida de % pra unidade do
+    viewBox 0..24 (24 = 100%). Nucleo mora abaixo do centro da marca, dentro
+    do proprio ponto - igual a bolinha.
 
-    LEGIBILIDADE EM 16PX: o ponto MAIS LONGE do nucleo do gradiente (raio 15)
-    e o topo do anel, perto do fim aberto do arco - fica a ~12.3 unidades do
-    centro do gradiente (12,15.5), ou seja ~82% do raio. Por isso o ultimo
-    stop usado de fato pelo desenho e o de 82% (#9B3618, vermelho-laranja
-    profundo mas ainda bem visivel), nunca o stop de 100% (#7B2815, guardado
-    so como cauda de seguranca da curva - a geometria da marca nunca chega
-    la). Nenhum ponto do anel ou do ponto se aproxima da cor de fundo
-    (#070103): o stop mais escuro que a silhueta realmente usa fica muitas
-    vezes mais claro que o fundo, entao a volta INTEIRA do anel continua
-    lendo como forma solida contra o fundo quase preto, mesmo pequena.
-    Preferi isso a deixar o topo do anel escurecer ate quase sumir.
+    CAMADA L4 (ambiente, raio 112%x92%) e a que evita o "disco morto": ela
+    cobre o quadro quase inteiro com um banho fraco, entao MESMO o ponto do
+    anel mais longe do nucleo (o topo, perto da abertura) recebe alguma luz
+    e nunca cai na cor do fundo - e exatamente o papel dela na bolinha
+    original (comentario ".luz4" no CSS: sem ela sobra faixa morta).
 
-    SEM blur, sem glow gaussiano, sem sombra: a luz e so o gradiente.
+    CORES: mesmos valores oklch do CSS, convertidos a mao pra hex (SVG nao
+    interpola oklch em stop-color) - OKLab -> LMS linear -> sRGB -> gama.
+    Os stops opacos (#FFEFD4, #FF8800, #FF7407, #C82A00/#C82B00, #7B2815)
+    ja tinham sido convertidos na v1 reprovada e bateram de novo aqui: sao
+    reuso, nao invencao. Os stops que a bolinha usa como cauda transparente
+    (alpha 0) ganharam conversao propria porque agora cada camada tem SUA
+    cauda, nao uma unica curva de 6 paradas.
+
+    SEM blur, sem glow gaussiano, sem sombra: a maciez e so a largura dos
+    gradientes somando em screen.
   -->
   <svg viewBox="0 0 24 24" fill="none">
     <defs>
-      <radialGradient id="brasa" gradientUnits="userSpaceOnUse" cx="12" cy="15.5" r="15">
-        <stop offset="0%"   stop-color="#FFEFD4"/>
-        <stop offset="20%"  stop-color="#FF8800"/>
-        <stop offset="40%"  stop-color="#FF7407"/>
-        <stop offset="62%"  stop-color="#C82A00"/>
-        <stop offset="82%"  stop-color="#9B3618"/>
-        <stop offset="100%" stop-color="#7B2815"/>
+      <mask id="marcaMask" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+        <path d="M20.5 9.722A8.8 8.8 0 1 1 15.719 4.024" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+        <circle cx="12" cy="12" r="4.4" fill="#fff"/>
+      </mask>
+
+      <!-- L4 - ambiente: banho largo, "112% 92% at 50% 48%" do .brasa -->
+      <radialGradient id="l4" gradientUnits="userSpaceOnUse" gradientTransform="translate(12 11.52) scale(26.88 22.08)" cx="0" cy="0" r="1">
+        <stop offset="0%"  stop-color="#7B2815" stop-opacity=".44"/>
+        <stop offset="48%" stop-color="#4C0803" stop-opacity=".20"/>
+        <stop offset="90%" stop-color="#170100" stop-opacity="0"/>
+      </radialGradient>
+
+      <!-- L1 - corpo de fogo: "74% 64% at 50% 78%" do .brasa -->
+      <radialGradient id="l1" gradientUnits="userSpaceOnUse" gradientTransform="translate(12 18.72) scale(17.76 15.36)" cx="0" cy="0" r="1">
+        <stop offset="0%"  stop-color="#FF7407"/>
+        <stop offset="42%" stop-color="#C82B00" stop-opacity=".76"/>
+        <stop offset="86%" stop-color="#3D0000" stop-opacity="0"/>
+      </radialGradient>
+
+      <!-- L2 - vermelho-laranja: "58% 54% at 36% 71%" do .brasa -->
+      <radialGradient id="l2" gradientUnits="userSpaceOnUse" gradientTransform="translate(8.64 17.04) scale(13.92 12.96)" cx="0" cy="0" r="1">
+        <stop offset="0%"  stop-color="#FF5A54"/>
+        <stop offset="82%" stop-color="#490000" stop-opacity="0"/>
+      </radialGradient>
+
+      <!-- L3 - nucleo quase branco: "38% 32% at 50% 75%" do .brasa -->
+      <radialGradient id="l3" gradientUnits="userSpaceOnUse" gradientTransform="translate(12 18) scale(9.12 7.68)" cx="0" cy="0" r="1">
+        <stop offset="0%"  stop-color="#FFEFD4"/>
+        <stop offset="36%" stop-color="#FF8800" stop-opacity=".70"/>
+        <stop offset="78%" stop-color="#430200" stop-opacity="0"/>
       </radialGradient>
     </defs>
-    <path
-      d="M20.5 9.722A8.8 8.8 0 1 1 15.719 4.024"
-      stroke="url(#brasa)"
-      stroke-width="2.6"
-      stroke-linecap="round"
-    />
-    <circle cx="12" cy="12" r="4.4" fill="url(#brasa)"/>
+
+    <g mask="url(#marcaMask)">
+      <g style="isolation:isolate">
+        <rect x="-4" y="-4" width="32" height="32" fill="#9B3618"/>
+        <rect x="-4" y="-4" width="32" height="32" fill="url(#l4)" style="mix-blend-mode:screen"/>
+        <rect x="-4" y="-4" width="32" height="32" fill="url(#l1)" style="mix-blend-mode:screen"/>
+        <rect x="-4" y="-4" width="32" height="32" fill="url(#l2)" style="mix-blend-mode:screen"/>
+        <rect x="-4" y="-4" width="32" height="32" fill="url(#l3)" style="mix-blend-mode:screen"/>
+      </g>
+    </g>
   </svg>
 </div>
 

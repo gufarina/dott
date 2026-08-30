@@ -37,10 +37,47 @@ body{font-family:'Public Sans',system-ui,sans-serif;-webkit-font-smoothing:antia
    oklch(.97 .05 62) 0%, oklch(.80 .22 50 / .70) 36%, oklch(.24 .10 40 / 0) 78%);}
 .brasa .grao{position:absolute;inset:0;opacity:.07;mix-blend-mode:overlay;background-image:var(--grao);}
 
-/* ATMOSFERA: a luz da sala, ancorada onde a bolinha mora (canto direito baixo) */
-.aurora{right:-6%;top:-18%;width:900px;aspect-ratio:1;z-index:0;--op:.82;
-  -webkit-mask-image:radial-gradient(closest-side,#000 28%,transparent 72%);
-          mask-image:radial-gradient(closest-side,#000 28%,transparent 72%);}
+/* ATMOSFERA: a luz da sala, centrada no centro real do orbe (1362px,310px
+   em relacao ao quadro - orbe sem as teclas fica exatamente no meio da
+   coluna de 620px). campo largo de proposito (caixa de 1000px => raio de
+   queda de 500px, closest-side): a rampa e linear do centro ate a borda da
+   caixa, entao a queda acontece ao longo de 500px continuos - nao ha ponto
+   de quebra, so o degrade sumindo aos poucos. a caixa e maior que a
+   distancia ate as bordas do quadro (238px na direita, 310px em cima/baixo),
+   entao o ponto onde a mascara realmente chega a zero fica FORA do quadro -
+   o corte que se ve e sempre um pedaco do meio do degrade (sem fim visivel),
+   nunca a borda real da mascara. overflow:visible pra o filtro de desfoque
+   nao ser cortado pela propria caixa. */
+.aurora{left:1362px;top:310px;width:1000px;aspect-ratio:1;z-index:0;--op:1;
+  transform:translate(-50%,-50%);overflow:visible;filter:blur(100px);
+  -webkit-mask-image:radial-gradient(closest-side,#000 0%,transparent 100%);
+          mask-image:radial-gradient(closest-side,#000 0%,transparent 100%);}
+/* recentra o nucleo de cada camada no meio da propria atmosfera (50%/50%) -
+   as posicoes originais (l1/l2/l3, replica do widget) sao deslocadas de
+   proposito pra caber no orb; aqui a luz de fundo tem que nascer centrada,
+   nao no ponto do widget. mesma forma/cor/raio de cada camada, so o centro
+   muda - o orbe (.orbe .brasa) continua usando a regra original, intocada. */
+.aurora .l4{background:radial-gradient(74.67% 61.33% at 50% 50% in oklch,
+   oklch(.40 .12 34 / .44) 0%, oklch(.27 .10 30 / .20) 48%, oklch(.13 .05 28 / 0) 90%);}
+.aurora .l1{background:radial-gradient(49.33% 42.67% at 50% 50% in oklch,
+   oklch(.74 .21 45) 0%, oklch(.54 .20 37 / .76) 42%, oklch(.22 .10 30 / 0) 86%);}
+.aurora .l2{background:radial-gradient(38.67% 36% at 50% 50% in oklch,
+   oklch(.70 .21 26) 0%, oklch(.24 .12 26 / 0) 82%);}
+.aurora .l3{background:radial-gradient(25.33% 21.33% at 50% 50% in oklch,
+   oklch(.97 .05 62) 0%, oklch(.80 .22 50 / .70) 36%, oklch(.24 .10 40 / 0) 78%);}
+
+/* apagada da moldura: leva os ultimos 110px de cada lado (direita, cima,
+   baixo - e a esquerda tambem, simetrico no codigo, mesmo ja preta la) ate
+   a cor de fundo. z-index:1 fica ACIMA da aurora (z0) e ABAIXO da grade
+   (z2) de proposito: cobre o brilho de fundo perto da borda, mas o texto e
+   o orbe (z2, opacos) pintam por cima dela e nunca sao escurecidos. so a
+   luz que sobra sem nada opaco na frente e apagada. */
+.quadro::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    linear-gradient(to left,var(--breu) 0,transparent 110px),
+    linear-gradient(to right,var(--breu) 0,transparent 110px),
+    linear-gradient(to bottom,var(--breu) 0,transparent 110px),
+    linear-gradient(to top,var(--breu) 0,transparent 110px);}
 
 /* grao da placa inteira: o que impede a luz de virar degrade liso */
 .quadro::after{content:'';position:absolute;inset:0;z-index:4;pointer-events:none;
@@ -88,11 +125,6 @@ h1 em{font-style:normal;color:var(--tinta-brasa);}
   transform:translate(-50%,-50%);--op:.5;
   -webkit-mask-image:radial-gradient(closest-side,#000 8%,transparent 66%);
           mask-image:radial-gradient(closest-side,#000 8%,transparent 66%);}
-.teclas{margin-top:26px;display:flex;align-items:center;justify-content:center;gap:6px;}
-.kbd{font-size:13px;font-weight:600;color:var(--cal-2);background:oklch(.24 .012 40);
-  border:1px solid oklch(.97 .006 60 / .14);border-radius:7px;padding:6px 9px;
-  box-shadow:0 2px 0 oklch(.15 .01 40);}
-.mais{font-size:13px;color:var(--cal-3);}
 </style>
 </head>
 <body>
@@ -130,11 +162,6 @@ h1 em{font-style:normal;color:var(--tinta-brasa);}
         </svg>
       </div>
       <span class="contador">2</span>
-      <div class="teclas">
-        <span class="kbd">Ctrl</span><span class="mais">+</span>
-        <span class="kbd">Shift</span><span class="mais">+</span>
-        <span class="kbd">Espaço</span>
-      </div>
     </div>
   </div>
 

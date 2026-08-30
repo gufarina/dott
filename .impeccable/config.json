@@ -7,10 +7,13 @@
         "rule": "radial-halo",
         "value": "*",
         "files": [
-          "landing/lp-dott-lancamento-2026-08-07.html"
+          "landing/lp-dott-lancamento-2026-08-09.html",
+          "landing/_header-github.html",
+          "landing/_icon-source.html"
         ],
         "createdAt": "2026-08-07T19:05:35.331Z",
-        "reason": "E o motor da brasa do proprio widget do Dott (4 camadas oklch em screen, extraidas literalmente do produto) - pedido explicito do operador para usar o gradiente do widget na LP. Contraste ja medido e corrigido (ver comentario L186 do arquivo: campo de luz atras do titulo media 1,84:1, vetado, corrigido). Nao e wash decorativo generico de IA."
+        "updatedAt": "2026-08-30T00:00:00.000Z",
+        "reason": "E o motor da brasa do proprio widget do Dott (4 camadas oklch em screen, extraidas literalmente do produto) - pedido explicito do operador para usar o gradiente do widget nestas pecas. Contraste ja medido e corrigido (ver comentario L186 da LP: campo de luz atras do titulo media 1,84:1, vetado, corrigido). Nao e wash decorativo generico de IA. ATUALIZADO 30/08/2026: (a) o caminho da LP apontava para 'lp-dott-lancamento-2026-08-07.html', arquivo que nao existe mais - a LP virou '-2026-08-09.html' e por isso a excecao parou de valer e o alerta voltou a disparar todo dia numa peca ja decidida; (b) incluidos o cabecalho do GitHub e a fonte do icone do app, que reusam o MESMO motor de luz do widget, tambem por pedido explicito do CEO ('replique o widget flutuante identico, nao invente nada' e 'esse blur no fundo quero 10x mais blurred'). Nos tres arquivos o efeito E o produto, nao enfeite."
       }
     ]
   }
