@@ -64,14 +64,26 @@ h1 em{font-style:normal;color:var(--tinta-brasa);}
 .sep{width:4px;height:4px;border-radius:50%;background:var(--cal-3);opacity:.6;}
 
 /* ---- a bolinha, corpo literal do produto ---- */
+/* header replica o widget real (orb de 56px) ampliado por N = 184/56 = 23/7.
+   marca e contador abaixo derivam TODOS deste mesmo N - nao sao numeros novos. */
 .orbe-palco{position:relative;justify-self:center;width:184px;}
 .orbe{position:relative;width:184px;height:184px;border-radius:50%;isolation:isolate;
   overflow:hidden;background:#070103;
   box-shadow:inset 0 0 0 1px rgb(255 150 105 / .28), 0 20px 48px rgb(0 0 0 / .6);
   display:flex;align-items:center;justify-content:center;}
 .orbe .brasa{inset:0;}
-.orbe .marca{position:relative;z-index:3;width:44%;color:#fff;
+/* 46.4% = 26/56, a proporcao real da marca dentro do orb (Widget.tsx linha 742) */
+.orbe .marca{position:relative;z-index:3;width:46.4%;color:#fff;
   filter:drop-shadow(0 1px 4px rgb(0 0 0 / .6));}
+
+/* contador: mesmo desenho do .badge em Widget.module.css, escalado por N = 23/7.
+   fica FORA do orb de proposito (mesmo motivo do widget real: o orb tem
+   overflow hidden pras camadas de luz, o contador seria cortado). */
+.contador{position:absolute;top:0;right:0;z-index:4;
+  min-width:59px;height:59px;padding:0 16px;border-radius:50%;
+  background:#0d0d10;color:#fff;font-size:36px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  border:3px solid rgba(255,255,255,.18);}
 .halo{position:absolute;left:50%;top:50%;width:420%;aspect-ratio:1;z-index:-1;
   transform:translate(-50%,-50%);--op:.5;
   -webkit-mask-image:radial-gradient(closest-side,#000 8%,transparent 66%);
@@ -98,7 +110,7 @@ h1 em{font-style:normal;color:var(--tinta-brasa);}
         Duas teclas, a frase, e você já voltou pro que estava fazendo.</p>
       <div class="meta">
         <span class="tag">Windows 10 e 11</span><span class="sep"></span>
-        <span class="tag">instalador de 3,4 MB</span><span class="sep"></span>
+        <span class="tag">instalador de 2,9 MB</span><span class="sep"></span>
         <span class="tag">sem conta</span><span class="sep"></span>
         <span class="tag">liga as notas sozinho</span><span class="sep"></span>
         <span class="tag">sem IA</span>
@@ -117,6 +129,7 @@ h1 em{font-style:normal;color:var(--tinta-brasa);}
           <circle cx="12" cy="12" r="4.4" fill="currentColor"/>
         </svg>
       </div>
+      <span class="contador">2</span>
       <div class="teclas">
         <span class="kbd">Ctrl</span><span class="mais">+</span>
         <span class="kbd">Shift</span><span class="mais">+</span>

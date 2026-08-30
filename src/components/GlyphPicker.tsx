@@ -36,7 +36,7 @@ export function GlyphPicker({
           </button>
         </div>
 
-        <p className={s.hint}>Marcas do próprio Dott — iguais em qualquer computador.</p>
+        <p className={s.hint}>Marcas do próprio Dott, iguais em qualquer computador.</p>
 
         <div ref={gridRef} className={`${s.grid} scrollFadeBottom`}>
           {GLYPH_ORDER.map(g => (

@@ -15,7 +15,7 @@ import { useScrollEdgeFade } from '../../hooks/useScrollEdgeFade'
 import s from './InboxPanel.module.css'
 
 function DraggableCard({
-  id, onClick, children, title = 'Arraste para uma pasta — ou clique para editar',
+  id, onClick, children, title = 'Arraste para uma pasta ou clique para editar',
 }: { id: string; onClick: () => void; children: React.ReactNode; title?: string }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: `card:${id}` })
   return (
@@ -147,7 +147,7 @@ export function InboxPanel() {
                 key={c.id}
                 id={c.id}
                 onClick={() => (c.type === 'IMAGEM' ? setProcessing(c.id) : setEditingCard(c.id))}
-                title={c.type === 'IMAGEM' ? 'Arraste para uma pasta — ou clique para escolher' : undefined}
+                title={c.type === 'IMAGEM' ? 'Arraste para uma pasta ou clique para escolher' : undefined}
               >
                 <div className={s.cardHeader}>
                   <span className={`${s.cardType} ${s['type-' + TYPE_CLASS[c.type]]}`}>

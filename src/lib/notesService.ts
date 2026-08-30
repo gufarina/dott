@@ -76,7 +76,7 @@ export async function saveNoteToVault(note: Note): Promise<void> {
   try {
     await invoke('vault_save', { note: fromNote(note) })
   } catch (e) {
-    showToast('warn', 'Falha ao salvar', 'Não consegui gravar a nota no disco. O texto ainda está aqui — tente de novo.')
+    showToast('warn', 'Falha ao salvar', 'Não consegui gravar a nota no disco. O texto ainda está aqui, tente de novo.')
     console.error('vault_save falhou:', e)
   }
 }

@@ -104,7 +104,7 @@ export function CaptureBox() {
         <textarea
           ref={taRef}
           className={s.convoInput}
-          placeholder={isFull ? 'Inbox cheio — processe alguns cards' : 'O que está na sua mente?'}
+          placeholder={isFull ? 'Inbox cheio. Processe alguns cards' : 'O que está na sua mente?'}
           rows={1}
           value={text}
           disabled={isFull}
@@ -154,7 +154,7 @@ export function CaptureBox() {
             className={`${s.convoSend} hoverZoom hoverGlow ${isFull ? s.convoSendFull : ''}`}
             onClick={capture}
             disabled={isFull || !text.trim()}
-            title={isFull ? 'Inbox cheio — processe alguns cards primeiro' : 'Capturar (Enter)'}
+            title={isFull ? 'Inbox cheio. Processe alguns cards primeiro' : 'Capturar (Enter)'}
           >
             {isFull ? 'Cheio' : <>Capturar<Icon name="enviar" size={13} /></>}
           </button>

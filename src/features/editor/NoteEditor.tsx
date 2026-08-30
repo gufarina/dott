@@ -460,7 +460,7 @@ export function NoteEditor() {
                 key={v.id}
                 type="button"
                 className={s.chip}
-                title={`${v.confidence === 'ACHADA' ? 'Achada' : 'Inferida'} — ${v.why}`}
+                title={`${v.confidence === 'ACHADA' ? 'Achada' : 'Inferida'}: ${v.why}`}
                 onClick={() => setView('editor', { note: v.id })}
               >
                 <span

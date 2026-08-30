@@ -696,7 +696,7 @@ export function Widget() {
               className={`${s.btn} ${isFull ? s.btnFull : ''}`}
               onClick={capture}
               disabled={isFull}
-              title={isFull ? 'Inbox cheio — processe alguns cards' : undefined}
+              title={isFull ? 'Inbox cheio. Processe alguns cards' : undefined}
             >
               {isFull ? '10/10 cheio' : <>Salvar <Icon name="enviar" size={13} /></>}
             </button>

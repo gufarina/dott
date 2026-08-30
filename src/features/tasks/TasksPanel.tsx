@@ -45,8 +45,9 @@ export interface SecaoTarefas {
  *  balde fixo "Sem pasta" - derivado aqui, nunca escrito em disco, sem nome
  *  escolhido a mao (a capacidade de nomear uma lista solta foi rejeitada de
  *  proposito: seria o conceito de grupo voltando com outro nome).
- *  O balde "Sem pasta" aparece sempre que ha ALGUMA tarefa no app, mesmo
- *  vazio - e o lugar pra capturar uma tarefa que ainda nao tem Pasta. */
+ *  O balde "Sem pasta" so aparece quando existe de fato uma tarefa sem Pasta -
+ *  grupo sem nenhuma tarefa e um grupo fantasma (defeito medido em 30/08/2026:
+ *  aparecia sempre que havia QUALQUER tarefa no app, mesmo com o balde vazio). */
 export function agruparPorPasta(tasks: TaskItem[], para: Record<string, Quadrant>): SecaoTarefas[] {
   const porFolder = new Map<string, TaskItem[]>()
   const semPasta: TaskItem[] = []
@@ -64,7 +65,7 @@ export function agruparPorPasta(tasks: TaskItem[], para: Record<string, Quadrant
       if (items?.length) secoes.push({ chave: f.id, nome: f.name, cor: q.color, folderId: f.id, items })
     }
   }
-  secoes.push({ chave: 'sem-pasta', nome: 'Sem pasta', cor: 'var(--fg3)', items: semPasta })
+  if (semPasta.length) secoes.push({ chave: 'sem-pasta', nome: 'Sem pasta', cor: 'var(--fg3)', items: semPasta })
   return secoes
 }
 

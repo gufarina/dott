@@ -138,13 +138,13 @@ export function Onboarding() {
           <div className={active(0)}>
             <div className="ob-kicker">Boas-vindas</div>
             <h2 className="ob-title">Bem-vindo ao Dott</h2>
-            <p className="ob-text">Seu segundo cérebro. Tire as ideias da cabeça — o Dott <b>guarda e organiza</b>. Você escolhe onde elas ficam.</p>
+            <p className="ob-text">Seu segundo cérebro. Tire as ideias da cabeça. O Dott <b>guarda e organiza</b>. Você escolhe onde elas ficam.</p>
           </div>
           <div className={active(1)}>
             <div className="ob-kicker">1 · Capturar</div>
             <h2 className="ob-title">Primeiro, capture. Sem pensar onde.</h2>
             <p className="ob-text">Teve uma ideia, um link, um trecho? Aperte <span className="ob-kbd">Ctrl+Shift+Space</span> em qualquer app e jogue na <b>Inbox</b>. Onde guardar fica pra depois.</p>
-            <div className="ob-note"><span className="ob-badge">GTD</span><span>Capturar antes de organizar é o hábito que vem do GTD. A Inbox segura até <b>10</b> itens de propósito — quando enche, é hora de organizar.</span></div>
+            <div className="ob-note"><span className="ob-badge">GTD</span><span>Capturar antes de organizar é o hábito que vem do GTD. A Inbox segura até <b>10</b> itens de propósito. Quando enche, é hora de organizar.</span></div>
           </div>
           <div className={active(2)}>
             <div className="ob-kicker">2 · Organizar · método PARA</div>
@@ -161,7 +161,7 @@ export function Onboarding() {
           <div className={active(3)}>
             <div className="ob-kicker">3 · Processar</div>
             <h2 className="ob-title">Esvazie a Inbox</h2>
-            <p className="ob-text">Arraste cada card pro lugar certo no board. Ele vira uma <b>nota</b>, prontinha pra editar. A Inbox não é um destino — é uma caixa de entrada.</p>
+            <p className="ob-text">Arraste cada card pro lugar certo no board. Ele vira uma <b>nota</b>, prontinha pra editar. A Inbox não é um destino, é uma caixa de entrada.</p>
           </div>
           <div className={active(4)}>
             <div className="ob-kicker">4 · Conectar</div>

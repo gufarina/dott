@@ -10,6 +10,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn().mockResolvedValue(undefined) }))
 
 import { useStore } from './store'
+import { agruparPorPasta } from './features/tasks/TasksPanel'
 
 describe('clearExamples', () => {
   beforeEach(() => {
@@ -93,6 +94,25 @@ describe('clearExamples', () => {
     expect(plan.noteIds).toHaveLength(0)
     expect(plan.folders).toHaveLength(0)
     expect(() => useStore.getState().clearExamples()).not.toThrow()
+  })
+
+  it('painel de Tarefas: instalacao intocada, depois de Limpar exemplos, fica honestamente vazio - sem pasta fantasma nem balde "Sem pasta" vazio (defeito reportado em 30/08/2026, v0.2.15)', () => {
+    useStore.getState().clearExamples()
+    const { tasks, para } = useStore.getState()
+    expect(agruparPorPasta(tasks, para)).toHaveLength(0)
+  })
+
+  it('painel de Tarefas: pasta de exemplo com uma tarefa REAL dentro sobrevive a limpeza, so com a tarefa real - nunca "0/1" de exemplo disfarcado', () => {
+    const { addTask } = useStore.getState()
+    const taskId = addTask('Minha tarefa de verdade', 'start')
+
+    useStore.getState().clearExamples()
+
+    const { tasks, para } = useStore.getState()
+    const secoes = agruparPorPasta(tasks, para)
+    expect(secoes).toHaveLength(1)
+    expect(secoes[0].chave).toBe('start')
+    expect(secoes[0].items.map(t => t.id)).toEqual([taskId])
   })
 
   it('card de inbox de exemplo EDITADO pela pessoa sobrevive a limpeza; o intocado some', () => {

@@ -168,6 +168,15 @@ export default function App() {
   // fechamento padrao e reusa o MESMO closeMainWindow do botao (que faz o
   // flush e so entao chama destroy(), que nao reemite este evento).
   useEffect(() => {
+    // Fora do app nativo (navegador comum, ex.: servidor de dev usado pra
+    // conferencia visual do squad) a ponte window.__TAURI_INTERNALS__ nao
+    // existe - getCurrentWindow() le essa ponte NA HORA (fora de qualquer
+    // Promise) e lancava sincronamente, derrubando a arvore inteira
+    // (capturado pelo ErrorBoundary). So registra quando a ponte existe de
+    // verdade; no app NATIVO o comportamento e IDENTICO - fechar pela
+    // Titlebar, por Alt+F4 ou pela barra de tarefas continua dando flush
+    // do autosave pendente antes de fechar, nada mudou nesse caminho.
+    if (!('__TAURI_INTERNALS__' in window)) return
     let unlisten: (() => void) | undefined
     getCurrentWindow()
       .onCloseRequested(event => {

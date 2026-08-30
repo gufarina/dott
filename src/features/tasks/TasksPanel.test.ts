@@ -92,10 +92,15 @@ describe('agruparPorPasta (TASK-374: Pasta e a UNICA hierarquia, "grupo" morreu)
     expect(semPasta.items.map(t => t.id)).toEqual(['t2'])
   })
 
-  it('o balde "Sem pasta" existe mesmo quando NENHUMA tarefa esta sem pasta - e o lugar sempre disponivel pra capturar uma tarefa nova sem contexto', () => {
+  it('o balde "Sem pasta" NAO aparece quando nenhuma tarefa esta sem pasta - grupo sem tarefa nenhuma e grupo fantasma (defeito medido em 30/08/2026)', () => {
     const tasks: TaskItem[] = [tarefa({ id: 't1', folderId: 'habitos' })]
     const secoes = agruparPorPasta(tasks, para)
-    expect(secoes.find(sec => sec.chave === 'sem-pasta')).toBeDefined()
+    expect(secoes.find(sec => sec.chave === 'sem-pasta')).toBeUndefined()
+  })
+
+  it('o balde "Sem pasta" tambem nao aparece com a lista de tarefas totalmente vazia', () => {
+    const secoes = agruparPorPasta([], para)
+    expect(secoes).toHaveLength(0)
   })
 
   it('Pasta sem NENHUMA tarefa nao aparece como secao - so Pastas com tarefa viva ganham secao', () => {

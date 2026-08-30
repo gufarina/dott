@@ -19,7 +19,7 @@ export function FolderHintChip({
     <div className={s.hint}>
       <Icon name="sugestao" size={14} />
       <span className={s.txt}>
-        Parece <b>{suggestion.folderName}</b> — {suggestion.reason}
+        Parece <b>{suggestion.folderName}</b>: {suggestion.reason}
       </span>
       <span className={s.actions}>
         <button type="button" className={s.aceitar} onClick={onAccept}>Mover</button>
