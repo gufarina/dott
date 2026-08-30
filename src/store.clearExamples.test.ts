@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
-/** store.clearExamples.test.ts - TDD (TASK-367).
+/** store.clearExamples.test.ts - TDD (TASK-367, regra de identidade
+ * atualizada no DEFEITO 2 de 30/08/2026).
  *
  * Prova de ponta a ponta contra o estado REAL da store (o que o app tem no
- * primeiro uso): clearExamples() so apaga o que veio pronto, nunca o que a
- * pessoa escreveu, e um exemplo editado sobrevive.
+ * primeiro uso): clearExamples() so apaga o que veio pronto (por ID de
+ * seed, mesmo que editado - mandato do CEO), nunca o que a pessoa escreveu
+ * (id que nao e de seed).
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -60,7 +62,7 @@ describe('clearExamples', () => {
     expect(Object.values(after.para).flatMap(q => q.folders).map(f => f.id)).toEqual([folderId])
   })
 
-  it('nota de exemplo EDITADA pela pessoa sobrevive a limpeza, e o restante do exemplo some', () => {
+  it('nota de exemplo EDITADA pela pessoa AINDA sai na limpeza (mandato 30/08/2026: identidade, nao conteudo)', () => {
     const { saveNote } = useStore.getState()
     const n1 = useStore.getState().notes.find(n => n.id === 'n1')!
     saveNote('n1', n1.title, n1.body + '\n\nAdicionei uma frase minha aqui.')
@@ -68,10 +70,10 @@ describe('clearExamples', () => {
     useStore.getState().clearExamples()
 
     const after = useStore.getState()
-    expect(after.notes.map(n => n.id)).toEqual(['n1'])
-    expect(after.notes[0].body).toContain('Adicionei uma frase minha aqui.')
-    // A pasta "start" (onde n1 mora) sobrevive porque ainda tem uma nota viva.
-    expect(after.para.projects.folders.map(f => f.id)).toContain('start')
+    expect(after.notes.map(n => n.id)).not.toContain('n1')
+    // "start" (onde n1 morava) nao tem mais nada vivo - n1 tinha id de seed,
+    // saiu junto com o resto do exemplo. A pasta some tambem.
+    expect(after.para.projects.folders.map(f => f.id)).not.toContain('start')
   })
 
   it('o grafo nao aponta mais pra nenhuma nota apagada depois da limpeza', async () => {
@@ -115,7 +117,7 @@ describe('clearExamples', () => {
     expect(secoes[0].items.map(t => t.id)).toEqual([taskId])
   })
 
-  it('card de inbox de exemplo EDITADO pela pessoa sobrevive a limpeza; o intocado some', () => {
+  it('card de inbox de exemplo EDITADO AINDA sai na limpeza (mandato 30/08/2026: identidade, nao conteudo)', () => {
     useStore.setState(s => ({
       inbox: s.inbox.map(c => (c.id === 'i3' ? { ...c, content: 'Texto real que eu escrevi aqui.' } : c)),
     }))
@@ -123,8 +125,8 @@ describe('clearExamples', () => {
     useStore.getState().clearExamples()
 
     const after = useStore.getState()
-    expect(after.inbox.map(c => c.id)).toEqual(['i3'])
-    expect(after.inbox[0].content).toBe('Texto real que eu escrevi aqui.')
+    expect(after.inbox.map(c => c.id)).not.toContain('i3')
+    expect(after.inbox).toHaveLength(0)
   })
 })
 

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react'
 import { useDroppable } from '@dnd-kit/core'
-import { useStore, Folder, Quadrant } from '../../store'
+import { useStore, Folder, Quadrant, SEM_PASTA_ID, notasSemPasta } from '../../store'
 import { saveImageFile } from '../../lib/attachments'
 import { showToast } from '../../components/Toast'
 import { Icon } from '../../components/Icon'
@@ -165,7 +165,11 @@ function CreateFolderModal({ categoryId, onClose }: { categoryId: string; onClos
 
 export function PARAGrid() {
   const { para, setView } = useStore()
+  const notes = useStore(st => st.notes)
   const [createIn, setCreateIn] = useState<string | null>(null)
+  /** So conta - nunca desenha o balde vazio (mesmo defeito que o CEO
+   *  reclamou hoje no painel de Tarefas: grupo fantasma sem item nenhum). */
+  const semPasta = notasSemPasta(notes)
 
   return (
     <>
@@ -173,6 +177,25 @@ export function PARAGrid() {
           PARA, renderizado em App.tsx (.captureShell), nao mais filho deste
           grid. O board volta a ser so os 4 quadrantes, fechados na propria
           moldura (.central, em App.module.css). */}
+
+      {/* Balde "Sem pasta": so aparece quando uma pasta excluida deixou
+          Nota orfa pra tras (deleteFolder, store.ts). Mesmo conceito do
+          balde "Sem pasta" que TasksPanel.tsx ja sustenta pra Tarefa - a
+          Nota nao podia ficar so alcancavel pela Busca/Constelacao (o app
+          promete "continua existindo"; sumir da navegacao normal quebra
+          essa promessa igual apagar quebraria). */}
+      {semPasta.length > 0 && (
+        <button
+          className={s.semPastaBanner}
+          onClick={() => setView('canvas', { category: '', folder: SEM_PASTA_ID })}
+          title="Notas que ficaram sem pasta"
+        >
+          <Icon name="pasta" size={13} />
+          <span>Sem pasta</span>
+          <span className={s.semPastaCount}>{semPasta.length}</span>
+        </button>
+      )}
+
       <div className={s.grid}>
         {Q_ORDER.map(qid => {
             const q = para[qid]

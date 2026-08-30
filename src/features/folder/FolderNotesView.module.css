@@ -151,6 +151,33 @@
 .btnNewAlt:hover { background: var(--surface3); color: var(--fg); border-color: var(--fg3); }
 .btnNewAlt:active { scale: .975; }
 
+/* Exclusao: neutro em repouso, so acende vermelho (--danger) no hover -
+   mesmo tratamento do botao Excluir da nota (NoteEditor.module.css), pra
+   nao existir um segundo vocabulario de "acao destrutiva" no app. */
+.btnDelete {
+  height: var(--btn-h-lg);
+  padding: 0 14px;
+  border-radius: var(--r-btn);
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--fg3);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+.btnDelete:hover { background: var(--danger-s); color: var(--danger); border-color: var(--danger); }
+
+.avisoExclusao {
+  font-size: var(--text-3xs);
+  color: var(--fg2);
+  line-height: 1.5;
+}
+
 /* TASK-354: era 18px - quando a lista rola ate o fim, o ultimo .card
    (--r-lg, 16px) fica so 18px de folga do --r-shell (18px) do .central
    que envolve esta tela - espacamento igual ao raio de fora, sem margem

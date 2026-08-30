@@ -1,4 +1,4 @@
-import { useStore } from '../store'
+import { useStore, SEM_PASTA_ID } from '../store'
 import { Icon } from './Icon'
 import s from './Breadcrumb.module.css'
 
@@ -16,6 +16,9 @@ export function Breadcrumb() {
 
   const quad = category ? para[category] : null
   const folderObj = folder && quad ? quad.folders.find(f => f.id === folder) : null
+  /** Balde virtual "Sem pasta" (SEM_PASTA_ID, PARAGrid.tsx): nunca tem
+   *  categoria real, entao nao passa por `quad`/`folderObj` acima. */
+  const semPasta = folder === SEM_PASTA_ID
   /** Na tela da tarefa o caminho termina nela, com o titulo encurtado. */
   const tarefa = view === 'task' ? tasks.find(t => t.id === taskId) : null
   const tituloCurto = tarefa
@@ -40,6 +43,12 @@ export function Breadcrumb() {
           >
             {quad.label}
           </span>
+        </>
+      )}
+      {semPasta && (
+        <>
+          <span className={s.sep}>›</span>
+          <span className={`${s.item} ${tarefa ? '' : s.active}`}>Sem pasta</span>
         </>
       )}
       {folderObj && (

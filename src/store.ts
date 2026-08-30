@@ -103,6 +103,23 @@ export interface Note {
   cover?: string
 }
 
+/** ID fixo do balde virtual "Sem pasta" pra Nota, na tela inicial (PARAGrid) -
+ *  mesmo conceito que `agruparPorPasta` (TasksPanel.tsx) ja usa pra Tarefa.
+ *  Excluir uma pasta nunca destroi o que estava nela (Invariante:
+ *  Durabilidade), mas escondida da navegacao normal quebra a mesma
+ *  confianca que apagar quebraria (CEO, 30/08/2026) - por isso a Nota
+ *  orfa precisa de um lugar clicavel a partir do board, sem busca. Nunca
+ *  gravado como folderId de verdade - so uma chave de agrupamento na tela. */
+export const SEM_PASTA_ID = 'sem-pasta'
+
+/** Notas sem pasta (folderId indefinido) - exatamente o que o balde "Sem
+ *  pasta" da tela inicial mostra. Pura, extraida pra TDD: prova que a Nota
+ *  orfa de uma pasta apagada continua no estado que a tela consome (nunca
+ *  fica so alcancavel pela Busca/Constelacao). */
+export function notasSemPasta(notes: Note[]): Note[] {
+  return notes.filter(n => !n.folderId)
+}
+
 interface AppState {
   view: View
   category: string | null
@@ -150,6 +167,11 @@ interface AppState {
   createFolder: (categoryId: string, name: string) => void
   /** Define (ou remove, se cover='') a imagem de capa de uma pasta */
   setFolderCover: (categoryId: string, folderId: string, cover: string) => void
+  /** Apaga uma pasta. Nota e tarefa sao arquivo do usuario (Invariante:
+   *  Durabilidade) - nunca somem junto: so perdem o folderId e continuam
+   *  existindo, sem pasta. Sem exclusao em cascata de proposito - quem quer
+   *  apagar o conteudo apaga nota por nota (ja existe). */
+  deleteFolder: (categoryId: string, folderId: string) => void
   /** Salva corpo e título, refaz o grafo, persiste. Etiqueta nova nasce SO
    *  no CORPO (TASK-360). `tags` visivel e a UNIAO de extractTags(body) com
    *  o que ainda restar em legacyTags (TASK-364: dado anterior a esta task,
@@ -558,6 +580,42 @@ export const useStore = create<AppState>((set, get) => ({
     })
   },
 
+  /** Ver doc em AppState.deleteFolder. */
+  deleteFolder: (categoryId, folderId) => {
+    if (!get().para[categoryId]) return
+    const orphanNoteIds = get().notes.filter(n => n.folderId === folderId).map(n => n.id)
+    const hadTasks = get().tasks.some(t => t.folderId === folderId)
+    let notesAfter: Note[] = get().notes
+    let tasksAfter: TaskItem[] = get().tasks
+    set(s => {
+      const q = s.para[categoryId]
+      if (!q) return s
+      const notes = orphanNoteIds.length
+        ? s.notes.map(n => (n.folderId === folderId ? { ...n, folderId: undefined } : n))
+        : s.notes
+      const tasks = hadTasks
+        ? s.tasks.map(t => (t.folderId === folderId ? { ...t, folderId: undefined } : t))
+        : s.tasks
+      notesAfter = notes
+      tasksAfter = tasks
+      const next = {
+        ...s.para,
+        [categoryId]: { ...q, folders: q.folders.filter(f => f.id !== folderId) },
+      }
+      const para = recountFolders(next, notes, tasks)
+      saveFolders(para)
+      return { notes, tasks, para }
+    })
+    if (orphanNoteIds.length) {
+      scheduleGraphRebuild()
+      for (const id of orphanNoteIds) {
+        const saved = notesAfter.find(n => n.id === id)
+        if (saved) saveNoteToVault(saved)
+      }
+    }
+    if (hadTasks) saveTasksFile(tasksAfter)
+  },
+
   saveNote: (id, title, body) => {
     const bodyTags = extractTags(body)
     const now = new Date().toLocaleDateString('pt-BR')
@@ -758,3 +816,44 @@ export const useStore = create<AppState>((set, get) => ({
     }
   },
 }))
+
+/** DEFEITO 2 (CEO ja reclamou 3x: "cliquei em apagar e continuam pastas...
+ *  o numero de notas por pasta esta GRAVADO no folders.json e esta
+ *  desatualizado - a tela mostra 'X notas' porque le esse numero salvo, nao
+ *  porque contou"). `folder.notes`/`.tasks`/`.total` (Folder, em `para`) sao
+ *  campos DERIVADOS - ate aqui, cada acao que mexia em nota ou tarefa tinha
+ *  que lembrar de chamar `recountFolders` ANTES de salvar. Bastou UMA nao
+ *  lembrar (era exatamente `clearExamples`, que antes do conserto de
+ *  identidade acima nunca apagava nada de verdade) pra tela ficar mostrando
+ *  um numero que nunca foi contado. Esta assinatura fecha a classe inteira
+ *  do defeito: toda vez que `notes` ou `tasks` mudam - por QUALQUER acao,
+ *  presente ou futura, mesmo uma que esqueca de recontar sozinha - os
+ *  contadores de pasta sao recalculados a partir da verdade e regravados.
+ *  Guard por referencia (arrays imutaveis: todo update troca a referencia)
+ *  evita loop - setar `para` aqui nao muda `notes`/`tasks`, entao a proxima
+ *  notificacao nao reentra neste bloco. So regrava quando um numero de
+ *  verdade mudou (`countsChanged`) - editar titulo/corpo de uma nota sem
+ *  mover ela de pasta nao altera contagem nenhuma, entao nao gera escrita
+ *  em disco a mais (o disco so muda quando a CONTAGEM muda de verdade). */
+function countsChanged(a: Record<string, Quadrant>, b: Record<string, Quadrant>): boolean {
+  for (const qid of Object.keys(a)) {
+    const fa = a[qid]?.folders ?? []
+    const fb = b[qid]?.folders ?? []
+    if (fa.length !== fb.length) return true
+    for (let i = 0; i < fa.length; i++) {
+      if (fa[i].notes !== fb[i].notes || fa[i].tasks !== fb[i].tasks || fa[i].total !== fb[i].total) return true
+    }
+  }
+  return false
+}
+let lastNotesRef = useStore.getState().notes
+let lastTasksRef = useStore.getState().tasks
+useStore.subscribe(s => {
+  if (s.notes === lastNotesRef && s.tasks === lastTasksRef) return
+  lastNotesRef = s.notes
+  lastTasksRef = s.tasks
+  const fresh = recountFolders(s.para, s.notes, s.tasks)
+  if (!countsChanged(fresh, s.para)) return
+  useStore.setState({ para: fresh })
+  saveFolders(fresh)
+})

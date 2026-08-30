@@ -12,13 +12,18 @@
  * exemplo?" e so olhar o ID: nenhuma marca nova precisou entrar no arquivo
  * do usuario nem no disco, nada pra migrar em quem ja tem o app instalado.
  *
- * Preservacao (a REGRA ABSOLUTA - nunca apagar o que a pessoa escreveu):
- * um item de exemplo que a pessoa EDITOU deixa de contar como exemplo na
- * hora de limpar. "Editado" e comparado direto contra o texto ORIGINAL
- * destas mesmas constantes (a fonte que semeou o item na primeira vez) -
- * sem precisar guardar historico nem hash em lugar nenhum. Ver
- * isUnchangedExampleNote / isUnchangedExampleTask.
- */
+ * Preservacao (DEFEITO 2, mandato do CEO em 30/08/2026 - a regra antiga foi
+ * DERRUBADA): ate aqui, um item de exemplo so contava como exemplo se o
+ * conteudo fosse IGUAL ao original (`n.body === seed.body`). Provado que
+ * essa igualdade nunca batia depois do primeiro save (o proprio primeiro
+ * uso ja grava os exemplos no vault - `serialize_note`/`parse_note` em
+ * src-tauri/vault.rs somam um "\n" que a constante em JS nao tem) - o botao
+ * "limpar exemplos" nunca funcionou pra ninguem que reabriu o app.
+ * Limpar exemplo agora e SO IDENTIDADE: id de seed sai, tenha sido lido,
+ * aberto ou editado. A UNICA protecao que sobra e para o outro lado -
+ * conteudo do USUARIO (id que nao e de seed) nunca e tocado, e pasta de
+ * exemplo com algo dele dentro sobrevive com esse algo dentro. Ver
+ * planExampleCleanup abaixo. */
 import type { Folder, InboxCard, Note, Quadrant, TaskItem } from '../store'
 import { SEED_NOTES } from './seedNotes'
 
@@ -81,36 +86,8 @@ export const SEED_TASKS: TaskItem[] = [
 
 const EXAMPLE_NOTE_IDS = new Set(SEED_NOTES.map(n => n.id))
 const EXAMPLE_FOLDER_IDS = new Set(Object.values(INITIAL_PARA).flatMap(q => q.folders.map((f: Folder) => f.id)))
-const EXAMPLE_TASK_TEXT = new Map(SEED_TASKS.map(t => [t.id, t.text] as const))
+const EXAMPLE_TASK_IDS = new Set(SEED_TASKS.map(t => t.id))
 const EXAMPLE_INBOX_IDS = new Set(INITIAL_INBOX.map(c => c.id))
-const seedNoteById = new Map(SEED_NOTES.map(n => [n.id, n]))
-const seedInboxById = new Map(INITIAL_INBOX.map(c => [c.id, c]))
-
-/** Uma nota de exemplo so continua exemplo se ninguem mexeu em titulo, corpo,
- *  simbolo ou capa dela - qualquer um desses e a pessoa tomando posse dela. */
-function isUnchangedExampleNote(n: Note): boolean {
-  const seed = seedNoteById.get(n.id)
-  if (!seed) return false
-  return n.title === seed.title && n.body === seed.body && !n.glyph && !n.cover
-}
-
-/** Uma tarefa de exemplo so continua exemplo se o texto e igual ao original
- *  e a pessoa nao anexou prazo nem anotacao - o seed nao tem nenhum dos
- *  dois, entao a presenca de qualquer um e a pessoa usando a tarefa de
- *  verdade, nao so seguindo o tutorial. */
-function isUnchangedExampleTask(t: TaskItem): boolean {
-  const original = EXAMPLE_TASK_TEXT.get(t.id)
-  if (original === undefined) return false
-  return t.text === original && !t.deadline && !t.notes
-}
-
-/** Um card de inbox de exemplo so continua exemplo se ninguem editou o
- *  conteudo - mesma logica de isUnchangedExampleNote/Task, aplicada ao card. */
-function isUnchangedExampleInboxCard(c: InboxCard): boolean {
-  const seed = seedInboxById.get(c.id)
-  if (!seed) return false
-  return c.content === seed.content
-}
 
 export interface ExamplePlan {
   noteIds: string[]
@@ -131,13 +108,13 @@ export function planExampleCleanup(
   tasks: TaskItem[],
   inbox: InboxCard[],
 ): ExamplePlan {
-  const noteIds = notes.filter(n => EXAMPLE_NOTE_IDS.has(n.id) && isUnchangedExampleNote(n)).map(n => n.id)
+  const noteIds = notes.filter(n => EXAMPLE_NOTE_IDS.has(n.id)).map(n => n.id)
   const noteIdSet = new Set(noteIds)
 
-  const taskIds = tasks.filter(t => EXAMPLE_TASK_TEXT.has(t.id) && isUnchangedExampleTask(t)).map(t => t.id)
+  const taskIds = tasks.filter(t => EXAMPLE_TASK_IDS.has(t.id)).map(t => t.id)
   const taskIdSet = new Set(taskIds)
 
-  const inboxIds = inbox.filter(c => EXAMPLE_INBOX_IDS.has(c.id) && isUnchangedExampleInboxCard(c)).map(c => c.id)
+  const inboxIds = inbox.filter(c => EXAMPLE_INBOX_IDS.has(c.id)).map(c => c.id)
 
   const folders: { categoryId: string; folderId: string }[] = []
   for (const [categoryId, q] of Object.entries(para)) {

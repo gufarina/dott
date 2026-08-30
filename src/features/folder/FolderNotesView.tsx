@@ -1,9 +1,9 @@
 import { useMemo, useRef, useState } from 'react'
-import { useStore, type Note } from '../../store'
+import { useStore, type Note, SEM_PASTA_ID, notasSemPasta } from '../../store'
 import { saveImageFile } from '../../lib/attachments'
 import { showToast } from '../../components/Toast'
 import { Icon } from '../../components/Icon'
-import { Modal, ModalField, ModalInput, ModalFooter, ModalButton } from '../../components/Modal'
+import { Modal, ModalHint, ModalField, ModalInput, ModalFooter, ModalButton } from '../../components/Modal'
 import { GlyphPicker } from '../../components/GlyphPicker'
 import { NoteGlyph } from '../../components/NoteGlyphs'
 import { hojeISO, amanhaISO } from '../../lib/localDate'
@@ -43,6 +43,7 @@ export function FolderNotesView() {
   const toggleTask = useStore(st => st.toggleTask)
   const setFolderCover = useStore(st => st.setFolderCover)
   const setNoteCover = useStore(st => st.setNoteCover)
+  const deleteFolder = useStore(st => st.deleteFolder)
   const fileRef = useRef<HTMLInputElement>(null)
   const noteFileRef = useRef<HTMLInputElement>(null)
 
@@ -53,11 +54,19 @@ export function FolderNotesView() {
   const [nomePasta, setNomePasta] = useState('')
   const [novaTarefa, setNovaTarefa] = useState(false)
   const [textoTarefa, setTextoTarefa] = useState('')
+  /** true abre a confirmacao de excluir a pasta aberta agora. */
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false)
   /** Prazo escolhido AINDA na criacao (YYYY-MM-DD ou null) - antes so dava
    *  pra definir depois, editando a tarefa ja criada. */
   const [prazoTarefa, setPrazoTarefa] = useState<string | null>(null)
 
-  const folderNotes = notes.filter(n => n.folderId === folder)
+  /** Balde virtual "Sem pasta" (folder === SEM_PASTA_ID, entrada no PARAGrid):
+   *  nao e uma Pasta de verdade - so agrupa na tela a Nota que ficou orfa
+   *  depois de `deleteFolder`. Nunca tem categoria/pasta real, entao nao
+   *  ganha capa, nao cria pasta/nota/tarefa dentro dela nem pode ser
+   *  "excluida" - so navega. */
+  const isSemPasta = folder === SEM_PASTA_ID
+  const folderNotes = isSemPasta ? notasSemPasta(notes) : notes.filter(n => n.folderId === folder)
 
   /** Previa de cada nota desta pasta (TASK-362): a capa explicita (n.cover)
    *  vence; sem capa, usa a PRIMEIRA imagem embutida no corpo (mesma linha
@@ -68,25 +77,30 @@ export function FolderNotesView() {
   const notePreviews = useMemo(() => {
     const map = new Map<string, string>()
     for (const n of notes) {
-      if (n.folderId !== folder) continue
+      const pertence = isSemPasta ? !n.folderId : n.folderId === folder
+      if (!pertence) continue
       const url = notePreviewUrl(n)
       if (url) map.set(n.id, url)
     }
     return map
-  }, [notes, folder])
+  }, [notes, folder, isSemPasta])
 
   /** URLs de previa que falharam ao carregar (arquivo sumiu do disco) - cai
    *  pro simbolo/estado neutro em vez de icone de imagem quebrada. */
   const [brokenPreviews, setBrokenPreviews] = useState<Set<string>>(new Set())
   const marcarQuebrada = (url: string) =>
     setBrokenPreviews(prev => (prev.has(url) ? prev : new Set(prev).add(url)))
-  /** Tarefas desta pasta (TASK-374: sem grupo - a Pasta e a unica hierarquia). */
-  const folderTasks = tasks.filter(t => t.folderId === folder)
+  /** Tarefas desta pasta (TASK-374: sem grupo - a Pasta e a unica hierarquia).
+   *  O balde "Sem pasta" de Nota nao repete a Tarefa aqui - a Tarefa sem
+   *  pasta ja tem o proprio balde "Sem pasta", sempre visivel em
+   *  TasksPanel.tsx (painel fixo, nao precisa de uma segunda porta). */
+  const folderTasks = isSemPasta ? [] : tasks.filter(t => t.folderId === folder)
   const tarefasAbertas = folderTasks.filter(t => !t.done).length
   const tarefasFeitas = folderTasks.length - tarefasAbertas
   const folderObj = category && folder
     ? para[category]?.folders.find(f => f.id === folder)
     : undefined
+  const bannerName = isSemPasta ? 'Sem pasta' : (folderObj?.name ?? 'Notas')
 
   /** Fade de rolagem na base (TASK-349) - tarefas e notas da pasta juntas. */
   const bodyRef = useRef<HTMLDivElement>(null)
@@ -95,7 +109,7 @@ export function FolderNotesView() {
   const openNote = (id: string) => setView('editor', { note: id })
 
   const newNote = () => {
-    if (!folder) return
+    if (!folder || isSemPasta) return
     const id = createNote(folder, 'Nova nota')
     showToast('info', 'Nota criada', 'Escreva do seu jeito. O Dott conecta sozinho.')
     setView('editor', { note: id })
@@ -106,7 +120,7 @@ export function FolderNotesView() {
    *  duplicado ja que a Pasta e a hierarquia real). */
   const criarTarefa = () => {
     const texto = textoTarefa.trim()
-    if (!texto || !folder) return
+    if (!texto || !folder || isSemPasta) return
     const id = addTask(texto, folder)
     if (prazoTarefa) setTaskDeadline(id, prazoTarefa)
     setTextoTarefa('')
@@ -116,11 +130,37 @@ export function FolderNotesView() {
 
   const criarPasta = () => {
     const nome = nomePasta.trim()
-    if (!nome || !category) return
+    if (!nome || !category || isSemPasta) return
     createFolder(category, nome)
     showToast('info', 'Pasta criada', `"${nome}" adicionada em ${para[category]?.label ?? 'PARA'}.`)
     setNomePasta('')
     setNovaPasta(false)
+  }
+
+  /** Resumo do conteudo da pasta pra confirmacao de exclusao (ex.: "9 notas
+   *  e 1 tarefa"). So entra na frase o que a pasta de fato tem. */
+  const resumoConteudo = [
+    folderNotes.length > 0 ? `${folderNotes.length} nota${folderNotes.length === 1 ? '' : 's'}` : null,
+    folderTasks.length > 0 ? `${folderTasks.length} tarefa${folderTasks.length === 1 ? '' : 's'}` : null,
+  ].filter(Boolean).join(' e ')
+
+  /** Onde a Nota/Tarefa desta pasta vai continuar visivel depois da
+   *  exclusao - a confirmacao precisa dizer a verdade sobre ONDE olhar, nao
+   *  so que "continua existindo" (CEO, 30/08/2026: esconder sem avisar
+   *  onde procurar destroi a mesma confianca que apagar destruiria). So
+   *  entra na frase o que a pasta de fato tem. */
+  const explicacaoLocalizacao = [
+    folderNotes.length > 0 ? 'as notas vão para "Sem pasta" na tela inicial' : null,
+    folderTasks.length > 0 ? 'as tarefas vão para "Sem pasta" na lista de tarefas' : null,
+  ].filter(Boolean).join(', e ')
+
+  const excluirPasta = () => {
+    if (!category || !folder || isSemPasta) return
+    const nome = folderObj?.name ?? 'Pasta'
+    deleteFolder(category, folder)
+    setConfirmandoExclusao(false)
+    showToast('info', 'Pasta excluída', `"${nome}" removida.`)
+    setView('canvas', { category, folder: '' })
   }
 
   const pickCover = (e: React.MouseEvent) => {
@@ -131,7 +171,7 @@ export function FolderNotesView() {
   const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     e.target.value = ''
-    if (!file || !category || !folder) return
+    if (!file || !category || !folder || isSemPasta) return
     const url = await saveImageFile(file)
     if (!url) { showToast('warn', 'Erro', 'Não foi possível salvar a imagem.'); return }
     setFolderCover(category, folder, url)
@@ -159,15 +199,19 @@ export function FolderNotesView() {
           : <div className={s.bannerBg} style={{ background: folderObj?.bg }} />
         }
         <div className={s.bannerScrim} />
-        <span className={s.bannerName}>{folderObj?.name ?? 'Notas'}</span>
-        <button className={s.coverBtn} onClick={pickCover} title="Trocar capa da pasta">
-          <Icon name="imagem" size={13} />
-        </button>
+        <span className={s.bannerName}>{bannerName}</span>
+        {!isSemPasta && (
+          <button className={s.coverBtn} onClick={pickCover} title="Trocar capa da pasta">
+            <Icon name="imagem" size={13} />
+          </button>
+        )}
         <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={onFile} />
       </div>
 
       {/* Barra de acoes: UM botao por item, cada um com icone e rotulo.
-          A pasta guarda NOTA e TAREFA - por isso os dois nascem aqui. */}
+          A pasta guarda NOTA e TAREFA - por isso os dois nascem aqui.
+          O balde "Sem pasta" (isSemPasta) e so navegacao - nao e uma Pasta
+          de verdade, entao nao ganha nenhuma acao de criar/excluir aqui. */}
       <div className={s.toolbar}>
         <span className={s.count}>
           {folderNotes.length} nota{folderNotes.length === 1 ? '' : 's'}
@@ -175,15 +219,22 @@ export function FolderNotesView() {
             <> · {tarefasAbertas} de {folderTasks.length} tarefa{folderTasks.length === 1 ? '' : 's'} aberta{tarefasAbertas === 1 ? '' : 's'}</>
           )}
         </span>
-        <button className={`${s.btnNew} hoverZoom hoverGlow`} onClick={newNote} title="Criar uma nota nesta pasta">
-          <Icon name="nota" size={14} /> Nova nota
-        </button>
-        <button className={`${s.btnNewAlt} hoverZoom hoverGlow`} onClick={() => setNovaTarefa(true)} title="Criar uma tarefa nesta pasta">
-          <Icon name="tarefa" size={14} /> Nova tarefa
-        </button>
-        <button className={`${s.btnNewAlt} hoverZoom hoverGlow`} onClick={() => setNovaPasta(true)} title="Criar outra pasta nesta categoria">
-          <Icon name="pasta" size={14} /> Nova pasta
-        </button>
+        {!isSemPasta && (
+          <>
+            <button className={`${s.btnNew} hoverZoom hoverGlow`} onClick={newNote} title="Criar uma nota nesta pasta">
+              <Icon name="nota" size={14} /> Nova nota
+            </button>
+            <button className={`${s.btnNewAlt} hoverZoom hoverGlow`} onClick={() => setNovaTarefa(true)} title="Criar uma tarefa nesta pasta">
+              <Icon name="tarefa" size={14} /> Nova tarefa
+            </button>
+            <button className={`${s.btnNewAlt} hoverZoom hoverGlow`} onClick={() => setNovaPasta(true)} title="Criar outra pasta nesta categoria">
+              <Icon name="pasta" size={14} /> Nova pasta
+            </button>
+            <button className={s.btnDelete} onClick={() => setConfirmandoExclusao(true)} title="Excluir esta pasta">
+              <Icon name="lixo" size={14} /> Excluir pasta
+            </button>
+          </>
+        )}
       </div>
 
       {novaTarefa && (
@@ -262,6 +313,27 @@ export function FolderNotesView() {
         </Modal>
       )}
 
+      {confirmandoExclusao && (
+        <Modal title="Excluir pasta" onClose={() => setConfirmandoExclusao(false)}>
+          {resumoConteudo ? (
+            <>
+              <ModalHint>Esta pasta tem {resumoConteudo}.</ModalHint>
+              <p className={s.avisoExclusao}>
+                A pasta vai sumir. Nada é apagado: {explicacaoLocalizacao}.
+              </p>
+            </>
+          ) : (
+            <ModalHint>Esta pasta está vazia. Ela vai sumir.</ModalHint>
+          )}
+          <ModalFooter>
+            <ModalButton variant="ghost" onClick={() => setConfirmandoExclusao(false)}>Cancelar</ModalButton>
+            <ModalButton variant="ghost" onClick={excluirPasta}>
+              <Icon name="lixo" size={13} /> Excluir pasta
+            </ModalButton>
+          </ModalFooter>
+        </Modal>
+      )}
+
       <div ref={bodyRef} className={`${s.body} scrollFadeBottom`}>
         {/* As tarefas da pasta vem ANTES das notas: sao o que tem prazo. */}
         {folderTasks.length > 0 && (
@@ -302,17 +374,19 @@ export function FolderNotesView() {
 
         {folderNotes.length === 0 ? (
           <div className={s.empty}>
-            <p>{folderTasks.length > 0 ? 'Nenhuma nota nesta pasta ainda.' : 'Esta pasta está vazia.'}</p>
-            <div className={s.emptyAcoes}>
-              <button className={`${s.btnNewBig} hoverZoom hoverGlow`} onClick={newNote}>
-                <Icon name="nota" size={15} /> Criar primeira nota
-              </button>
-              {folderTasks.length === 0 && (
-                <button className={`${s.btnNewBigAlt} hoverZoom hoverGlow`} onClick={() => setNovaTarefa(true)}>
-                  <Icon name="tarefa" size={15} /> Criar primeira tarefa
+            <p>{isSemPasta ? 'Nenhuma nota sem pasta agora.' : folderTasks.length > 0 ? 'Nenhuma nota nesta pasta ainda.' : 'Esta pasta está vazia.'}</p>
+            {!isSemPasta && (
+              <div className={s.emptyAcoes}>
+                <button className={`${s.btnNewBig} hoverZoom hoverGlow`} onClick={newNote}>
+                  <Icon name="nota" size={15} /> Criar primeira nota
                 </button>
-              )}
-            </div>
+                {folderTasks.length === 0 && (
+                  <button className={`${s.btnNewBigAlt} hoverZoom hoverGlow`} onClick={() => setNovaTarefa(true)}>
+                    <Icon name="tarefa" size={15} /> Criar primeira tarefa
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <div className={s.grid}>

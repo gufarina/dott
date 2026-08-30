@@ -83,6 +83,24 @@ export function NoteEditor() {
 
   const current = notes.find(n => n.id === note)
   const [title, setTitle] = useState(current?.title ?? '')
+  /** DEFEITO 1 (27/08/2026, corrupcao medida em producao): espelhos de
+   *  `current.id`/`title` atualizados a cada render, lidos só DENTRO do
+   *  `onChange` (abaixo). Antes, `onChange` era recriado a cada render do
+   *  NoteEditor (fechava sobre `current`/`title` direto) - isso muda a
+   *  IDENTIDADE da funcao passada pro CodeMirror controlado toda vez que
+   *  o store muda (ex.: `graph` recalculado ~0ms depois de QUALQUER
+   *  `saveNote`, via scheduleGraphRebuild em store.ts). O
+   *  `useCodeMirror` da lib (`@uiw/react-codemirror`) redespacha
+   *  `StateEffect.reconfigure` sempre que `onChange` muda de referencia -
+   *  reconfigurar a EditorView bem no instante em que o usuario retoma a
+   *  digitacao (logo apos o autosave de 800ms) e o gatilho mais provavel
+   *  da nota embaralhada. Com os refs, `onChange` agora tem UMA unica
+   *  identidade pra vida inteira do componente - reconfigure nunca mais
+   *  dispara por causa dele. */
+  const currentIdRef = useRef<string | undefined>(current?.id)
+  currentIdRef.current = current?.id
+  const titleRef = useRef(title)
+  titleRef.current = title
   const [tagInput, setTagInput] = useState('')
   // TASK-351 (28/08/2026, CEO: "botao tag sem proposito ali"): sem nenhuma
   // Etiqueta na nota, o campo tracejado comeca ESCONDIDO — vira o convite
@@ -186,7 +204,7 @@ export function NoteEditor() {
     if (!pendingSave.current || !current) return
     clearTimeout(saveTimer.current)
     pendingSave.current = false
-    whenNoImageInFlight(() => saveNote(current.id, title, bodyRef.current))
+    whenNoImageInFlight(() => saveNote(current.id, title, readLiveBody()))
   }
 
   /** CORRIGIR item 2: teto de espera por imagem em voo no caminho de
@@ -205,7 +223,8 @@ export function NoteEditor() {
     while (pendingImages.current > 0 && Date.now() - inicio < TETO_ESPERA_IMAGEM_MS) {
       await new Promise(r => setTimeout(r, 150))
     }
-    const corpo = pendingImages.current > 0 ? stripPendingImageMarkers(bodyRef.current) : bodyRef.current
+    const vivo = readLiveBody()
+    const corpo = pendingImages.current > 0 ? stripPendingImageMarkers(vivo) : vivo
     await saveNote(current.id, title, corpo)
   }
 
@@ -257,6 +276,12 @@ export function NoteEditor() {
       setHintState(st => applyFolderHint(st, candidate))
     }, 800)
   }
+  // Espelho de `scheduleHintRecalc` (mesma razao dos refs acima): `onChange`
+  // precisa de identidade fixa, `scheduleHintRecalc` e recriada a cada
+  // render (fecha sobre `current`/`para`/`notes`) - o ref sempre aponta pra
+  // versao mais nova sem exigir que `onChange` mude junto.
+  const scheduleHintRecalcRef = useRef(scheduleHintRecalc)
+  scheduleHintRecalcRef.current = scheduleHintRecalc
 
   useEffect(() => {
     scheduleHintRecalc(title, bodyRef.current)
@@ -264,24 +289,34 @@ export function NoteEditor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [note, title])
 
-  const onChange = (val: string) => {
+  /** DEFESA (item exigido junto do conserto do DEFEITO 1): gravar nota e o
+   *  ato sagrado do produto - nunca persiste um `val`/`bodyRef` que possa
+   *  ter ficado pra tras. Le direto da EditorView viva (o que esta
+   *  DE FATO na tela agora); so cai pro ref quando nao ha view montada
+   *  (nota-imagem, ImageViewer). Barata: um `toString()` sobre o doc que o
+   *  CodeMirror ja mantem, nenhuma validacao de conteudo do usuario. */
+  const readLiveBody = () => editorRef.current?.view?.state.doc.toString() ?? bodyRef.current
+
+  const onChange = useCallback((val: string) => {
     bodyRef.current = val
-    if (!current) return
+    const id = currentIdRef.current
+    if (!id) return
     clearTimeout(saveTimer.current)
     pendingSave.current = true
     saveTimer.current = setTimeout(() => {
       whenNoImageInFlight(() => {
-        saveNote(current.id, title, val)
+        saveNote(id, titleRef.current, readLiveBody())
         pendingSave.current = false
         showToast('info', 'Salvo', 'Nota atualizada.')
       })
     }, 800)
-    scheduleHintRecalc(title, val)
-  }
+    scheduleHintRecalcRef.current(titleRef.current, val)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [whenNoImageInFlight, saveNote])
 
   const saveTitle = () => {
     if (current && title !== current.title) {
-      whenNoImageInFlight(() => saveNote(current.id, title, bodyRef.current))
+      whenNoImageInFlight(() => saveNote(current.id, title, readLiveBody()))
     }
   }
 
@@ -290,12 +325,13 @@ export function NoteEditor() {
    *  sem override — tags nascem de volta de extractTags(body) no store. */
   const applyTagChange = (transform: (body: string) => string) => {
     if (!current) return
-    const newBody = transform(bodyRef.current)
-    if (newBody === bodyRef.current) return
+    const oldBody = readLiveBody()
+    const newBody = transform(oldBody)
+    if (newBody === oldBody) return
     const view = editorRef.current?.view
     if (view) applyBodyToView(view, newBody)
     bodyRef.current = newBody
-    whenNoImageInFlight(() => saveNote(current.id, title, newBody))
+    whenNoImageInFlight(() => saveNote(current.id, title, readLiveBody()))
   }
 
   /** Remover pela interface cobre os DOIS lados (TASK-364): etiqueta que
@@ -423,7 +459,7 @@ export function NoteEditor() {
           url={parseImageOnly(initialBody)!}
           // TASK-364: reanotar a imagem troca o corpo inteiro pela imagem
           // nova - sem isto, a linha de #etiquetas do corpo velho sumia.
-          onSave={(id, t, newBody) => saveNote(id, t, reattachTags(bodyRef.current, newBody))}
+          onSave={(id, t, newBody) => saveNote(id, t, reattachTags(readLiveBody(), newBody))}
         />
       ) : (
         <div className={s.editorWrap}>

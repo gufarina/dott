@@ -4,6 +4,40 @@
    compartilhar espaco entre os dois. O grid agora e filho direto de
    .viewMotion (App.module.css, ja flex-column) e fecha sozinho na moldura
    de .central. */
+/* Balde "Sem pasta": pilula discreta ACIMA do grid, so desenhada quando ha
+   Nota orfa de verdade (nunca vazia - ver o guard no componente). Mesma
+   familia neutra dos botoes secundarios do app (.btnNewAlt em
+   FolderNotesView.module.css) - nao inventa um vocabulario novo so pra
+   isto. */
+.semPastaBanner {
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin: 10px 16px 0;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--r-btn);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--fg2);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+.semPastaBanner:hover { background: var(--surface3); color: var(--fg); border-color: var(--fg3); }
+
+.semPastaCount {
+  font-size: var(--text-2xs);
+  color: var(--fg3);
+  background: var(--surface3);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+
 .grid {
   flex: 1;
   min-height: 0;
