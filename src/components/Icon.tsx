@@ -15,6 +15,14 @@ export type IconName =
   | 'ajustes' | 'tema' | 'grafo' | 'lixo' | 'inbox' | 'tag'
   | 'sugestao' | 'lapis' | 'backup' | 'rever'
   | 'minimizar' | 'maximizar' | 'acervo' | 'leitura'
+  // Toolbar de formatacao (TASK-314): glifo funcional/legivel (B, i) tem
+  // precedencia sobre o ponto de assinatura aqui, mesma excecao ja aberta
+  // pra minimizar/maximizar acima.
+  | 'negrito' | 'italico' | 'citacao' | 'listaPontos' | 'listaNumeros' | 'link' | 'guia'
+  // Barra de formatacao permanente (TASK-335): mesma excecao de letterform
+  // acima - "H" (titulo) e "<>" (codigo) sao mais legiveis como glifo
+  // funcional do que forcados na gramatica geometrica de circulo/quadrado.
+  | 'titulo' | 'codigo'
 
 const P: Record<IconName, React.ReactElement> = {
   // Folha com o canto dobrado + o ponto
@@ -62,6 +70,24 @@ const P: Record<IconName, React.ReactElement> = {
   leitura: <><path d="M8 4.4C6.8 3.4 5.1 3 2.4 3v9.4c2.7 0 4.4.4 5.6 1.4 1.2-1 2.9-1.4 5.6-1.4V3c-2.7 0-4.4.4-5.6 1.4z"/><path d="M8 4.4v9.4"/></>,
   // Folha com linhas: o acervo de notas da pasta
   acervo: <><path d="M4 2.6h5l3 3V13a.6.6 0 0 1-.6.6H4a.6.6 0 0 1-.6-.6V3.2a.6.6 0 0 1 .6-.6z"/><path d="M5.8 8.4h4M5.8 10.6h2.8"/></>,
+  // "B" — espinha vertical + duas bojas crescentes
+  negrito: <><path d="M5 3v10"/><path d="M5 3h2.6a2 2 0 0 1 0 4H5"/><path d="M5 7h3a2.3 2.3 0 0 1 0 6H5"/></>,
+  // "i" tipografico — barra, diagonal, barra (icone classico de italico)
+  italico: <><path d="M6.4 3.6h4.2"/><path d="M5.4 12.4h4.2"/><path d="M9.4 3.6l-2.8 8.8"/></>,
+  // Duas aspas curvas (citacao/blockquote)
+  citacao: <><path d="M3.2 4.6h2.6v2.4a2.4 2.4 0 0 1-2.4 2.4"/><path d="M9 4.6h2.6v2.4A2.4 2.4 0 0 1 9.2 9.4"/></>,
+  // Lista com marcador circulo (primitiva "circulo")
+  listaPontos: <><circle cx="3" cy="4.6" r=".95" fill="currentColor" stroke="none"/><path d="M6.2 4.6h6.8"/><circle cx="3" cy="8" r=".95" fill="currentColor" stroke="none"/><path d="M6.2 8h6.8"/><circle cx="3" cy="11.4" r=".95" fill="currentColor" stroke="none"/><path d="M6.2 11.4h6.8"/></>,
+  // Lista com marcador quadrado (primitiva "quadrado") — distingue de listaPontos
+  listaNumeros: <><rect x="2.15" y="3.75" width="1.7" height="1.7" rx=".4"/><path d="M6.2 4.6h6.8"/><rect x="2.15" y="7.15" width="1.7" height="1.7" rx=".4"/><path d="M6.2 8h6.8"/><rect x="2.15" y="10.55" width="1.7" height="1.7" rx=".4"/><path d="M6.2 11.4h6.8"/></>,
+  // Duas capsulas cruzadas (elo)
+  link: <><rect x="2.6" y="6.3" width="6" height="3.4" rx="1.7" transform="rotate(-45 5.6 8)"/><rect x="7.4" y="6.3" width="6" height="3.4" rx="1.7" transform="rotate(-45 10.4 8)"/></>,
+  // Circulo com "?" — o ponto da interrogacao ja e a assinatura desta
+  guia: <><circle cx="8" cy="8" r="5.6"/><path d="M6.2 6.1a2 2 0 1 1 2.9 1.8c-.75.42-1.1.9-1.1 1.75"/><circle cx="8" cy="11.5" r=".55" fill="currentColor" stroke="none"/></>,
+  // "H" tipografico — titulo/heading da barra de formatacao (TASK-335)
+  titulo: <><path d="M4 3v10M12 3v10M4 8h8"/></>,
+  // "< >" — chevrons de trecho de codigo (TASK-335)
+  codigo: <><path d="M6 4.5L2.4 8l3.6 3.5"/><path d="M10 4.5L13.6 8l-3.6 3.5"/></>,
 }
 
 export function Icon({ name, size = 15, className }: { name: IconName; size?: number; className?: string }) {

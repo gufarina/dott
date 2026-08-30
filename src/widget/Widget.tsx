@@ -149,6 +149,19 @@ export function Widget() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // O contador local so ressincronizava no mount e no summon; a Inbox pode
+  // mudar pela janela principal (processar/excluir card) sem o widget saber,
+  // e o guard `isFull` disparava errado. Mesmo evento que App.tsx ja escuta.
+  useEffect(() => {
+    let unlisten: (() => void) | undefined
+    import('@tauri-apps/api/event')
+      .then(({ listen }) => listen('inbox-changed', () => refreshCount()))
+      .then(fn => { unlisten = fn })
+      .catch(() => {})
+    return () => { unlisten?.() }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const win = () => getCurrentWindow()
 
   // ── A ANCORA ──────────────────────────────────────────────────────────────
@@ -481,7 +494,13 @@ export function Widget() {
         collapse()
         return
       }
-      try { await invoke('inbox_add', { content: url, kind: 'IMAGEM' }) } catch {}
+      try {
+        await invoke('inbox_add', { content: url, kind: 'IMAGEM' })
+      } catch {
+        showToast('warn', 'Falha ao guardar', 'Não consegui salvar no Dott. Tente de novo.')
+        collapse()
+        return
+      }
       setCount(c => c + 1)
       // O aviso so entra DEPOIS que o painel saiu: ele nasce da bolinha, e a
       // bolinha ainda estava la em cima fazendo de marca do cabecalho.
@@ -491,7 +510,13 @@ export function Widget() {
     const v = text.trim()
     if (!v) return
     const d = detectType(v)
-    try { await invoke('inbox_add', { content: v, kind: d.type }) } catch {}
+    try {
+      await invoke('inbox_add', { content: v, kind: d.type })
+    } catch {
+      showToast('warn', 'Falha ao guardar', 'Não consegui salvar no Dott. Tente de novo.')
+      collapse()
+      return
+    }
     setCount(c => c + 1)
     collapse(() => avisar(d.type, d.label, v))
   }

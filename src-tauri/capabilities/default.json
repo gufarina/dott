@@ -5,9 +5,19 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "opener:default",
-    "opener:allow-open-path",
-    "opener:allow-open-url",
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [
+        { "path": "$DOCUMENT/Dott Backups" },
+        { "path": "$DOCUMENT/Dott Backups/**" }
+      ]
+    },
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        { "url": "https://*" }
+      ]
+    },
     "core:window:allow-minimize",
     "core:window:allow-maximize",
     "core:window:allow-unmaximize",

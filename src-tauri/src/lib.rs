@@ -1,6 +1,9 @@
+mod atomic;
 mod attachments;
+mod corrupt;
 mod backup;
 mod folders;
+mod path_safety;
 mod inbox;
 mod tasks;
 mod vault;
@@ -36,7 +39,11 @@ pub fn run() {
                         })
                         .build(),
                 )?;
-                let _ = app.global_shortcut().register(summon);
+                if let Err(e) = app.global_shortcut().register(summon) {
+                    // Ctrl+Shift+Space pode ja estar em uso por outro programa; avisa o
+                    // frontend em vez de falhar calado (a bolinha nunca apareceria).
+                    let _ = app.emit("shortcut-register-failed", e.to_string());
+                }
             }
 
             // Posiciona o widget no canto inferior direito e o exibe.

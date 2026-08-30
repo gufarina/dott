@@ -1,8 +1,21 @@
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { useStore } from '../store'
+import { flushNoteEditor } from '../features/editor/NoteEditor'
 import { Icon } from './Icon'
 import { DottMark } from './DottMark'
 import s from './Titlebar.module.css'
+
+/** Caminho UNICO de fechamento da janela principal - usado pelo botao desta
+ *  barra E pelo onCloseRequested nativo (App.tsx, Alt+F4/barra de tarefas),
+ *  pra nao duplicar a logica de flush (CORRIGIR item 3 desta rodada).
+ *  `destroy()` (nao `close()`) fecha sem reemitir onCloseRequested - sem
+ *  isso o proprio flush+close daria um loop com o listener de App.tsx.
+ *  Item 1: aguarda flushNoteEditor() ANTES de fechar - o autosave (ate
+ *  800ms) da nota aberta chega ao disco antes da janela sumir. */
+export async function closeMainWindow() {
+  await flushNoteEditor()
+  await getCurrentWindow().destroy().catch(() => {})
+}
 
 export function Titlebar({ onSearch, onSettings }: { onSearch?: () => void; onSettings?: () => void }) {
   const theme = useStore(st => st.theme)
@@ -10,7 +23,6 @@ export function Titlebar({ onSearch, onSettings }: { onSearch?: () => void; onSe
   const view = useStore(st => st.view)
   const setView = useStore(st => st.setView)
 
-  const close = () => getCurrentWindow().close().catch(() => {})
   const minimize = () => getCurrentWindow().minimize().catch(() => {})
   const maximize = () => getCurrentWindow().toggleMaximize().catch(() => {})
   const toggleGraph = () => setView(view === 'graph' ? 'board' : 'graph')
@@ -20,6 +32,7 @@ export function Titlebar({ onSearch, onSettings }: { onSearch?: () => void; onSe
       <div className={s.drag} data-tauri-drag-region>
         <DottMark size={15} className={s.mark} />
         <span className={s.logo}>Dott</span>
+        <span className={s.version} title={`Dott v${__APP_VERSION__}`}>v{__APP_VERSION__}</span>
       </div>
       <div className={s.right}>
         <button className={s.btn} onClick={onSearch} aria-label="Buscar (Ctrl+K)" title="Buscar (Ctrl+K)">
@@ -43,7 +56,7 @@ export function Titlebar({ onSearch, onSettings }: { onSearch?: () => void; onSe
           <button className={s.wbtn} onClick={maximize} aria-label="Maximizar">
             <Icon name="maximizar" size={11} />
           </button>
-          <button className={`${s.wbtn} ${s.wclose}`} onClick={close} aria-label="Fechar">
+          <button className={`${s.wbtn} ${s.wclose}`} onClick={closeMainWindow} aria-label="Fechar">
             <Icon name="fechar" size={11} />
           </button>
         </div>

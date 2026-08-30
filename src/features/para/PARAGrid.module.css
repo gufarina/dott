@@ -1,5 +1,12 @@
+/* TASK-346: .boardWrap saiu daqui - a caixa de captura (CaptureBox) deixou
+   de ser filha deste grid (virou painel irmao, .captureShell em
+   App.module.css), entao nao existe mais um pai flex-column so pra
+   compartilhar espaco entre os dois. O grid agora e filho direto de
+   .viewMotion (App.module.css, ja flex-column) e fecha sozinho na moldura
+   de .central. */
 .grid {
   flex: 1;
+  min-height: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
@@ -93,8 +100,17 @@
   transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
 }
 
-.q-projects .qAdd { color: var(--q-p); background: rgba(224,64,64,.12); }
-.q-projects .qAdd:hover { background: rgba(224,64,64,.22); }
+/* TASK-329: era rgba(224,64,64,X) cravado. Aqui a cor NAO e o estado
+   "perigo" (--danger) - e o quadrante Projetos (--q-p), que so COINCIDE
+   com o hex de --danger no tema escuro (#e04040 nos dois) e diverge no
+   claro (--q-p #c83030 vs --danger #c0392b). Por isso o fundo usa
+   color-mix() sobre --q-p, nao o --danger-s novo - a cor certa e a do
+   dado (quadrante), nao a de perigo. As tres irmas (.q-areas/.q-resources/
+   .q-archives .qAdd, abaixo) tem o MESMO defeito com --q-a/--q-r/--q-ar e
+   ficam de fora desta correcao (fora do "vermelho cravado" pedido) -
+   registrado como Known Gap no DESIGN.md. */
+.q-projects .qAdd { color: var(--q-p); background: color-mix(in oklab, var(--q-p) 12%, transparent); }
+.q-projects .qAdd:hover { background: color-mix(in oklab, var(--q-p) 22%, transparent); }
 .q-areas .qAdd { color: var(--q-a); background: rgba(74,143,217,.12); }
 .q-areas .qAdd:hover { background: rgba(74,143,217,.22); }
 .q-resources .qAdd { color: var(--q-r); background: rgba(61,179,122,.12); }
@@ -111,7 +127,16 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
   gap: 13px;
-  padding: 8px 16px 16px;
+  /* TASK-354: laterais/base eram 16px - o .folderCard (--r-xl, 20px,
+     mascara squircle) do quadrante inferior encosta direto no --r-shell
+     (18px) do .central que envolve o board, com so 16px de folga: a curva
+     de 20px do card nao cabe concentrica na curva de 18px do painel com
+     tao pouca folga (regra de aninhamento, DESIGN.md secao 7). Em vez de
+     encolher o raio do card (e a "identidade de canto generoso" dele, ja
+     aprovada - DESIGN.md secao 7), a folga sobe pra 20px: com espacamento
+     maior que o raio de fora as duas curvas deixam de competir (mesmo
+     numero que .catBody, a tela de categoria unica, ja usa - ver abaixo). */
+  padding: 8px 20px 20px;
   overflow-y: auto;
   overflow-x: hidden;
   flex: 1;
@@ -133,19 +158,30 @@
      border-radius + mascara, que arredondam sem precisar cortar. */
   background: var(--surface);
   border: 1px solid var(--border);
+  /* TASK-318: no tema claro a separacao de card e por SOMBRA difusa
+     (--elevation-card), nao por borda escura - token vira `none` no tema
+     escuro (mantem hairline-only la, ver DESIGN.md secao 6). */
+  box-shadow: var(--elevation-card, none);
   cursor: pointer;
   transition: border-color var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
   position: relative;
   display: flex;
   flex-direction: column;
-  /* O piso AMARRA na capa: capa + o pior caso de texto (nome + contagem + barra
-     + legenda = 100px, medido). A grade nao consegue calcular isso sozinha —
-     ela dimensiona a linha pelo min-height e ignora o conteudo real do card —
+  /* O piso AMARRA na capa: capa + o pior caso de texto (nome + contagem +
+     barra + legenda). A grade nao consegue calcular isso sozinha — ela
+     dimensiona a linha pelo min-height e ignora o conteudo real do card —
      entao o piso precisa ja vir certo. Amarrado ao token, nao chutado: mudou a
      capa, o piso acompanha.
-     118 = pior caso MEDIDO: nome + contagem + barra + legenda com a legenda
-     quebrando em DUAS linhas (acontece a partir de ~6 colunas, card ~167px). */
-  min-height: calc(var(--capa-h) + 118px);
+     90 = pior caso hoje (TASK-368, pasta COM tarefa - a unica que ainda tem
+     rodape): padding do .info (25) + nome com margem (20.8) + contagem (15.5)
+     + rodape numa linha so (23.5) = ~85, com folga ate 90. Era 118 antes desta
+     task: o rodape empilhava barra + legenda em ATE DUAS linhas (a legenda
+     podia quebrar); agora e uma linha so com ellipsis (nunca quebra) e a
+     variante sem tarefa (mais curta ainda, ~61) foi cortada do calculo por
+     nao ser mais o pior caso. Numeros computados a partir dos tokens
+     declarados (--text-xs 11.5px, --text-3xs 10px, line-height base 1.55,
+     reset.css) - conferir com screenshot do build antes de fechar a task. */
+  min-height: calc(var(--capa-h) + 90px);
   animation: appearUp .26s ease both;
 }
 .folderCard:hover { border-color: var(--border2); transform: translateY(-1px); }
@@ -168,7 +204,7 @@
   justify-content: center;
   background: color-mix(in oklab, var(--accent) 82%, transparent);
   color: #fff;
-  font-size: 12px;
+  font-size: var(--text-2xs);
   font-weight: 700;
   letter-spacing: .03em;
   animation: overlayIn .12s ease both;
@@ -246,7 +282,7 @@
 }
 
 .name {
-  font-size: 13px;
+  font-size: var(--text-xs);
   font-weight: 700;
   color: var(--fg);
   white-space: nowrap;
@@ -257,19 +293,31 @@
 }
 
 .meta {
-  font-size: 11px;
+  font-size: var(--text-3xs);
   color: var(--fg3);
   margin-bottom: auto;
 }
 
-.bottom { margin-top: 8px; }
+/* TASK-368: era bloco EMPILHADO (barra numa linha, legenda embaixo, +
+   variante gemea .densityBar/.densityLabel pra pasta sem tarefa) - duas
+   linhas de altura so pra repetir em texto o que a barra ja mostra em
+   forma. Virou UMA linha so: barra + numero lado a lado. A variante sem
+   tarefa foi cortada (ver comentario no .tsx) - por isso este bloco so
+   renderiza quando ha tarefa. */
+.bottom {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
 .progressBar {
+  flex: 1 1 auto;
+  min-width: 20px;
   height: 4px;
   border-radius: 2px;
   background: var(--surface3);
   overflow: hidden;
-  margin-bottom: 4px;
 }
 /* Preenche por transform, nao por width: animar width forca recalculo de
    layout a cada quadro. O trilho tem overflow:hidden, entao o canto ja vem
@@ -280,30 +328,19 @@
   transform-origin: left center;
   transition: transform var(--dur-slow) var(--ease-out);
 }
-.progressLabel { font-size: 11px; color: var(--fg3); }
-
-.densityBar {
-  height: 4px;
-  border-radius: 2px;
-  background: var(--surface3);
-  overflow: hidden;
-  margin-bottom: 4px;
-}
-.densityFill {
-  height: 100%;
-  width: 100%;
-  opacity: .5;
-  transform-origin: left center;
-  transition: transform var(--dur-slow) var(--ease-out);
-}
-.densityLabel {
-  font-size: 11px;
+/* flex-shrink (nao 0): num card no piso da largura minima (158px), o texto
+   cede espaco pra barra em vez de forcar quebra de linha - white-space
+   nowrap + ellipsis garantem UMA linha sempre, nunca as duas que
+   estouravam o piso de altura do card antes desta task. */
+.progressLabel {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: var(--text-3xs);
   color: var(--fg3);
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.densityLabel svg { flex-shrink: 0; }
 
 .folderNew {
   border-radius: var(--r-xl);
@@ -317,14 +354,15 @@
   color: var(--fg3);
   transition: border-color var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out);
   /* Acompanha a altura da linha (que o card real define). O min-height so vale
-     pro caso de o quadrante nao ter nenhuma pasta ainda. */
-  min-height: calc(var(--capa-h) + 118px);
+     pro caso de o quadrante nao ter nenhuma pasta ainda. Mesmo numero do
+     .folderCard acima (TASK-368: 118 -> 90). */
+  min-height: calc(var(--capa-h) + 90px);
   align-self: stretch;
 }
 .folderNew:hover { border-color: var(--fg3); color: var(--fg); background: var(--surface); }
 
 .plus { display: flex; align-items: center; justify-content: center; line-height: 1; }
-.folderNew span { font-size: 12px; font-weight: 500; }
+.folderNew span { font-size: var(--text-2xs); font-weight: 500; }
 
 /* Modal */
 .overlay {
@@ -358,17 +396,19 @@
   border-bottom: 1px solid var(--border);
 }
 .modalHeader h3 {
-  font-size: 16px;
+  font-size: var(--text-base);
   font-weight: 700;
   letter-spacing: -0.01em;
   flex: 1;
 }
 
+/* TASK-334 (Fase 3, DESIGN.md secao 17.2): era 26px - convergido pro
+   `--icon-btn-md` (28px), mesmo porte dos demais "fechar modal" do app. */
 .modalClose {
-  width: 26px; height: 26px; border-radius: var(--r-sm);
+  width: var(--icon-btn-md); height: var(--icon-btn-md); border-radius: var(--r-sm);
   border: none; background: transparent;
   color: var(--fg3); cursor: pointer;
-  font-size: 17px;
+  font-size: var(--text-lg);
   display: flex; align-items: center; justify-content: center;
   transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
@@ -405,7 +445,7 @@
   background: var(--surface3);
   border: 1px solid var(--border2);
   color: var(--fg2);
-  font-size: 13px;
+  font-size: var(--text-xs);
   font-weight: 500;
   cursor: pointer;
   transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
@@ -426,24 +466,29 @@
   border: 1px solid var(--border2);
   border-radius: var(--r-md);
   color: var(--fg2);
-  font-size: 13px; font-weight: 500;
+  font-size: var(--text-xs); font-weight: 500;
   cursor: pointer; font-family: inherit;
   transition: background var(--dur-micro) var(--ease-out);
 }
 .btnCancel:hover { background: var(--surface3); }
 
+/* TASK-329 (DESIGN.md secao 17.2): era preenchimento solido --accent -
+   receita de ANTES da TASK-319/320, nunca migrada. Fill vira --surface3
+   (mesma familia neutra do resto do app); brilho-no-hover (hoverGlow) fica
+   pendente de JSX (RUSTLINE) - aqui e so o CSS parando de contradizer a
+   regra vigente. */
 .btnPrimary {
   height: 36px; padding: 0 18px;
-  background: var(--accent);
-  border: 1px solid var(--accent);
+  background: var(--surface3);
+  border: none;
   border-radius: var(--r-md);
-  color: #fff;
-  font-size: 13px; font-weight: 600;
+  color: var(--fg);
+  font-size: var(--text-xs); font-weight: 600;
   cursor: pointer; font-family: inherit;
   display: flex; align-items: center; gap: 7px;
   transition: opacity var(--dur-micro) var(--ease-out);
 }
-.btnPrimary:hover { opacity: .85; }
+.btnPrimary:hover { opacity: .88; }
 
 /* ─── Tela de UMA categoria (todas as pastas dela) ─── */
 .catWrap {
@@ -472,19 +517,31 @@
 }
 .catSubtitle { font-size: 12.5px; color: var(--fg3); line-height: 1.3; }
 .catCount {
-  font-size: 12px;
+  font-size: var(--text-2xs);
   color: var(--fg3);
   flex-shrink: 0;
   white-space: nowrap;
 }
+/* TASK-372 (29/08/2026, CEO: "o botao de nova pasta ta sem isso... investiga
+   a consistencia do design dos botoes... TOKENIZACAO!"). Achado da auditoria:
+   este botao ("Nova pasta", ao lado de ".catCount") nunca tinha entrado no
+   inventario da TASK-327 (17.2 do DESIGN.md) - porte proprio (32px, nem lg
+   nem md), raio proprio (--r-md em vez de --r-btn) e SEM `hoverGlow`, o
+   unico "criar X" secundario do app sem a tarja. Convergido pra receita
+   `secundario/ghost lg` (a mesma de `.btnNewAlt`, FolderNotesView): altura e
+   raio pelo token, `--glow-intensity` igual (.6, o mesmo grau de contencao
+   dos outros secundarios de fileira de criacao). A classe `hoverGlow
+   hoverZoom` foi adicionada no JSX (PARAGrid.tsx, `CategoryView`), unico
+   arquivo desta familia que nao esta sob restricao de edicao nesta rodada. */
 .catAdd {
-  height: 32px;
+  --glow-intensity: .6;
+  height: var(--btn-h-lg);
   padding: 0 14px;
-  border-radius: var(--r-md);
+  border-radius: var(--r-btn);
   border: 1px solid var(--border2);
   background: transparent;
   color: var(--fg2);
-  font-size: 13px;
+  font-size: var(--text-xs);
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
@@ -492,9 +549,10 @@
   align-items: center;
   gap: 7px;
   flex-shrink: 0;
-  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), scale var(--dur-instant) var(--ease-out);
 }
 .catAdd:hover { background: var(--surface3); color: var(--fg); border-color: var(--fg3); }
+.catAdd:active { scale: .975; }
 
 .catBody { flex: 1; overflow-y: auto; padding: 20px; }
 .catBody::-webkit-scrollbar { width: 3px; }
@@ -518,7 +576,7 @@
   padding: 72px 20px;
   text-align: center;
 }
-.catEmpty p { font-size: 14px; color: var(--fg2); }
+.catEmpty p { font-size: var(--text-sm); color: var(--fg2); }
 
 /* ── Tela sem hover (toque) ────────────────────────────────────────────────
    Regra do emilkowalski/skills: hover precisa de `@media (hover: hover)`.

@@ -80,3 +80,608 @@ textarea, input { font-family: inherit; }
    por carregar depois, vencia o de la e matava TAMBEM os fades — o oposto da
    regra ("keep opacity and color transitions that aid comprehension, remove
    movement and position animations", emilkowalski/skills). */
+
+/* ── A "tag" de marca dentro do botao (TASK-330, 28/08/2026; geometria
+   revisada na TASK-336, 28/08/2026) ──────────────────────────────────────
+   O CEO mandou de volta uma captura de uma rodada ANTERIOR (os botoes
+   "Nova tarefa"/"Nova pasta" com o highlight antigo) e disse "quero o
+   highlight como nessa imagem, que e uma forma contida com o gradiente
+   dentro dele, tipo uma tag" - o oposto da luz sem aresta que a TASK-320
+   escolheu (uma "fresta de luz" que dissolve nas duas direcoes, sem
+   forma propria). Ele e o dono do gosto - a receita troca de vez, sem
+   tentar reconciliar as duas.
+
+   NAO e um retorno ao defeito que a TASK-320 corrigiu (o retangulo de 60%
+   da altura do botao, cantos vivos, cortado a pique pela borda) - a tag
+   e deliberadamente diferente em tres medidas:
+     1. BAIXA - o que sobra visivel e uma lasca fina (ver TASK-336
+        abaixo), nao um bloco de fundo.
+     2. VAZADA NA BASE (TASK-336, revisa a TASK-330) - a TASK-330 tinha
+        posto a tag com folga dos 4 lados, flutuando DENTRO do botao. O
+        CEO reprovou essa versao: "eu pedi claramente pra essa tag com o
+        gradiente estar vazando metade pra fora e metade pra dentro na
+        parte inferior... nao quero que ela esteja pra dentro." A tag
+        agora fica CENTRADA na borda inferior do botao - metade de cima
+        dentro (visivel), metade de baixo fora (cortada pelo
+        `overflow: hidden` desta classe). Zero recuo da base - so
+        `--tag-inset-x` continua recuando as LATERAIS.
+     3. COM RAIO PROPRIO - `--tag-r`, menor que o raio do botao
+        (`--r-btn`/`--r-md`, o que o botao usar), nunca igual. Como o
+        corte agora e feito pela borda RETA do botao (nao pelo proprio
+        border-radius da tag), so os dois cantos de CIMA ficam com curva
+        visivel depois do corte - o de baixo e a propria borda do botao.
+        Isso evita "retangulo duro" (tem canto arredondado em cima) e
+        "elipse esticada" (o raio nao muda de proporcao so porque a caixa
+        ficou mais alta - ver conta na TASK-336 abaixo).
+
+   Geometria em 3 custom properties (default pensado pro porte `lg`, ver
+   `--btn-h-lg` em tokens.css - 36px desde a TASK-372, era 44px; ver
+   `.btnEdit` em ImageViewer.module.css pro override dos botoes menores,
+   que precisam de tudo proporcionalmente menor; `.btnCapture` foi extinto
+   na TASK-343/375, o botao "Capturar" hoje e `.convoSend` em
+   CaptureBox.module.css e usa o DEFAULT desta classe, sem override):
+     --tag-h        altura TOTAL da tag (so a metade de cima fica visivel)
+     --tag-inset-x  recuo das laterais (esquerda e direita)
+     --tag-r        raio da propria tag
+
+   [TASK-336] `--tag-inset-b` foi REMOVIDA (existia na TASK-330, recuava a
+   tag da base do botao - exatamente o que o CEO reprovou). A posicao
+   vertical agora nasce so de `--tag-h`: `bottom: calc(var(--tag-h) / -2)`
+   desloca a caixa pra baixo em meia altura, entao o EIXO horizontal do
+   meio da tag cai em cima da borda inferior do botao - metade acima
+   (dentro, visivel), metade abaixo (fora, cortada pelo `overflow:hidden`
+   desta classe). Sem essa formula a tag flutua inteira dentro do botao
+   (o defeito reprovado); com ela, o corte e sempre exatamente na metade,
+   nao importa o valor de `--tag-h`.
+
+   [TASK-336] Altura TOTAL dobrada em relacao a TASK-330 (6px -> 12px no
+   default de 44px; 3px -> 6px nos overrides de 28-30px). O CEO pediu pra
+   calibrar pensando em quanto SOBRA visivel, nao na altura total: como
+   so a metade de cima aparece, dobrar a altura faz o pedaco visivel ter
+   a MESMA presenca que a tag inteira tinha antes (6px visiveis hoje = os
+   6px que apareciam por inteiro na TASK-330) - nem lasca fina demais pra
+   sumir, nem barra gorda. `--tag-r` NAO mudou (3px no default, 2px nos
+   overrides) - o raio ja era ~metade da altura ANTIGA (pill completo),
+   entao mantido igual ele passa a ser ~metade da altura VISIVEL de agora
+   (3px de raio pra 6px visiveis, 2px pra 3px visiveis) - a mesma curvatura
+   relativa de antes no pedaco que sobra, so que agora com o topo
+   arredondado e a base cortada reta pela borda do botao, em vez de pill
+   inteiro flutuando.
+
+   Duas camadas (nenhuma mexe em `--glow-x`/`--glow-y` nem no laco - isso
+   e do hook, `src/hooks/useHoverGlowCursor.ts`, INTOCADO):
+
+   1) `::before` - o CORPO da tag, sempre do MESMO tamanho/posicao que
+      `::after` (mesmas 4 variaveis). Em repouso mostra `--tag-groove`
+      (tokens.css) - um tom neutro recuado (nunca cor de marca), a forma
+      "apagada" mas PRESENTE - resolve o meio-termo entre "sumir de vez" e
+      "voltar a ter marca acesa sempre": a FORMA e visivel em repouso
+      (e por isso lê como tag, nao como nada), o GRADIENTE (a marca em si)
+      so acende no hover, continuando a regra "repouso neutro" que a
+      TASK-319/320 já tinham fixado.
+   2) `::after` - o PREENCHIMENTO de marca + o ponto quente. Duas
+      background-image na MESMA caixa: `--dott-gradient-linear` (o corpo,
+      estatico, preenche a tag inteira quando acesa) por baixo, e
+      `--dott-gradient-glow` (o ponto quente, um circulo simples) por
+      cima, deslocado por `background-position: calc(50% + --glow-x)
+      calc(50% + --glow-y)`. Opacidade 0 em repouso; acende no hover/foco.
+
+   MUDANCA DE MECANISMO (translate -> background-position): a receita
+   anterior movia o ponto quente com `translate` (compositor, nunca
+   repintura) porque a caixa cobria boa parte do botao. Agora a caixa E a
+   propria tag - pequena (poucos px de altura, ~60-70% da largura do
+   botao) - entao mover o PREENCHIMENTO por `background-position` (que
+   fisicamente muda tela a cada quadro, ao contrario de `translate`)
+   repinta uma area minuscula, nao o botao inteiro. Troca deliberada,
+   documentada em vez de silenciosa: **peco remedicao de performance com
+   varios botoes .hoverGlow na tela ao mesmo tempo em hardware fraco - nao
+   tenho como medir FPS aqui.** Se pesar, a saida é trocar por `translate`
+   de novo SO na camada do ponto quente, com um `clip-path` identico ao de
+   `::before` pra conter o vazamento - mais complexo, por isso nao foi a
+   escolha default.
+
+   HIERARQUIA primario/secundario: **mesma forma, intensidade diferente**
+   - a regra que ja existia (`--glow-intensity`, default 1; secundario
+   define um valor menor, ex. `.btnNewAlt { --glow-intensity: .6; }`).
+   Nao muda com esta rodada - so o que acende dentro da forma mudou.
+
+   CONTRASTE (TASK-336, atualiza a conta original; numeros da geometria
+   atualizados na TASK-372 abaixo): continua trivial - a tag e centrada na
+   propria borda inferior, entao a parte VISIVEL vai so da borda do botao
+   ate `calc(var(--tag-h) / 2)` acima dela (4px num botao de 36px, metade
+   do `--tag-h: 8px` default vigente - era 6px/12px num botao de 44px antes
+   da TASK-372). Isso deixa a faixa visivel ainda mais perto da borda (e
+   mais longe do centro, onde o texto senta) do que a receita anterior (11px
+   a partir do fundo, versao pre-TASK-330). Sem geometria especial pra
+   "proteger" nada - a metade cortada pra fora ja garante a distancia. */
+@property --glow-x { syntax: '<length>'; inherits: true; initial-value: 0px; }
+@property --glow-y { syntax: '<length>'; inherits: true; initial-value: 0px; }
+
+/* TASK-372 (29/08/2026, CEO sobre o botao "Capturar": "com essa tarja com o
+   gradiente ta muito alto, reduz a altura dessa tarja e a altura dos botoes
+   tambem, ta ridiculo, e quero que tenha mais easy in and out de animacao,
+   demore levemente pra acender, ta muito com cara de software vagabundo").
+   Dois consertos separados, os dois no default de `.hoverGlow` (afeta TODO
+   consumidor do porte lg de uma vez so, incluindo `.convoSend`/"Capturar"
+   em CaptureBox.module.css, arquivo fora do alcance desta rodada - o efeito
+   chega la por HERANCA do token/classe, sem editar aquele arquivo):
+
+   1) GEOMETRIA menor - `--tag-h` 12px->8px, `--tag-r` 3px->2px,
+      `--tag-inset-x` 10px->8px. `--btn-h-lg` (tokens.css) tambem caiu de
+      44px->36px na mesma rodada (mesmo motivo: a restricao antiga que
+      exigia 44px+ nao existe mais, ver comentario junto de `--dott-gradient`
+      em tokens.css). Antes: 6px de tag VISIVEIS (metade de 12px) num botao
+      de 44px = 13,6% da altura. Depois: 4px visiveis (metade de 8px) num
+      botao de 36px = 11,1% da altura - a fatia visivel encolheu 33% em
+      valor absoluto (6px->4px) E a proporcao caiu, os dois pedidos do CEO
+      ("reduz a tarja" e "reduz o botao") resolvidos pelo MESMO par de
+      numeros. `--tag-r` acompanha (metade do visivel, a mesma proporcao
+      historica) e `--tag-inset-x` encolhe na mesma razao do botao (10/44 =
+      8/36 ~= 22%), pra tag nao ficar comprida demais num botao mais curto.
+      Os overrides de botao MENOR que ja existiam (`.btnEdit` em
+      ImageViewer.module.css, fora do alcance - fronteira do editor) nao
+      mudam - continuam com a propria geometria (6/2), ja proporcional ao
+      porte deles.
+   2) ANIMACAO simetrica e com leve demora - ver os dois `transition` abaixo
+      (`::before`/`::after`): trocado `220ms var(--ease-out)` (numero solto,
+      nao token) por `var(--dur-glow) var(--ease-inout)` (tokens.css). O
+      `--ease-out` comeca RAPIDO (a brasa parecia acender num flash
+      instantaneo, "cara de software vagabundo"); `--ease-inout` e simetrico
+      (devagar->rapido->devagar nos DOIS sentidos, acender e apagar usam a
+      MESMA curva) - e o "easy in and out" pedido, com a demora leve no
+      inicio que faz a marca parecer GANHAR FORCA em vez de LIGAR. */
+.hoverGlow {
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+  --tag-h: 8px;
+  --tag-inset-x: 8px;
+  --tag-r: 2px;
+}
+/* O CORPO da tag - visivel em repouso (tom neutro, `--tag-groove`), nunca
+   cor de marca fora do hover.
+   `bottom: calc(var(--tag-h) / -2)` (TASK-336) centra a caixa na borda
+   inferior do botao: metade da altura fica acima da borda (dentro,
+   visivel), metade fica abaixo (fora, cortada pelo `overflow:hidden` de
+   `.hoverGlow`). Nao usar um valor fixo aqui - tem que ser SEMPRE metade
+   de `--tag-h`, senao a tag deixa de ficar centrada no corte. */
+.hoverGlow::before {
+  content: '';
+  position: absolute;
+  left: var(--tag-inset-x);
+  right: var(--tag-inset-x);
+  bottom: calc(var(--tag-h) / -2);
+  height: var(--tag-h);
+  border-radius: var(--tag-r);
+  z-index: -2;
+  pointer-events: none;
+  background: var(--tag-groove);
+  transition: background var(--dur-glow) var(--ease-inout);
+}
+/* O preenchimento de marca + o ponto quente - MESMA caixa de `::before`
+   (mesmas 3 variaveis + a formula de `bottom`), opacidade 0 ate o
+   hover/foco. */
+.hoverGlow::after {
+  content: '';
+  position: absolute;
+  left: var(--tag-inset-x);
+  right: var(--tag-inset-x);
+  bottom: calc(var(--tag-h) / -2);
+  height: var(--tag-h);
+  border-radius: var(--tag-r);
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  background-image: var(--dott-gradient-glow), var(--dott-gradient-linear);
+  background-size: 220% 220%, 100% 100%;
+  background-repeat: no-repeat, no-repeat;
+  background-position: calc(50% + var(--glow-x, 0px)) calc(50% + var(--glow-y, 0px)), 0 0;
+  transition: opacity var(--dur-glow) var(--ease-inout);
+}
+/* So acende de verdade com mouse - em touch nao existe "passar por cima"
+   sem tocar, e a variavel de posicao nunca seria escrita. */
+@media (hover: hover) and (pointer: fine) {
+  .hoverGlow:hover::after { opacity: var(--glow-intensity, 1); }
+}
+/* PERFORMANCE (TASK-334, 28/08/2026 - o coordenador pediu pra medir ou
+   reduzir risco por desenho; nao tenho ferramenta de FPS neste posto de
+   trabalho, entao e desenho, nao medicao):
+
+   Por que nao da pra usar `translate` (compositor, nunca repintura) igual
+   a receita anterior: `translate` move a caixa INTEIRA depois de qualquer
+   `clip-path`/mascara ja aplicados a ela - clip e transform nao sao
+   independentes no MESMO elemento, entao "luz em translate DENTRO de um
+   recorte fixo" exige um par pai-filho real (pai com `overflow:hidden`
+   fixo, filho que translada por dentro) - pseudo-elemento nao tem filho.
+   Fazer isso direito e um `<span>` real dentro do botao (contrato pro
+   RUSTLINE, quando `.tsx` estiver liberado): um wrapper com o tamanho da
+   tag + `overflow:hidden`, e dentro dele um ponto que anda via
+   `translate: var(--glow-x) 0` (a caixa em si nao precisa de recorte -
+   quem recorta e o pai). Ate la, a receita usa `background-position`
+   (repintura), mas a AREA repintada e so a da tag (poucos px de altura x
+   a largura do botao) - nao o botao inteiro como a receita anterior
+   fazia, e so UM botao por vez (o hook so escreve --glow-x/y no elemento
+   que esta recebendo pointermove agora, os outros ficam parados). Risco
+   estimado baixo por CONTA da area pequena, nao confirmado em FPS real.
+
+   Reducao de risco por desenho, sem depender de medicao: em telas com
+   `update: slow` (o navegador avisa que redesenhar e caro - e-ink, alguns
+   modos de economia de energia), a posicao do ponto quente para de
+   reagir ao cursor (fica fixa no centro) - o hook continua escrevendo
+   --glow-x/--glow-y (nao mexer nele), mas a CAMADA para de LER esses
+   valores, entao o navegador nunca precisa repintar por causa deles. */
+@media (update: slow) {
+  .hoverGlow::after {
+    background-position: 50% 50%, 0 0;
+  }
+}
+/* Fora do alcance do ponteiro (teclado): acende numa posicao PADRAO -
+   --glow-x/--glow-y continuam em 0px/0px porque nenhum loop de mouse
+   escreveu nelas, entao o ponto quente aparece centralizado na tag. */
+.hoverGlow:focus-visible::after { opacity: var(--glow-intensity, 1); }
+/* O pico de clique - no preenchimento, que ja esta aceso pelo hover.
+   Escala reduzida (1.08, era 1.18) - a tag e pequena agora, um pulso de
+   18% ficaria proporcionalmente grande demais pro tamanho dela. */
+.hoverGlow:active::after { animation: glowClique .16s var(--ease-out) both; }
+@keyframes glowClique {
+  from { opacity: 1; scale: 1.08; }
+  to   { opacity: var(--glow-intensity, 1); scale: 1; }
+}
+/* Desabilitado nunca acende - nem a tag nem o preenchimento. */
+.hoverGlow:disabled::before,
+.hoverGlow:disabled::after,
+.hoverGlow[aria-disabled="true"]::before,
+.hoverGlow[aria-disabled="true"]::after {
+  content: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hoverGlow::before,
+  .hoverGlow::after {
+    transition-duration: 80ms;
+  }
+}
+
+/* ── Hover com leve zoom (TASK-317, 27/08/2026) ──────────────────────────────
+   Regra do CEO: "ao fazer hover em todas as pecas do app deveria ter uma
+   regra de zoom... estimulando visualmente a interagir". Definida UMA vez
+   aqui (token + classe utilitaria) e HERDADA por qualquer peca que aplique
+   a classe `.hoverZoom` — nunca reescrita numero-a-numero em cada modulo.
+
+   Valor deliberadamente pequeno (o pedido foi "leve DE VERDADE"): 1,5%.
+   Se parecer notavel, e bug, nao feature.
+
+   Tres armadilhas resolvidas (nao ignoradas):
+   1) Texto borra ao escalar em alguns motores de composicao -> a classe so
+      deve ir no CONTAINER (card, botao, item de grade), nunca direto num
+      bloco de texto corrido. Onde o elemento e PRINCIPALMENTE texto (ex.
+      corpo de leitura da nota), a superficie sobe por ELEVACAO
+      (sombra/borda/cor), nunca por escala - ver `.hoverElevate` abaixo.
+   2) Linha de lista de largura total nao pode escalar (cresce pra fora do
+      container, treme) - por isso NAO existe uma regra global tipo
+      `button:hover, a:hover { scale: ... }`; a ativacao e por classe,
+      opt-in, e linhas full-width (`.list-item`, `.linhaTarefa`,
+      `.tagItem`, `.processFolder`, `.acaoLinha`, `.tab`, resultado de
+      busca) usam SO fundo/borda no hover (o que a maioria ja tinha) -
+      nunca ganham `.hoverZoom`.
+   3) `scale` (propriedade separada, nao `transform: scale()`) pra nao
+      colidir com `translate`/`rotate` que outras regras (drag ghost,
+      cards com translateY no hover) ja usam na MESMA propriedade
+      `transform`. Nao briga com a respiracao dos botoes de acao porque
+      aquela anima o `::after` (camada separada) - a compensacao e
+      aditiva (o botao cresce 1,5% e a brasa por dentro continua
+      respirando do jeito dela), nunca as duas competindo pelo mesmo
+      valor.
+
+   `(hover: hover) and (pointer: fine)` evita ativar em touch (onde nao
+   existe "passar o mouse"). `prefers-reduced-motion` (bloco no topo deste
+   arquivo) ja zera a transicao globalmente. */
+:root {
+  --hover-scale: 1.015;
+}
+@media (hover: hover) and (pointer: fine) {
+  .hoverZoom {
+    transition: scale var(--dur-instant) var(--ease-out);
+  }
+  .hoverZoom:hover,
+  .hoverZoom:focus-visible {
+    scale: var(--hover-scale);
+  }
+  /* Onde o conteudo e majoritariamente texto (risco de borrar ao
+     escalar): elevacao no lugar de zoom - sobe 1px e ganha sombra difusa
+     fraca (o MESMO vocabulario de --elevation-card do tema claro; no
+     tema escuro fica so o translateY, sombra continua reservada a
+     superficie flutuante). */
+  .hoverElevate {
+    transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+  }
+  .hoverElevate:hover,
+  .hoverElevate:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: var(--elevation-card, none);
+  }
+}
+
+/* ── Conteudo do painel anima na troca de aba (TASK-333, 28/08/2026) ─────
+   CEO: "quero que a aba como um todo, o conteudo, quando eu troco de aba
+   tenha uma animacao, nao so na parte superior mas no conteudo, algo
+   elegante". Classe global (mesmo padrao de `.hoverGlow`/`.tabIndicator`
+   acima) - aplicada por classe literal (`tabContent`) no JSX de quem
+   troca de aba (InboxPanel.tsx: Inbox/Tags, blocos condicionais que
+   montam/desmontam de verdade; TasksPanel.tsx: PRAZO/Tudo, via `key` no
+   container pra forcar remontagem no swap - o filtro so RECALCULA a lista
+   sem desmontar nada por padrao).
+
+   Direcao: cada consumidor escreve `--content-dir` (1 ou -1) no elemento -
+   o lado onde a aba/filtro fica na fileira (esquerda = -1, direita = 1),
+   entao o conteudo entra "vindo de onde a aba esta", sem precisar
+   rastrear qual era a aba ANTERIOR. Fallback 1 se ninguem definir.
+
+   Duracao 240ms (--dur-medium, dentro da faixa 180-260ms pedida) e a
+   curva unica da casa (--ease-out). `prefers-reduced-motion` ja zera isso
+   sozinho via o bloco global em tokens.css (mesma garantia que
+   `appearUp`/`.item` ja usam) - sem ajuste extra aqui. */
+@keyframes tabContentIn {
+  from { opacity: 0; transform: translateX(calc(var(--content-dir, 1) * 8px)); }
+  to   { opacity: 1; transform: none; }
+}
+.tabContent {
+  animation: tabContentIn var(--dur-medium) var(--ease-out) both;
+}
+
+/* ── Indicador de aba deslizante (TASK-323; componente unico desde
+   TASK-333, 28/08/2026) ───────────────────────────────────────────────
+   A troca de conteudo ao mudar de aba anima via `.tabContent` (acima) -
+   faltava so o TRILHO: a faixa que marca qual aba/filtro esta ativo hoje
+   pula de um lado pro outro sem transicao (border-image em `.tab.active`
+   nao tem como deslizar sozinho - e propriedade local de CADA botao, nao
+   um elemento que se move). Classe global (mesmo padrao de `.hoverGlow` /
+   `.hoverZoom` acima - definida uma vez aqui, usada por classe literal
+   `<span className="tabIndicator" />` dentro de `src/components/
+   TabBar.tsx`, o UNICO lugar do app que renderiza aba/filtro desde a
+   TASK-333 - nao duplicada por CSS module nem por JSX de cada tela).
+
+   CONTRATO (cumprido por `TabBar.tsx`, nao mais por cada tela): o
+   indicador e IRMAO dos botoes de aba/filtro, dentro do container
+   (`.tabs`, `TabBar.module.css`). O componente mede a aba ativa
+   (`ref.offsetLeft`/`ref.offsetWidth`) via `useLayoutEffect` +
+   `ResizeObserver` e escreve DUAS custom properties no PROPRIO CONTAINER
+   (nao no indicador - ele le por heranca, mesmo mecanismo de
+   `--glow-x`/`--glow-y` em `.hoverGlow`):
+     `--indicator-x` - deslocamento horizontal em `px` (equivale ao
+       `offsetLeft` da aba ativa dentro do container).
+     `--indicator-w` - largura em `px` (equivale ao `offsetWidth` da aba
+       ativa).
+   Remede na troca de aba E na mudanca de largura do rotulo (ex. contador
+   "4" -> "12" muda o `offsetWidth`), via o mesmo `ResizeObserver`.
+
+   Por que `transform`/`width` e nunca `left`: mover via `left` forca o
+   navegador a recalcular LAYOUT a cada quadro da transicao (a mesma razao
+   que barra o `zoom` de CSS e a animacao de `top`/`width` em outras partes
+   do app - ver o comentario de Movimento em tokens.css). `translateX` e
+   trabalho de compositor.
+
+   REVISADO (28/08/2026, achado do guarda de design - `width` ainda e
+   propriedade de LAYOUT, mesmo com `position:absolute`): a alternativa
+   sem NENHUM layout seria trocar `width` por `scaleX` (largura base fixa
+   + `transform: translateX(x) scaleX(w/base)`, `transform-origin: left`
+   - roda 100% no compositor). Considerada e REJEITADA por desenho, nao
+   decidida sozinha sem medir: `border-radius: 2px` e computado ANTES do
+   transform, sobre a caixa no tamanho BASE - um `scaleX` nao-uniforme
+   estica esse raio na horizontal proporcionalmente ao fator de escala,
+   virando elipse (o "canto redondo" perderia a leitura de pilula e viraria
+   uma cunha achatada nas pontas quando o fator de escala for grande). Como
+   os rotulos das duas abas de cada grupo variam pouco em largura (ex.
+   INBOX/TAGS, PRAZO/Tudo - nunca uma diferenca de varias vezes), um `base`
+   fixo intermediario ainda exigiria fatores de escala grandes o bastante
+   pra distorcer visivelmente o raio em pelo menos um dos dois estados, e
+   este posto de trabalho nao tem como renderizar e confirmar se a
+   distorcao fica aceitavel. Mantido `width` por decisao consciente:
+   1) o elemento e `position:absolute`, ENTAO o `width` dele NUNCA forca
+      reflow dos irmaos (os botoes de aba) - o navegador recalcula so a
+      caixa pequena do proprio indicador (poucos px de altura), nao o
+      `.tabs` inteiro; 2) e SEMPRE um unico elemento por vez trocando de
+      largura (nunca uma lista de indicadores em massa) - o mesmo raciocinio
+      de custo ja aceito em DESIGN.md secao 18.5 ("um elemento por vez
+      trocando de degrau: custo desprezivel"). Se aparecer um caso REAL de
+      engasgo medido nesta transicao, a saida documentada e testar `scaleX`
+      com o raio recalculado via `border-radius: calc(2px / var(--indicator-
+      scale))` no consumidor (contra-escala o raio pra ele nao esticar) -
+      nao tentado aqui por ser mais uma variavel sem como confirmar no
+      pixel.
+
+   Cor: cada consumidor passa `indicatorColor` pro `TabBar` (ou deixa a
+   classe cair no fallback `--accent`, o default de `TabBar.module.css
+   .tabs`) - ver `src/components/TabBar.tsx` (escreve `--tab-indicator-
+   color` no `.tabs` via `style` quando a prop existe). Os dois usos reais
+   hoje (`InboxPanel.tsx` e `TasksPanel.tsx`) passam
+   `indicatorColor="var(--dott-gradient-linear)"` - a MESMA reducao linear
+   que `.tab.active` ja usa no texto/borda dos dois grupos (DESIGN.md
+   secao 1 reserva o gradiente pra "tab ativa", entre outros poucos usos -
+   PRAZO/Tudo virou aba de verdade nesta rodada, herda a regra). O
+   fallback `--accent` (o tom solido que `.filterToggle.active` usava
+   antes) so entra em jogo se um consumidor futuro nao passar a prop.
+
+   REAVALIADO (TASK-372, 29/08/2026, pedido do coordenador - "agora que voce
+   esta refazendo a animacao dos botoes e mexendo em curvas, da pra ficar
+   100% no compositor?"): o comentario acima (REVISADO, 28/08/2026) que
+   rejeita `scaleX` + `border-radius: calc(2px / var(--indicator-scale))`
+   CONTINUA no arquivo - nao sumiu (conferido linha a linha nesta rodada
+   antes de mexer aqui). Reavaliado de verdade, nao só repetido: o calculo
+   em si fecha (compensar o raio pela escala e matematica valida, o mesmo
+   truque que corrige `stroke-width` em SVG escalado). O que NAO mudou desde
+   28/08 e a MESMA lacuna que impediu testar entao: aplicar isso exige
+   ENSINAR `TabBar.tsx` a escrever uma TERCEIRA custom property
+   (`--indicator-scale`, um numero sem unidade = offsetWidth / largura-base
+   fixa) alem de `--indicator-x`/`--indicator-w` que ja escreve - uma
+   mudanca de LOGICA (`.tsx`), nao so de CSS, e sem preview/Playwright
+   neste posto pra confirmar que a ponta arredondada nao distorce quando o
+   contador troca de digito (o caso que mais estica a largura). Continuo
+   sem essa ferramenta agora, entao a decisao de manter `width` nao muda
+   por falta de prova nova - só ganhou a math confirmada por escrito, pra
+   quem tiver Playwright/preview um dia saber que a saida ja foi
+   equacionada, so falta verificar no pixel. `--indicator-scale` citado no
+   paragrafo REVISADO acima e essa mesma variavel, ainda hipotetica.
+
+   TOKENIZADO (mesmo pedido): os `220ms` soltos viram `var(--dur-medium)`
+   (tokens.css, 240ms) - DELIBERADAMENTE a mesma duracao de `.tabContent`
+   (acima nesta secao), nao a nova `var(--dur-glow)` criada pro acender da
+   marca (`.hoverGlow`). Motivo escrito, nao coincidencia: o trilho e o
+   conteudo da aba sao DUAS METADES da MESMA animacao (trocar de aba) -
+   precisam terminar JUNTOS pra ler como um so movimento "elegante" (o
+   pedido original da TASK-333). A brasa do botao e outro momento (marca
+   acendendo em hover), com outra exigencia do CEO (simetria com leve
+   demora) - por isso tem o par `--dur-glow`/`--ease-inout` PROPRIO,
+   nunca reusado aqui. `--ease-out` continua certo pro trilho (ele ENTRA
+   numa posicao nova a cada troca - regra da casa, ease-out pra entrada),
+   ao contrario da brasa (liga/desliga no MESMO lugar, por isso pede
+   simetria). */
+.tabIndicator {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--tab-indicator-color, var(--accent));
+  transform: translateX(var(--indicator-x, 0px));
+  width: var(--indicator-w, 0px);
+  transition: transform var(--dur-medium) var(--ease-out), width var(--dur-medium) var(--ease-out);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tabIndicator { transition: none; }
+}
+
+/* ── Fade de rolagem na base (TASK-349, 28/08/2026) ──────────────────────────
+   O CEO viu o card da pasta "Leituras" (quadrante Recursos do PARA) cortado
+   em linha reta na base da area de rolagem e pediu o mesmo fade que ja
+   existia no TOPO de cada quadrante (`.qHeader::after`, PARAGrid.module.css):
+   mesma altura (18px), mesma cor (var(--bg), o piso da tela por tras dos
+   cards), mesmo sentido invertido (transparent -> var(--bg) descendo pra
+   baixo, ao contrario do de cima que desce de var(--bg) pra transparent),
+   sem captar clique.
+
+   NAO e o mesmo mecanismo do fade de cima por um motivo: aquele fica na
+   classe `.qHeader::after`, um elemento QUE NAO ROLA (fixo acima da area de
+   rolagem, so vaza 18px pra dentro dela) - sempre visivel, decoracao da
+   transicao cabecalho->conteudo, nao depende de haver mais conteudo cortado.
+   O de BAIXO nao tem um "rodape fixo" equivalente pra pendurar nele, e
+   principalmente PRECISA ser condicional: fade permanente numa lista curta,
+   sem nada cortado, vira sombra no vazio (o proprio CEO nomeou o risco) - ou
+   pior, fade sobre a ULTIMA linha completa faria ela parecer cortada quando
+   nao esta. Por isso a classe global abaixo comeca apagada e so acende
+   quando o elemento tambem carrega `is-fade-bottom` - classe que o
+   hook `useScrollEdgeFade` (`src/hooks/useScrollEdgeFade.ts`) alterna DIRETO
+   no DOM (sem passar por estado do React) toda vez que sobra conteudo
+   cortado abaixo (`scrollHeight - scrollTop - clientHeight > 1px`).
+
+   CONTRATO pro consumidor (mesmo padrao de `.hoverGlow`/`.hoverZoom` acima -
+   classe global aplicada por nome literal, junto do modulo CSS, no MESMO
+   elemento que tem `overflow-y: auto`):
+     1. `className={`${styles.suaLista} scrollFadeBottom`}`
+     2. `ref` desse elemento amarrado ao hook: `useScrollEdgeFade(ref, [dep])`
+        - `dep` e o que muda o TAMANHO do conteudo (ex.: `[itens.length]`),
+          pra remedir quando a lista cresce/encolhe sem o container mudar de
+          altura (resize do proprio container ja e coberto por
+          ResizeObserver dentro do hook).
+     3. O elemento PRECISA ser o proprio scroller (quem tem overflow-y:auto),
+        nao um pai/filho dele - a classe pinta uma MASCARA (`mask-image`)
+        nesse mesmo elemento (ver correcao TASK-364 abaixo).
+
+   CORRECAO (TASK-364, 28/08/2026): a receita ORIGINAL desta secao usava
+   `position: relative` no scroller + um `::after` com `position: absolute;
+   bottom: 0`, com o comentario (ja apagado deste arquivo) afirmando que
+   isso "fica fixo na base do VIEWPORT de rolagem, nao do fim do conteudo".
+   ERRADO, medido: o CEO fotografou o fade GRUDADO num card especifico do
+   PARA, subindo e descendo junto com o scroll em vez de ficar parado na
+   borda de baixo - o `::after`, sendo filho do proprio elemento que rola,
+   nao se comportou como "decoracao fixa da caixa" na pratica (WebView2,
+   como as outras armadilhas medidas deste app). A afirmacao antiga NAO
+   deve ser reusada em nenhum novo fade de rolagem.
+
+   RECEITA NOVA: `mask-image` (como `background-image`) se pinta em relacao
+   a propria CAIXA, nunca ao conteudo que rola por dentro dela - por
+   construcao, nao tem como "grudar" num filho. A imagem da mascara e mais
+   ALTA que a caixa (`mask-size: 100% calc(100% + 18px)`): os primeiros
+   100% (a altura real da caixa) ficam opacos - nada cortado -, e os 18px
+   extras no fim da imagem sao o degrade opaco->transparente. `mask-position`
+   desloca essa imagem pra cima/baixo - e e ISSO que anima (length/percentage
+   transiciona nativo, sem precisar de `@property` nem trocar o `mask-image`
+   inteiro, que nao anima):
+     - `0 0` (padrao, sem a classe `is-fade-bottom`): o degrade fica todo
+       ABAIXO da caixa visivel -> fade apagado, lista curta fica intacta.
+     - `0 -18px` (com `is-fade-bottom`): a imagem sobe 18px e o degrade
+       encaixa exatamente na borda de baixo da caixa -> fade aceso.
+   Testado nos dois extremos (lista curta = mascara nunca acende; lista
+   longa = mascara acende e fica PARADA na borda de baixo enquanto o
+   conteudo rola por baixo dela).
+
+   CONFERIDO (TASK-364): nenhum dos 9 elementos abaixo tem `mask-image`
+   proprio (a mascara squircle do app - `paint(squircle)` - vive sempre no
+   FILHO - modal/card -, nunca no scroller), entao as duas mascaras nunca
+   competem no mesmo seletor.
+
+   Aplicado hoje em 9 areas de rolagem (a lista completa e o porque das que
+   ficaram de fora estao em DESIGN.md secao 21): PARAGrid (.qCards x4
+   quadrantes + .catBody), InboxPanel (.list e .tagsContent), TasksPanel
+   (.list), FolderNotesView (.body), SearchModal (.results), GlyphPicker
+   (.grid), Constellation (.painel). */
+.scrollFadeBottom {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 18px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 18px), transparent 100%);
+  -webkit-mask-size: 100% calc(100% + 18px);
+  mask-size: 100% calc(100% + 18px);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+  transition: -webkit-mask-position var(--dur-base) var(--ease-out), mask-position var(--dur-base) var(--ease-out);
+}
+.scrollFadeBottom.is-fade-bottom {
+  -webkit-mask-position: 0 -18px;
+  mask-position: 0 -18px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scrollFadeBottom { transition: none; }
+}
+
+/* ── Brilho de carregamento / shimmer (TASK-329, 28/08/2026) ─────────────────
+   Parte do sistema de profundidade (DESIGN.md secao 18.4) — nao existia
+   receita nenhuma pra "isto ainda esta carregando" no app; o CEO pediu
+   como parte do pedido de elevacao. Classe global (mesmo padrao de
+   `.hoverGlow`/`.hoverZoom`/`.tabIndicator` acima — definida uma vez aqui,
+   aplicada por classe literal no JSX de quem precisar, nunca duplicada por
+   CSS module).
+
+   CONTRATO PRO COMPONENTE: `<div className="shimmer">` (ou qualquer
+   elemento) no lugar de um bloco que ainda nao chegou (ex.: imagem sendo
+   salva). Regras que NAO podem ser quebradas:
+   1. So em conteudo que ainda NAO chegou — nunca em cima de conteudo ja
+      carregado (nao e decoracao, e sinal de estado).
+   2. Nunca escrever `animation-duration` nem `animation-delay` proprios no
+      consumidor — todo `.shimmer` da tela usa a MESMA duracao
+      (`--shimmer-duration`, tokens.css) e delay zero. Isto e o que evita
+      "varios blocos fora de sincronia": nao e sincronizar relogios, e
+      nunca inventar um numero novo por instancia (o erro classico e um
+      cada skeleton com seu proprio delay "pra variar").
+   3. Nunca cor de marca — o gradiente e sempre `--surface2`/`--surface3`
+      (neutro), a mesma regra de "sombra nunca colorida" da elevacao (secao
+      18.6): shimmer e estado de carregamento, nao momento de marca.
+   4. Some no instante em que o conteudo real chega — sem fade de saida,
+      sem tempo minimo artificial de exibicao ("teatro de skeleton").
+   5. `prefers-reduced-motion`: para de variar, fica parado num tom medio
+      (nunca continua animando "mais devagar"). */
+.shimmer {
+  background: var(--shimmer-gradient);
+  background-size: 220% 100%;
+  animation: shimmerSweep var(--shimmer-duration) linear infinite;
+}
+@keyframes shimmerSweep {
+  from { background-position: 200% 0; }
+  to   { background-position: -20% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+    background-position: 50% 0;
+  }
+}

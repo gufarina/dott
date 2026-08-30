@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Fuse from 'fuse.js'
 import { useStore } from '../store'
 import { Icon } from './Icon'
+import { TYPE_ACCENT_FIX } from '../lib/cardTypeClass'
+import { useScrollEdgeFade } from '../hooks/useScrollEdgeFade'
 import s from './SearchModal.module.css'
 
 interface Props { open: boolean; onClose: () => void }
@@ -16,6 +18,17 @@ interface SearchItem {
 
 const LABELS: Record<string, string> = { note: 'Notas', folder: 'Pastas', card: 'Inbox' }
 const ICONS: Record<string, string> = { note: '◆', folder: '▤', card: '·' }
+
+/** Decide o alvo do `setView('editor', ...)` para uma Nota achada na busca.
+ * Puro (sem store, sem DOM) pra poder testar a decisao isolada. Categoria e
+ * pasta so entram quando os DOIS resolvem (breadcrumb/Voltar corretos); do
+ * contrario abre so pelo id da Nota - NoteEditor le a Nota por `note` no
+ * store e nao exige categoria/pasta pra renderizar (ver NoteEditor.tsx). */
+export function editorTargetFor(category: string, folderId: string | undefined, noteId: string) {
+  return category && folderId
+    ? { category, folder: folderId, note: noteId }
+    : { note: noteId }
+}
 
 export function SearchModal({ open, onClose }: Props) {
   const notes = useStore(st => st.notes)
@@ -63,9 +76,7 @@ export function SearchModal({ open, onClose }: Props) {
         name: n.title,
         meta: folderName(n.folderId) || 'Nota',
         badge: 'NOTA',
-        onPick: () => {
-          if (cat && n.folderId) setView('editor', { category: cat, folder: n.folderId, note: n.id })
-        },
+        onPick: () => setView('editor', editorTargetFor(cat, n.folderId, n.id)),
       })
     }
     // Cards do inbox
@@ -74,7 +85,7 @@ export function SearchModal({ open, onClose }: Props) {
         type: 'card',
         name: c.content,
         meta: `Inbox · ${c.time}`,
-        badge: c.type,
+        badge: (TYPE_ACCENT_FIX[c.type] ?? c.type).toUpperCase(),
         onPick: () => onClose(),
       })
     }
@@ -96,6 +107,11 @@ export function SearchModal({ open, onClose }: Props) {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [open, onClose])
+
+  /** Fade de rolagem na base (TASK-349). `query`/`items` bastam pra remedir -
+   *  e o que muda quantos resultados a busca renderiza. */
+  const resultsRef = useRef<HTMLDivElement>(null)
+  useScrollEdgeFade(resultsRef, [query, items])
 
   if (!open) return null
 
@@ -119,7 +135,7 @@ export function SearchModal({ open, onClose }: Props) {
           />
           <span className={s.kbd}>ESC</span>
         </div>
-        <div className={s.results}>
+        <div ref={resultsRef} className={`${s.results} scrollFadeBottom`}>
           {!query.trim() && <div className={s.empty}>Digite para buscar...</div>}
           {query.trim() && !results.length && <div className={s.empty}>Nada encontrado.</div>}
           {Object.entries(groups).map(([type, list]) => (

@@ -1,7 +1,72 @@
-import { useState } from 'react'
-import { useStore } from '../../store'
+import { useRef, useState } from 'react'
+import { useStore, type Quadrant, type TaskItem } from '../../store'
 import { Icon } from '../../components/Icon'
+import { TabBar } from '../../components/TabBar'
+import { useScrollEdgeFade } from '../../hooks/useScrollEdgeFade'
 import s from './TasksPanel.module.css'
+
+/** Decide quais tarefas de uma secao aparecem na lista, dados os dois
+ *  filtros independentes: showCompleted ("Ver concluidas", link no rodape) e
+ *  filterPrazo (aba PRAZO/A Fazer). Extraida pra TDD (TASK-373): prova que a
+ *  aba sem prazo, no estado padrao (showCompleted=false, o que a pessoa ve
+ *  ao abrir o app), mostra SO tarefas em aberto - por isso o rotulo honesto
+ *  e "A Fazer", nunca "Tudo" (medido: essa mesma linha ja existia, so nao
+ *  tinha nome que contasse a verdade). */
+export function visibleTasks(items: TaskItem[], filterPrazo: boolean, showCompleted: boolean): TaskItem[] {
+  let out = showCompleted ? items : items.filter(t => !t.done)
+  if (filterPrazo) out = out.filter(t => t.deadline)
+  return out
+}
+
+/** Contador da aba "A Fazer": quantas tarefas estao abertas (nao concluidas),
+ *  em toda a lista - mesma forma de contador do INBOX/TAGS (TASK-373). */
+export function contarAbertas(allTasks: TaskItem[]): number {
+  return allTasks.filter(t => !t.done).length
+}
+
+/** Contador da aba "PRAZO": das abertas, quantas tem prazo marcado. */
+export function contarAbertasComPrazo(allTasks: TaskItem[]): number {
+  return allTasks.filter(t => !t.done && t.deadline).length
+}
+
+export interface SecaoTarefas {
+  /** folderId da Pasta, ou 'sem-pasta' pro balde das tarefas soltas. */
+  chave: string
+  nome: string
+  cor: string
+  /** undefined no balde "Sem pasta" - nao ha Pasta pra amarrar a tarefa nova. */
+  folderId?: string
+  items: TaskItem[]
+}
+
+/** Agrupa as tarefas por Pasta - a UNICA hierarquia que sobrou depois do
+ *  "grupo" morrer (TASK-374, decisao do CEO em 29/08/2026: uma segunda
+ *  hierarquia paralela a Pasta nao faz sentido). Tarefa sem Pasta cai no
+ *  balde fixo "Sem pasta" - derivado aqui, nunca escrito em disco, sem nome
+ *  escolhido a mao (a capacidade de nomear uma lista solta foi rejeitada de
+ *  proposito: seria o conceito de grupo voltando com outro nome).
+ *  O balde "Sem pasta" aparece sempre que ha ALGUMA tarefa no app, mesmo
+ *  vazio - e o lugar pra capturar uma tarefa que ainda nao tem Pasta. */
+export function agruparPorPasta(tasks: TaskItem[], para: Record<string, Quadrant>): SecaoTarefas[] {
+  const porFolder = new Map<string, TaskItem[]>()
+  const semPasta: TaskItem[] = []
+  for (const t of tasks) {
+    if (!t.folderId) { semPasta.push(t); continue }
+    const arr = porFolder.get(t.folderId) ?? []
+    arr.push(t)
+    porFolder.set(t.folderId, arr)
+  }
+
+  const secoes: SecaoTarefas[] = []
+  for (const q of Object.values(para)) {
+    for (const f of q.folders) {
+      const items = porFolder.get(f.id)
+      if (items?.length) secoes.push({ chave: f.id, nome: f.name, cor: q.color, folderId: f.id, items })
+    }
+  }
+  secoes.push({ chave: 'sem-pasta', nome: 'Sem pasta', cor: 'var(--fg3)', items: semPasta })
+  return secoes
+}
 
 export function TasksPanel() {
   const tasks = useStore(st => st.tasks)
@@ -13,12 +78,10 @@ export function TasksPanel() {
   const editTask = useStore(st => st.editTask)
   const deleteTask = useStore(st => st.deleteTask)
   const setTaskDeadline = useStore(st => st.setTaskDeadline)
-  const addGroup = useStore(st => st.addGroup)
-  const deleteGroup = useStore(st => st.deleteGroup)
   const setView = useStore(st => st.setView)
   const para = useStore(st => st.para)
 
-  /** Nome da pasta de uma tarefa, pra mostrar de onde ela veio. */
+  /** Nome da pasta de uma tarefa, pra abrir a tarefa com o caminho certo. */
   const pastaDe = (folderId?: string) => {
     if (!folderId) return null
     for (const q of Object.values(para)) {
@@ -37,45 +100,43 @@ export function TasksPanel() {
 
   const [draftFor, setDraftFor] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
-  const [groupDraft, setGroupDraft] = useState('')
-  const [addingGroup, setAddingGroup] = useState(false)
   const [editing, setEditing] = useState<string | null>(null)
   const [editText, setEditText] = useState('')
 
-  const allTasks = tasks.flatMap(g => g.items)
-  const pending = allTasks.filter(t => !t.done).length
+  const pending = contarAbertas(tasks)
+  const comPrazo = contarAbertasComPrazo(tasks)
+  const secoes = agruparPorPasta(tasks, para)
 
-  const submitTask = (groupId: string) => {
-    if (draft.trim()) addTask(groupId, draft)
+  /** Fade de rolagem na base (TASK-349). */
+  const listRef = useRef<HTMLDivElement>(null)
+  useScrollEdgeFade(listRef, [tasks, filterPrazo, showCompleted])
+
+  const submitTask = (secao: SecaoTarefas) => {
+    if (draft.trim()) addTask(draft, secao.folderId)
     setDraft('')
     // mantém o campo aberto pra adicionar várias seguidas
-  }
-  const submitGroup = () => {
-    if (groupDraft.trim()) addGroup(groupDraft)
-    setGroupDraft(''); setAddingGroup(false)
   }
   const startEdit = (id: string, text: string) => { setEditing(id); setEditText(text) }
   const commitEdit = () => { if (editing) editTask(editing, editText); setEditing(null) }
 
   return (
     <>
-      <div className={s.header}>
-        <div className={s.title}>
-          Tarefas
-          {pending > 0 && <span className={s.badge}>{pending}</span>}
-        </div>
-      </div>
+      <TabBar
+        indicatorColor="var(--dott-gradient-linear)"
+        activeKey={filterPrazo ? 'prazo' : 'afazer'}
+        onChange={key => { if (key !== (filterPrazo ? 'prazo' : 'afazer')) toggleFilter('prazo') }}
+        items={[
+          { key: 'prazo', label: 'PRAZO', icon: 'prazo', count: comPrazo, title: 'Só as tarefas com prazo' },
+          { key: 'afazer', label: 'A Fazer', icon: 'grupo', count: pending, title: 'Tarefas em aberto' },
+        ]}
+      />
 
-      <div className={s.filter}>
-        <button className={`${s.filterToggle} ${filterPrazo ? s.active : ''}`} onClick={() => !filterPrazo && toggleFilter('prazo')} title="Só as tarefas com prazo">
-          <Icon name="prazo" size={12} /> PRAZO
-        </button>
-        <button className={`${s.filterToggle} ${!filterPrazo ? s.active : ''}`} onClick={() => filterPrazo && toggleFilter('prazo')} title="Todas as tarefas">
-          <Icon name="grupo" size={12} /> TODOS
-        </button>
-      </div>
-
-      <div className={s.list}>
+      <div
+        ref={listRef}
+        key={filterPrazo ? 'prazo' : 'afazer'}
+        className={`${s.list} tabContent scrollFadeBottom`}
+        style={{ '--content-dir': filterPrazo ? -1 : 1 } as React.CSSProperties}
+      >
         {tasks.length === 0 ? (
           <div className={s.empty}>
             <div className={s.checkIcon}><Icon name="tarefa" size={22} /></div>
@@ -83,25 +144,19 @@ export function TasksPanel() {
           </div>
         ) : (
           <>
-            {tasks.map(group => {
-              let items = showCompleted ? group.items : group.items.filter(t => !t.done)
-              if (filterPrazo) items = items.filter(t => t.deadline)
-              const done = group.items.filter(t => t.done).length
-              const total = group.items.length
+            {secoes.map(secao => {
+              const items = visibleTasks(secao.items, filterPrazo, showCompleted)
+              const done = secao.items.filter(t => t.done).length
+              const total = secao.items.length
               return (
-                <div key={group.id} className={s.group}>
+                <div key={secao.chave} className={s.group}>
                   <div className={s.groupHeader}>
-                    <span className={s.dot} style={{ background: group.color }} />
-                    <span className={s.groupName}>{group.name}</span>
+                    <span className={s.dot} style={{ background: secao.cor }} />
+                    <span className={s.groupName}>{secao.nome}</span>
                     <span className={s.groupProg}>{done}/{total}</span>
-                    <button className={s.groupDel} title="Excluir grupo" onClick={() => deleteGroup(group.id)}>
-                      <Icon name="lixo" size={12} />
-                    </button>
                   </div>
 
-                  {items.map(task => {
-                    const pasta = pastaDe(task.folderId)
-                    return (
+                  {items.map(task => (
                     <div key={task.id} className={s.item}>
                       <button
                         className={`${s.check} ${task.done ? s.done : ''}`}
@@ -127,14 +182,8 @@ export function TasksPanel() {
                           title="Abrir a tarefa"
                         >
                           <span className={`${s.text} ${task.done ? s.done : ''}`}>{task.text}</span>
-                          {(pasta || task.deadline || task.notes) && (
+                          {(task.deadline || task.notes) && (
                             <span className={s.tarefaMeta}>
-                              {pasta && (
-                                <span className={s.pastaChip}>
-                                  <span className={s.pastaPonto} style={{ background: pasta.cor }} />
-                                  {pasta.nome}
-                                </span>
-                              )}
                               {task.deadline && (
                                 <span className={`${s.deadline} ${task.over ? s.over : task.urgent ? s.urgent : ''}`}>
                                   {task.over ? 'atrasado' : task.urgent ? 'hoje' : task.deadline.slice(5).replace('-', '/')}
@@ -173,13 +222,13 @@ export function TasksPanel() {
                         </button>
                       </div>
                     </div>
-                  )})}
+                  ))}
 
                   {/* Adicionar: o "+" ocupa exatamente a posicao da caixa de
                       marcar, entao a linha se le como um lugar vazio esperando
                       virar tarefa. O icone de tarefa (a caixa com check) NAO
                       serve aqui: ele significa ESTADO de tarefa, nao criacao. */}
-                  {draftFor === group.id ? (
+                  {draftFor === secao.chave ? (
                     <div className={s.addRow}>
                       <span className={s.addMais} aria-hidden="true"><Icon name="mais" size={13} /></span>
                       <input
@@ -190,14 +239,14 @@ export function TasksPanel() {
                         onChange={e => setDraft(e.target.value)}
                         onBlur={() => { setDraftFor(null); setDraft('') }}
                         onKeyDown={e => {
-                          if (e.key === 'Enter') submitTask(group.id)
+                          if (e.key === 'Enter') submitTask(secao)
                           if (e.key === 'Escape') { setDraftFor(null); setDraft('') }
                         }}
                       />
                       <kbd className={s.addDica}>Enter</kbd>
                     </div>
                   ) : (
-                    <button className={s.addTask} onClick={() => { setDraft(''); setDraftFor(group.id) }}>
+                    <button className={s.addTask} onClick={() => { setDraft(''); setDraftFor(secao.chave) }}>
                       <span className={s.addMais} aria-hidden="true"><Icon name="mais" size={13} /></span>
                       Adicionar tarefa
                     </button>
@@ -205,22 +254,6 @@ export function TasksPanel() {
                 </div>
               )
             })}
-
-            {addingGroup ? (
-              <input
-                className={s.addGroupInput}
-                placeholder="Nome do grupo… (Enter)"
-                value={groupDraft}
-                autoFocus
-                onChange={e => setGroupDraft(e.target.value)}
-                onBlur={submitGroup}
-                onKeyDown={e => { if (e.key === 'Enter') submitGroup(); if (e.key === 'Escape') { setGroupDraft(''); setAddingGroup(false) } }}
-              />
-            ) : (
-              <button className={s.addGroup} onClick={() => { setGroupDraft(''); setAddingGroup(true) }}>
-                <Icon name="grupo" size={13} /> Novo grupo
-              </button>
-            )}
 
             <div
               className={`${s.completedToggle} ${showCompleted ? s.completedAberto : ''}`}

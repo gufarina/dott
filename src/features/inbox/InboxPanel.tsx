@@ -1,26 +1,31 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { useStore, CardType } from '../../store'
 import { showToast } from '../../components/Toast'
-import { imageFromEvent, saveImageFile } from '../../lib/attachments'
-import { detectType } from '../../lib/detectType'
+import { setInbox } from '../../lib/inboxService'
 import { suggestTask, suggestFolder } from '../../lib/interpret'
+import { TYPE_CLASS, TYPE_ACCENT_FIX } from '../../lib/cardTypeClass'
 import { Icon } from '../../components/Icon'
 import { ModalPortal } from '../../components/ModalPortal'
 import { Modal, ModalHint, ModalField, ModalInput, ModalFooter, ModalButton } from '../../components/Modal'
 import { CardTypeIcon } from '../../components/CardTypeIcon'
+import { TabBar } from '../../components/TabBar'
+import { InboxCardEditor } from '../editor/InboxCardEditor'
+import { useScrollEdgeFade } from '../../hooks/useScrollEdgeFade'
 import s from './InboxPanel.module.css'
 
-function DraggableCard({ id, onClick, children }: { id: string; onClick: () => void; children: React.ReactNode }) {
+function DraggableCard({
+  id, onClick, children, title = 'Arraste para uma pasta — ou clique para editar',
+}: { id: string; onClick: () => void; children: React.ReactNode; title?: string }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: `card:${id}` })
   return (
     <div
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      className={`${s.card} ${isDragging ? s.cardDragging : ''}`}
+      className={`${s.card} hoverZoom ${isDragging ? s.cardDragging : ''}`}
       onClick={onClick}
-      title="Arraste para uma pasta — ou clique para escolher"
+      title={title}
     >
       {children}
     </div>
@@ -43,80 +48,41 @@ function relTime(ts: number | undefined, fallback: string): string {
  *  e ficam mais legiveis em monoespacada. */
 const TECNICO = new Set<CardType>(['URL', 'LINK', 'CODIGO', 'SHELL'])
 
-const TYPE_CLASS: Record<CardType, string> = {
-  NOTA: 'nota', CODIGO: 'codigo', SHELL: 'shell', URL: 'url', IDEIA: 'ideia',
-  AUDIO: 'audio', VIDEO: 'video', IMAGEM: 'imagem', ARQUIVO: 'arquivo', LINK: 'link',
-  PROMPT: 'prompt', TAREFA: 'tarefa', CONTATO: 'contato',
-}
-
 export function InboxPanel() {
   const inbox = useStore(st => st.inbox)
   const tags = useStore(st => st.tags)
   const leftTab = useStore(st => st.leftTab)
   const para = useStore(st => st.para)
   const setLeftTab = useStore(st => st.setLeftTab)
-  const captureCard = useStore(st => st.captureCard)
   const processCard = useStore(st => st.processCard)
   const removeCard = useStore(st => st.removeCard)
   const setView = useStore(st => st.setView)
 
   const notes = useStore(st => st.notes)
-  const tasks = useStore(st => st.tasks)
   const addTask = useStore(st => st.addTask)
 
-  const [text, setText] = useState('')
   const [processing, setProcessing] = useState<string | null>(null)
+  /** Card aberto na tela de escrita (TASK-333 urgente: clicar num card do
+   *  Inbox abre a proposta aprovada, nao mais direto o modal de destino). */
+  const [editingCard, setEditingCard] = useState<string | null>(null)
   const [tagFilter, setTagFilter] = useState('')
   /** Card que esta virando tarefa + o texto sugerido (editavel antes de criar). */
   const [virandoTarefa, setVirandoTarefa] = useState<{ cardId: string; texto: string } | null>(null)
-  const [capturaAtiva, setCapturaAtiva] = useState(false)
-  const [arrastandoArquivo, setArrastandoArquivo] = useState(false)
-  const taRef = useRef<HTMLTextAreaElement>(null)
-  const imgRef = useRef<HTMLInputElement>(null)
 
-  const isFull = inbox.length >= 10
-  const detection = text.trim() ? detectType(text) : null
+  /** Fade de rolagem na base (TASK-349) - cada lista rola independente. */
+  const listRef = useRef<HTMLDivElement>(null)
+  useScrollEdgeFade(listRef, [inbox.length])
+  const tagsRef = useRef<HTMLDivElement>(null)
+  useScrollEdgeFade(tagsRef, [tags.length, tagFilter])
 
-  /** Onde isso costuma morar — palpite do motor local, ANTES de capturar.
-   *  So aparece com texto que da pra ler (abaixo disso o palpite e chute). */
-  const palpiteDestino = text.trim().length >= 12 && detection
-    ? suggestFolder(text, detection.type as CardType, para, notes)
-    : null
-
-  /** A caixa cresce com o texto — o `height: 38px` fixo cortava ate o
-   *  placeholder (medido: precisava de 77px e tinha 38). Teto de 7 linhas
-   *  pra captura nao virar editor. */
-  useEffect(() => {
-    const el = taRef.current
-    if (!el) return
-    el.style.height = 'auto'
-    el.style.height = Math.min(el.scrollHeight, 150) + 'px'
-  }, [text])
-
-  /** Todo caminho de imagem (botao, arrastar, colar) cai aqui. */
-  const capturarImagem = async (file: File) => {
-    if (isFull) { showToast('warn', 'Inbox cheio (10/10)', 'Processe alguns cards antes.'); return }
-    const url = await saveImageFile(file)
-    if (!url) { showToast('warn', 'Erro', 'Nao consegui salvar a imagem.'); return }
-    captureCard(url)
-    showToast('info', 'Imagem capturada', 'No inbox como acervo visual.')
-  }
-
-  const aoSoltarArquivo = async (e: React.DragEvent) => {
-    setArrastandoArquivo(false)
-    const file = [...(e.dataTransfer?.files ?? [])].find(f => f.type.startsWith('image/'))
-    if (!file) return
-    e.preventDefault()
-    await capturarImagem(file)
-  }
-
-  const capture = () => {
-    if (isFull) return
-    const val = text.trim()
-    if (!val) return
-    captureCard(val)
-    setText('')
-    showToast('info', 'Card capturado', 'Movido para o inbox.')
+  /** Grava o texto editado de volta no card (ainda no Inbox, nao virou
+   *  Nota) — mesma ponte que o widget usa (`inbox_set`), so que chamada
+   *  daqui em vez de esperar o backend Rust re-emitir a lista inteira. */
+  const saveCardText = (cardId: string, texto: string) => {
+    const next = useStore.getState().inbox.map(c => (c.id === cardId ? { ...c, content: texto } : c))
+    useStore.setState({ inbox: next })
+    void setInbox(next)
+    showToast('info', 'Salvo', 'Card atualizado.')
   }
 
   const doProcess = (cardId: string, categoryId: string, folderId: string) => {
@@ -126,7 +92,7 @@ export function InboxPanel() {
       showToast('info', 'Processado', 'Card virou nota na pasta.')
       setView('editor', { category: categoryId, folder: folderId, note: noteId })
     } else {
-      showToast('warn', 'Nao consegui processar', 'O card nao foi encontrado no inbox.')
+      showToast('warn', 'Não consegui processar', 'O card não foi encontrado no inbox.')
     }
   }
 
@@ -139,18 +105,15 @@ export function InboxPanel() {
     setVirandoTarefa({ cardId, texto: suggestTask(card.content, card.type).text })
   }
 
-  /** Cria a tarefa no primeiro grupo (ou num grupo novo se nao houver nenhum). */
+  /** Cria a tarefa sem pasta (TASK-374: antes caia no primeiro "grupo" que
+   *  existisse, as vezes um que nao tinha nada a ver - bug real, chip errado
+   *  na tela da Pasta. O grupo morreu; a tela de Tarefas agora agrupa isso
+   *  sozinha no balde "Sem pasta"). */
   const confirmarTarefa = () => {
     if (!virandoTarefa) return
     const texto = virandoTarefa.texto.trim()
     if (!texto) return
-    let grupoId = tasks[0]?.id
-    if (!grupoId) {
-      useStore.getState().addGroup('Do inbox')
-      grupoId = useStore.getState().tasks[0]?.id
-    }
-    if (!grupoId) return
-    addTask(grupoId, texto)
+    addTask(texto)
     removeCard(virandoTarefa.cardId)
     setVirandoTarefa(null)
     showToast('info', 'Virou tarefa', 'Card saiu do inbox e entrou na lista.')
@@ -158,131 +121,37 @@ export function InboxPanel() {
 
   return (
     <>
-      <div className={s.tabs}>
-        <button className={`${s.tab} ${leftTab === 'inbox' ? s.active : ''}`} onClick={() => setLeftTab('inbox')}>
-          <Icon name="inbox" size={13} /> INBOX <span className={s.badge}>{inbox.length}</span>
-        </button>
-        <button className={`${s.tab} ${leftTab === 'tags' ? s.active : ''}`} onClick={() => setLeftTab('tags')}>
-          <Icon name="tag" size={13} /> TAGS <span className={s.badge}>{tags.length}</span>
-        </button>
-      </div>
+      <TabBar
+        activeKey={leftTab}
+        onChange={key => setLeftTab(key as 'inbox' | 'tags')}
+        indicatorColor="var(--dott-gradient-linear)"
+        items={[
+          { key: 'inbox', label: 'INBOX', icon: 'inbox', count: inbox.length },
+          { key: 'tags', label: 'TAGS', icon: 'tag', count: tags.length },
+        ]}
+      />
 
       {leftTab === 'inbox' && (
-        <div className={s.inboxContent}>
-          {/* ── Area de captura ──────────────────────────────────────────
-              A caixa CRESCE com o texto (antes tinha 38px fixos e cortava ate
-              o placeholder). Aceita texto, imagem do disco, arquivo arrastado
-              e imagem colada — os quatro caminhos entram no mesmo lugar. */}
-          <div
-            className={`${s.capture} ${arrastandoArquivo ? s.captureSoltando : ''}`}
-            onDragOver={e => { e.preventDefault(); if (!isFull) setArrastandoArquivo(true) }}
-            onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setArrastandoArquivo(false) }}
-            onDrop={aoSoltarArquivo}
-          >
-            <div className={s.captureMeta}>
-              {detection ? (
-                <span className={`${s.captureChip} ${s['type-' + TYPE_CLASS[detection.type as CardType]]}`}>
-                  <CardTypeIcon type={detection.type as CardType} size={9} />
-                  {detection.label}
-                </span>
-              ) : (
-                <span className={s.captureChipNeutral}>Nota</span>
-              )}
-              <span className={`${s.captureCounter} ${isFull ? s.captureCounterFull : ''}`}>
-                {inbox.length}/10
-              </span>
-            </div>
-
-            <div className={s.captureCaixa}>
-              <textarea
-                ref={taRef}
-                className={s.captureInput}
-                placeholder={isFull ? 'Inbox cheio — processe alguns cards' : 'O que está na sua mente?'}
-                rows={1}
-                value={text}
-                disabled={isFull}
-                onChange={e => setText(e.target.value)}
-                onFocus={() => setCapturaAtiva(true)}
-                onBlur={() => setCapturaAtiva(false)}
-                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); capture() } }}
-                onPaste={async e => {
-                  const file = imageFromEvent(e.nativeEvent)
-                  if (!file) return
-                  e.preventDefault()
-                  const url = await saveImageFile(file)
-                  if (url) { captureCard(url); showToast('info', 'Imagem capturada', 'No inbox como acervo visual.') }
-                }}
-              />
-
-              {/* Rodape da caixa: acoes a esquerda, enviar a direita */}
-              <div className={s.captureAcoes}>
-                <button
-                  className={s.captureIconBtn}
-                  onClick={() => imgRef.current?.click()}
-                  disabled={isFull}
-                  title="Imagem do computador"
-                  aria-label="Inserir imagem do computador"
-                >
-                  <Icon name="imagem" size={14} />
-                </button>
-
-                {/* A dica so aparece com a caixa em uso — nao polui o repouso. */}
-                <span className={`${s.captureDica} ${capturaAtiva && text ? s.captureDicaVisivel : ''}`}>
-                  Enter envia · Shift+Enter quebra linha
-                </span>
-
-                <button
-                  className={`${s.btnCapture} ${isFull ? s.btnCaptureFull : ''}`}
-                  onClick={capture}
-                  disabled={isFull || !text.trim()}
-                  title={isFull ? 'Inbox cheio — processe alguns cards primeiro' : 'Capturar (Enter)'}
-                >
-                  {isFull ? 'Cheio' : <Icon name="enviar" size={15} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Palpite de destino ANTES de capturar: o motor ja sabe ler o texto,
-                entao ele adianta onde isso costuma morar. So palpite, sem acao. */}
-            {palpiteDestino && (
-              <div className={s.capturePalpite}>
-                <Icon name="sugestao" size={12} />
-                <span>
-                  costuma virar nota em <b>{palpiteDestino.folderName}</b>
-                  <span className={s.capturePalpiteQuad}> · {palpiteDestino.categoryLabel}</span>
-                </span>
-              </div>
-            )}
-
-            <input
-              ref={imgRef}
-              type="file"
-              accept="image/*"
-              style={{ display: 'none' }}
-              onChange={async e => {
-                const file = e.target.files?.[0]
-                e.target.value = ''
-                if (file) await capturarImagem(file)
-              }}
-            />
-
-            {arrastandoArquivo && (
-              <div className={s.captureSolte}>
-                <Icon name="imagem" size={16} /> Solte a imagem aqui
-              </div>
-            )}
-          </div>
-          <div className={s.list}>
+        <div className={`${s.inboxContent} tabContent`} style={{ '--content-dir': -1 } as React.CSSProperties}>
+          {/* TASK-343: a caixa de captura saiu daqui - agora mora no painel
+              central, abaixo dos 4 quadrantes do PARA (ver CaptureBox.tsx).
+              Este painel volta a ser so a fila de itens do Inbox. */}
+          <div ref={listRef} className={`${s.list} scrollFadeBottom`}>
             {inbox.length === 0 ? (
               <div className={s.empty}>
                 <div className={s.pulseRing} />
                 <p>Sua mente está limpa</p>
               </div>
             ) : inbox.map(c => (
-              <DraggableCard key={c.id} id={c.id} onClick={() => setProcessing(c.id)}>
+              <DraggableCard
+                key={c.id}
+                id={c.id}
+                onClick={() => (c.type === 'IMAGEM' ? setProcessing(c.id) : setEditingCard(c.id))}
+                title={c.type === 'IMAGEM' ? 'Arraste para uma pasta — ou clique para escolher' : undefined}
+              >
                 <div className={s.cardHeader}>
                   <span className={`${s.cardType} ${s['type-' + TYPE_CLASS[c.type]]}`}>
-                    <CardTypeIcon type={c.type} size={9} />{c.type}
+                    <CardTypeIcon type={c.type} size={9} />{(TYPE_ACCENT_FIX[c.type] ?? c.type).toUpperCase()}
                   </span>
                   <span className={s.cardTime}>{relTime(c.ts, c.time)}</span>
                   <button
@@ -310,7 +179,7 @@ export function InboxPanel() {
       )}
 
       {leftTab === 'tags' && (
-        <div className={s.tagsContent}>
+        <div ref={tagsRef} className={`${s.tagsContent} tabContent scrollFadeBottom`} style={{ '--content-dir': 1 } as React.CSSProperties}>
           <div className={s.tagSearch}>
             <input
               placeholder="Filtrar tags..."
@@ -345,7 +214,10 @@ export function InboxPanel() {
               {/* Mostra O QUE voce esta processando — antes o modal abria sem contexto. */}
               {card && (
                 <div className={s.previewCard}>
-                  <span className={`${s.previewTipo} ${s['type-' + TYPE_CLASS[card.type]]}`}>{card.type}</span>
+                  <span className={`${s.previewTipo} ${s['type-' + TYPE_CLASS[card.type]]}`}>
+                    <CardTypeIcon type={card.type} size={9} />
+                    {(TYPE_ACCENT_FIX[card.type] ?? card.type).toUpperCase()}
+                  </span>
                   <span className={s.previewTexto}>
                     {card.type === 'IMAGEM' ? 'Imagem capturada' : card.content}
                   </span>
@@ -441,6 +313,19 @@ export function InboxPanel() {
           </ModalFooter>
         </Modal>
       )}
+
+      {editingCard && (() => {
+        const card = inbox.find(c => c.id === editingCard)
+        if (!card) return null
+        return (
+          <InboxCardEditor
+            content={card.content}
+            onSave={texto => saveCardText(card.id, texto)}
+            onClose={() => setEditingCard(null)}
+            onChooseDestination={() => { setEditingCard(null); setProcessing(card.id) }}
+          />
+        )
+      })()}
     </>
   )
 }

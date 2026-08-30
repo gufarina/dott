@@ -1,0 +1,318 @@
+/* InboxCardEditor.module.css — TASK-335 REABERTA: o CEO abriu o app
+ * reconstruido e via o mesmo modal de antes ("mentira, ta igual") porque
+ * tudo que a rodada anterior escreveu so aparecia POS-interacao (selecionar
+ * texto, digitar "/", ja ter parentesco). Esta rodada redesenha o ESTADO DE
+ * REPOUSO: barra de formatacao fixa, linha de contexto, regiao de Conexoes
+ * sempre presente (com estado vazio honesto), e uma leitura tipografica
+ * real no lugar do vazio que a captura do CEO mostrava. Vocabulario de
+ * moldura/sombra/raio continua o do Modal unico do app (Modal.module.css,
+ * TASK-297) - so tokens que ja existem em tokens.css. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 6, 9, .72);
+  backdrop-filter: blur(2px);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: inboxCardEditorOverlayIn var(--dur-medium) var(--ease-out) both;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  /* Excecao "superficie flutuante" (DESIGN.md secao 6/18) — o modal paira
+     sobre o overlay escurecido, precisa se destacar dele. --elev-4 e o
+     mesmo valor de --shadow (alias, TASK-329) - nome mais correto pra
+     superficie desta categoria. */
+  box-shadow: var(--elev-4);
+  border-radius: var(--r-card);
+  --sq-r: var(--r-card);
+  -webkit-mask-image: paint(squircle);
+  mask-image: paint(squircle);
+  width: 720px;
+  max-width: calc(100vw - var(--space-8));
+  /* SEM altura fixa (CEO, 28/08/2026: "o modal tem que respirar com o
+     conteudo") - um item de UMA linha e o caso NORMAL do Inbox (teto de 10
+     itens curtos), nao a excecao. `height:auto` deixa o painel abracar o
+     conteudo; `min-height` evita um cartao anao pra uma nota de 2 palavras;
+     `max-height` e o UNICO teto - so a partir dele a area de escrita (unico
+     filho flexivel, ver `.body`) rola por dentro. */
+  min-height: 340px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: inboxCardEditorIn var(--dur-medium) var(--ease-out) both;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) 0;
+  flex-shrink: 0;
+}
+.title {
+  flex: 1;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: var(--fg);
+}
+.close {
+  width: var(--icon-btn-md);
+  height: var(--icon-btn-md);
+  flex-shrink: 0;
+  border-radius: var(--r-sm);
+  border: none;
+  background: transparent;
+  color: var(--fg3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.close:hover { background: var(--surface3); color: var(--fg); }
+
+/* ── Barra de formatacao PERMANENTE (item 3, reabertura) ─────────────────
+   Ancorada logo abaixo do titulo, presente desde a abertura do modal - nao
+   e a SelectionToolbar (essa continua so-por-selecao, flutuando sobre o
+   texto). TASK-338: a implementacao PROPRIA de botao-so-icone que morava
+   aqui foi extraida pra `EditorToolbar.tsx` (peca unica, tambem usada por
+   NoteEditor.tsx) - este seletor so declara o padding horizontal deste
+   contexto (16px, o mesmo do header do modal), a UNICA variavel que muda
+   por lugar. */
+.toolbar {
+  --toolbar-px: var(--space-4);
+}
+
+/* ── Linha de contexto (item 5, reabertura) ───────────────────────────────
+   Tipo detectado + etiquetas + destino sugerido - tudo dado que ja existe
+   no modelo (detectType/extractTags/suggestFolder), a mesma leitura que
+   InboxPanel.tsx ja faz do MESMO texto antes de capturar. Ajuda a decisao
+   que este modal existe pra tomar ("guardar em uma pasta..."). */
+.meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4) 0;
+  flex-shrink: 0;
+  min-width: 0;
+}
+.metaType {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--pill-font-size);
+  font-weight: var(--pill-font-weight);
+  letter-spacing: var(--pill-letter-spacing);
+  line-height: var(--pill-line-height);
+  padding: var(--pill-padding);
+  border-radius: var(--r-full);
+  border: 1px solid var(--border2);
+  text-transform: uppercase;
+  color: var(--fg3);
+  flex-shrink: 0;
+}
+.metaTags {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+/* Etiqueta detectada — pill nova, os 5 tokens da receita unica (DESIGN.md
+   secao 4, "Pill/Badge"), nunca um numero escrito a mao. */
+.metaTag {
+  font-size: var(--pill-font-size);
+  font-weight: var(--pill-font-weight);
+  letter-spacing: var(--pill-letter-spacing);
+  line-height: var(--pill-line-height);
+  padding: var(--pill-padding);
+  border-radius: var(--r-full);
+  border: 1px solid var(--border2);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.metaDestino {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-3xs);
+  color: var(--fg3);
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.metaDestino svg { color: var(--accent); flex-shrink: 0; }
+.metaDestino b { color: var(--fg2); font-weight: 600; }
+
+/* Mesma relatividade que NoteEditor.tsx usa pro SelectionToolbar/SlashMenu
+   (coordsAtPos e viewport; ancoram em `position: relative` mais proximo).
+   O texto capturado e o CONTEUDO PRINCIPAL do painel (item 3 da reabertura:
+   "o texto flutua no painel, nao dentro de uma caixa") - por isso nenhuma
+   borda/fundo proprio aqui, so espaco; a unica moldura da tela inteira
+   continua sendo a do proprio modal (excecao de superficie flutuante). */
+.body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: var(--space-2) var(--space-2) var(--space-5);
+}
+
+/* Escala de leitura do texto capturado - SO nesta tela (escopado por
+   `.panel`, nunca em `liveMarkup.css` global, que o NoteEditor tambem usa e
+   esta fora do escopo desta rodada). `.cm-content` de liveMarkup.css tinha
+   28px de padding horizontal PROPRIO, somado ao de `.body` - o dobro do
+   resto do modal (header/toolbar/footer usam --space-4/16px). Aqui o
+   padding horizontal do CONTEUDO cai pra bater com o resto, e o vertical
+   cresce (era o vazio que o CEO via). Especificidade (.panel + 2 classes
+   globais = 3 classes) vence a regra de liveMarkup.css (2 classes) de
+   proposito, independente de ordem de carga. */
+.panel :global(.cm-dott.cm-editor) {
+  font-size: 16px;
+}
+.panel :global(.cm-dott .cm-scroller) {
+  line-height: 1.85;
+}
+.panel :global(.cm-dott .cm-content) {
+  padding: var(--space-2) var(--space-4) var(--space-8);
+}
+
+/* ── Conexoes - regiao SEMPRE presente (item 4, reabertura) ───────────────
+   Nunca condicionada a `.length > 0`: sem parentesco real mostra o
+   silencio honesto por ESCRITO (`.connEmpty`), nunca some. Com parentesco,
+   cada item usa a MESMA receita de `Constellation.tsx` (`.marca`/`.vizinho`)
+   pra Conexoes salvas - o motivo (ACHADA/INFERIDA) e texto na propria peca,
+   a frase completa (`why`) tambem visivel, nunca preso num `title` de
+   tooltip nativo (o erro que reabriu esta task).
+   SEM `border-top` (CEO, 28/08/2026): com o `.toolbar` novo tambem tendo
+   borda embaixo, as duas linhas sanduichavam a area de escrita numa caixa
+   fechada - exatamente a "moldura de campo de formulario" que a task pediu
+   pra eliminar. A separacao agora e so contraste de superficie
+   (`--surface2` contra o `--surface` do painel/corpo) - respiro, nao fio.
+   Fundo tambem da a PRESENCA que faltava (era a coisa mais timida da tela;
+   agora e uma secao de verdade, mesmo cuidado da barra de formatacao). */
+.connections {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: var(--space-4);
+  flex-shrink: 0;
+  background: var(--surface2);
+  min-width: 0;
+  max-height: 170px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.connLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--fg2);
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+/* Nao mais cinza-claro em italico encolhido - texto normal, --fg2 (a mesma
+   presenca do rotulo), tamanho de leitura de lista. Continua HONESTO (a
+   frase e a mesma), so o peso visual sobe. */
+.connEmpty {
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--fg2);
+}
+
+.connList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Cada Conexao vira um item (nao mais so um chip); anima a ENTRADA (o
+   motor "trabalhando" enquanto o CEO escreve) - unica animacao nova desta
+   regiao, por isso e a unica com guarda explicita de prefers-reduced-motion
+   aqui (o resto do arquivo ja vinha sem guarda, fora do escopo consertar).
+   `--surface3` (nao mais `--surface2`) pra continuar destacando do fundo
+   novo da regiao, que subiu de `--surface` pra `--surface2`. */
+.connItem {
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  background: var(--surface3);
+  animation: inboxCardEditorConnIn var(--dur-base) var(--ease-out) both;
+}
+.connItemTop {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 2px;
+}
+
+/* Mesma pill ACHADA/INFERIDA de Constellation.module.css `.marca` - so os
+   5 tokens de pill, nunca reescritos a mao. */
+.connMark {
+  font-size: var(--pill-font-size);
+  font-weight: var(--pill-font-weight);
+  letter-spacing: var(--pill-letter-spacing);
+  line-height: var(--pill-line-height);
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border2);
+  border-radius: var(--r-full);
+  padding: var(--pill-padding);
+  color: var(--fg3);
+  flex: none;
+}
+.connMark.achada { color: var(--accent); border-color: var(--accent); }
+
+.connItemTitle {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.connItemWhy {
+  font-size: var(--text-3xs);
+  line-height: 1.4;
+  color: var(--fg3);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+@keyframes inboxCardEditorOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes inboxCardEditorIn {
+  from { opacity: 0; transform: translateY(8px) scale(.98); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes inboxCardEditorConnIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay, .panel, .connItem { animation: none; }
+}

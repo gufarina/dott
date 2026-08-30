@@ -5,6 +5,7 @@ import { saveImageFile } from '../../lib/attachments'
 import { showToast } from '../../components/Toast'
 import { Icon } from '../../components/Icon'
 import { ModalPortal } from '../../components/ModalPortal'
+import { useScrollEdgeFade } from '../../hooks/useScrollEdgeFade'
 import s from './PARAGrid.module.css'
 
 const Q_ORDER = ['projects', 'areas', 'resources', 'archives']
@@ -23,17 +24,9 @@ const Q_SUBTITULO: Record<string, string> = {
   archives: 'O que já serviu, mas não some.',
 }
 
-function maxNotes(para: Record<string, Quadrant>) {
-  let m = 0
-  Object.values(para).forEach(q => q.folders.forEach(f => { if (f.notes > m) m = f.notes }))
-  return m || 1
-}
-
 function FolderCard({ folder, quadrant, categoryId, onNavigate }: { folder: Folder; quadrant: Quadrant; categoryId: string; onNavigate: () => void }) {
-  const mn = maxNotes(useStore.getState().para)
   const hasTasks = folder.total > 0
   const pct = hasTasks ? Math.round(folder.tasks / folder.total * 100) : 0
-  const densityPct = Math.max(8, Math.round(folder.notes / mn * 100))
   const { setNodeRef, isOver } = useDroppable({ id: `folder:${categoryId}:${folder.id}` })
   const setFolderCover = useStore(st => st.setFolderCover)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -54,7 +47,7 @@ function FolderCard({ folder, quadrant, categoryId, onNavigate }: { folder: Fold
   }
 
   return (
-    <div ref={setNodeRef} className={`${s.folderCard} ${isOver ? s.folderOver : ''}`} onClick={onNavigate}>
+    <div ref={setNodeRef} className={`${s.folderCard} hoverZoom ${isOver ? s.folderOver : ''}`} onClick={onNavigate}>
       <div className={s.cover}>
         {folder.cover
           ? <img src={folder.cover} className={s.coverImg} alt="" />
@@ -68,24 +61,55 @@ function FolderCard({ folder, quadrant, categoryId, onNavigate }: { folder: Fold
       <div className={s.info}>
         <div className={s.name}>{folder.name}</div>
         <div className={s.meta}>{folder.notes} notas{hasTasks ? ` · ${folder.total} tarefas` : ''}</div>
-        <div className={s.bottom}>
-          {hasTasks ? (
-            <>
-              <div className={s.progressBar}><div className={s.progressFill} style={{ transform: `scaleX(${pct / 100})`, background: quadrant.color }} /></div>
-              <div className={s.progressLabel}>{pct}% concluído · {folder.total - folder.tasks} pendentes</div>
-            </>
-          ) : (
-            <>
-              <div className={s.densityBar}><div className={s.densityFill} style={{ transform: `scaleX(${densityPct / 100})`, background: quadrant.color }} /></div>
-              <div className={s.densityLabel}>
-                <Icon name="acervo" size={11} />
-                acervo
-              </div>
-            </>
-          )}
-        </div>
+        {/* TASK-368: o rodape so aparece quando ha tarefa - e o UNICO dado
+            que o .meta acima nao mostra sozinho (sem tarefa, .meta ja se
+            diferencia por OMISSAO do "X tarefas"). A barra de densidade que
+            existia aqui pra pasta sem tarefa foi CORTADA: comparava a pasta
+            contra o maximo de notas do PARA inteiro, uma info que so faz
+            sentido vendo TODAS as pastas lado a lado (nao decidivel a partir
+            de UM card so), e o rotulo "acervo" nao era exclusivo do
+            quadrante Arquivo - qualquer pasta sem tarefa em Projetos/Areas/
+            Recursos tambem caia nele, rotulo errado repetido, nao so
+            redundante. */}
+        {hasTasks && (
+          <div className={s.bottom}>
+            <div className={s.progressBar}><div className={s.progressFill} style={{ transform: `scaleX(${pct / 100})`, background: quadrant.color }} /></div>
+            <div className={s.progressLabel}>{pct}% concluído · {folder.total - folder.tasks} pendentes</div>
+          </div>
+        )}
       </div>
       <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={onFile} />
+    </div>
+  )
+}
+
+/** Grade de pastas de UM quadrante, com o fade de rolagem na base (TASK-349).
+ *  Componente proprio so pra dar a cada quadrante o SEU ref/estado de
+ *  rolagem - os 4 quadrantes rolam de forma independente. */
+function QuadrantCards({ qid, q, onNavigate, onCreate }: {
+  qid: string
+  q: Quadrant
+  onNavigate: (folderId: string) => void
+  onCreate: () => void
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  useScrollEdgeFade(ref, [q.folders.length])
+
+  return (
+    <div ref={ref} className={`${s.qCards} scrollFadeBottom`}>
+      {q.folders.map(f => (
+        <FolderCard
+          key={f.id}
+          folder={f}
+          quadrant={q}
+          categoryId={qid}
+          onNavigate={() => onNavigate(f.id)}
+        />
+      ))}
+      <div className={s.folderNew} onClick={onCreate}>
+        <span className={s.plus}><Icon name="pasta" size={16} /></span>
+        <span>Nova pasta</span>
+      </div>
     </div>
   )
 }
@@ -145,47 +169,42 @@ export function PARAGrid() {
 
   return (
     <>
+      {/* TASK-346: a caixa de captura saiu daqui - virou painel IRMAO do
+          PARA, renderizado em App.tsx (.captureShell), nao mais filho deste
+          grid. O board volta a ser so os 4 quadrantes, fechados na propria
+          moldura (.central, em App.module.css). */}
       <div className={s.grid}>
         {Q_ORDER.map(qid => {
-          const q = para[qid]
-          return (
-            <div key={qid} className={`${s.quadrant} ${s['q-' + qid]}`}>
-              <div className={s.qHeader}>
-                <div className={s.qIcon}>{Q_ICONS[qid]}</div>
-                {/* Abre a CATEGORIA (todas as pastas dela), nunca uma pasta
-                    especifica: pular direto pra primeira pasta rouba do usuario
-                    a escolha e some com as outras. */}
-                <div
-                  className={s.qInfo}
-                  role="button"
-                  title={`Ver todas as pastas de ${q.label}`}
-                  onClick={() => setView('canvas', { category: qid, folder: '' })}
-                >
-                  <div className={s.qTitle}>{q.label}</div>
-                  <div className={s.qSubtitle}>{Q_SUBTITULO[qid]}</div>
+            const q = para[qid]
+            return (
+              <div key={qid} className={`${s.quadrant} ${s['q-' + qid]}`}>
+                <div className={s.qHeader}>
+                  <div className={s.qIcon}>{Q_ICONS[qid]}</div>
+                  {/* Abre a CATEGORIA (todas as pastas dela), nunca uma pasta
+                      especifica: pular direto pra primeira pasta rouba do usuario
+                      a escolha e some com as outras. */}
+                  <div
+                    className={s.qInfo}
+                    role="button"
+                    title={`Ver todas as pastas de ${q.label}`}
+                    onClick={() => setView('canvas', { category: qid, folder: '' })}
+                  >
+                    <div className={s.qTitle}>{q.label}</div>
+                    <div className={s.qSubtitle}>{Q_SUBTITULO[qid]}</div>
+                  </div>
+                  <button className={s.qAdd} onClick={() => setCreateIn(qid)} title={`Nova pasta em ${q.label}`} aria-label={`Nova pasta em ${q.label}`}>
+                    <Icon name="pasta" size={14} />
+                  </button>
                 </div>
-                <button className={s.qAdd} onClick={() => setCreateIn(qid)} title={`Nova pasta em ${q.label}`} aria-label={`Nova pasta em ${q.label}`}>
-                  <Icon name="pasta" size={14} />
-                </button>
+                <QuadrantCards
+                  qid={qid}
+                  q={q}
+                  onNavigate={folderId => setView('canvas', { category: qid, folder: folderId })}
+                  onCreate={() => setCreateIn(qid)}
+                />
               </div>
-              <div className={s.qCards}>
-                {q.folders.map(f => (
-                  <FolderCard
-                    key={f.id}
-                    folder={f}
-                    quadrant={q}
-                    categoryId={qid}
-                    onNavigate={() => setView('canvas', { category: qid, folder: f.id })}
-                  />
-                ))}
-                <div className={s.folderNew} onClick={() => setCreateIn(qid)}>
-                  <span className={s.plus}><Icon name="pasta" size={16} /></span>
-                  <span>Nova pasta</span>
-                </div>
-              </div>
-            </div>
-          )
-        })}
+            )
+          })}
       </div>
 
       {createIn && <CreateFolderModal categoryId={createIn} onClose={() => setCreateIn(null)} />}
@@ -209,6 +228,9 @@ export function CategoryView() {
   const [criando, setCriando] = useState(false)
 
   const q = category ? para[category] : null
+  const catBodyRef = useRef<HTMLDivElement>(null)
+  useScrollEdgeFade(catBodyRef, [q?.folders.length ?? 0])
+
   if (!q || !category) return null
 
   return (
@@ -222,16 +244,16 @@ export function CategoryView() {
         <span className={s.catCount}>
           {q.folders.length} pasta{q.folders.length === 1 ? '' : 's'}
         </span>
-        <button className={s.catAdd} onClick={() => setCriando(true)} title={`Nova pasta em ${q.label}`}>
+        <button className={`${s.catAdd} hoverZoom hoverGlow`} onClick={() => setCriando(true)} title={`Nova pasta em ${q.label}`}>
           <Icon name="pasta" size={14} /> Nova pasta
         </button>
       </div>
 
-      <div className={s.catBody}>
+      <div ref={catBodyRef} className={`${s.catBody} scrollFadeBottom`}>
         {q.folders.length === 0 ? (
           <div className={s.catEmpty}>
             <p>Nenhuma pasta em {q.label} ainda.</p>
-            <button className={s.catAdd} onClick={() => setCriando(true)}>
+            <button className={`${s.catAdd} hoverZoom hoverGlow`} onClick={() => setCriando(true)}>
               <Icon name="pasta" size={14} /> Criar a primeira
             </button>
           </div>

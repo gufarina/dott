@@ -5,14 +5,21 @@ import { showToast } from './Toast'
 import { backupNow, backupsList, restoreBackup, openBackupsFolder } from '../lib/backupService'
 import { Icon } from './Icon'
 import { waitlistEmail } from '../lib/online'
+import { Modal, ModalHint, ModalFooter, ModalButton } from './Modal'
+import type { ExamplePlan } from '../lib/exampleContent'
 import s from './Settings.module.css'
 
 export function Settings({ open, onClose }: { open: boolean; onClose: () => void }) {
   const theme = useStore(st => st.theme)
   const toggleTheme = useStore(st => st.toggleTheme)
+  const previewExampleCleanup = useStore(st => st.previewExampleCleanup)
+  const clearExamples = useStore(st => st.clearExamples)
   const [dataPath, setDataPath] = useState('')
   const [backups, setBackups] = useState<string[]>([])
   const [busy, setBusy] = useState(false)
+  /** Plano de limpeza calculado no clique do botao - a confirmacao mostra a
+   *  contagem exata ANTES de apagar qualquer coisa (TASK-367-2). */
+  const [examplePlan, setExamplePlan] = useState<ExamplePlan | null>(null)
 
   useEffect(() => {
     if (!open) return
@@ -43,10 +50,27 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
     else showToast('warn', 'Falha ao restaurar', 'Não consegui restaurar esse backup.')
   }
 
+  const openClearExamples = () => {
+    const plan = previewExampleCleanup()
+    const total = plan.noteIds.length + plan.folders.length + plan.taskIds.length + plan.inboxIds.length
+    if (total === 0) {
+      showToast('info', 'Nada para limpar', 'Não sobrou exemplo, ou você já editou tudo. O que é seu fica onde está.')
+      return
+    }
+    setExamplePlan(plan)
+  }
+
+  const confirmClearExamples = () => {
+    clearExamples()
+    setExamplePlan(null)
+    showToast('info', 'Exemplos removidos', 'O que era seu continua intacto.')
+  }
+
   const replayOnboarding = () => { onClose(); window.dispatchEvent(new Event('dott:replay-onboarding')) }
   const openOnline = () => { onClose(); window.dispatchEvent(new Event('dott:open-online')) }
 
   return (
+    <>
     <div className={s.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
       <div className={s.modal}>
         <div className={s.header}>
@@ -94,6 +118,16 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
           </section>
 
           <section className={s.section}>
+            <div className={s.sectionTitle}>Conteúdo de exemplo</div>
+            <div className={s.row}>
+              <div><div className={s.label}>Notas, pastas e tarefas de exemplo</div><div className={s.hint}>Remove o que veio pronto pra você aprender. O que você escreveu fica.</div></div>
+              <button className={s.btn} onClick={openClearExamples}>
+                <Icon name="lixo" size={13} /> Limpar exemplos
+              </button>
+            </div>
+          </section>
+
+          <section className={s.section}>
             <div className={s.sectionTitle}>Sobre</div>
             <div className={s.row}>
               <div><div className={s.label}>Captura rápida</div><div className={s.hint}>Atalho global em qualquer app</div></div>
@@ -120,5 +154,42 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
         </div>
       </div>
     </div>
+
+    {examplePlan && (
+      <Modal title="Limpar exemplos" onClose={() => setExamplePlan(null)}>
+        <ModalHint>Isso remove o que veio pronto com o Dott, pra você aprender:</ModalHint>
+
+        <div>
+          <div className={s.row}>
+            <div className={s.label}>Notas</div>
+            <div className={s.label}>{examplePlan.noteIds.length}</div>
+          </div>
+          <div className={s.row}>
+            <div className={s.label}>Pastas</div>
+            <div className={s.label}>{examplePlan.folders.length}</div>
+          </div>
+          <div className={s.row}>
+            <div className={s.label}>Tarefas</div>
+            <div className={s.label}>{examplePlan.taskIds.length}</div>
+          </div>
+          <div className={s.row}>
+            <div className={s.label}>Itens da caixa de entrada</div>
+            <div className={s.label}>{examplePlan.inboxIds.length}</div>
+          </div>
+        </div>
+
+        <div className={s.label}>O que você escreveu ou mudou fica exatamente onde está.</div>
+
+        <ModalHint>Quer uma cópia de segurança antes? Feche este aviso e use "Fazer backup agora", ali em cima.</ModalHint>
+
+        <ModalFooter>
+          <ModalButton variant="primary" onClick={() => setExamplePlan(null)}>Cancelar</ModalButton>
+          <ModalButton variant="ghost" onClick={confirmClearExamples}>
+            <Icon name="lixo" size={13} /> Limpar exemplos
+          </ModalButton>
+        </ModalFooter>
+      </Modal>
+    )}
+    </>
   )
 }

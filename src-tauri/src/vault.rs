@@ -121,6 +121,10 @@ pub fn vault_load(app: tauri::AppHandle) -> Vec<VaultNote> {
                     if let Some(stem) = path.file_stem().and_then(|s| s.to_str()) {
                         notes.push(parse_note(stem.to_string(), &raw));
                     }
+                } else {
+                    // leitura falhou (ex.: lock, permissao): mantem o arquivo em
+                    // disco e nao inclui na lista, mas registra o caso.
+                    eprintln!("dott: leitura falhou, nota mantida em disco: {}", path.display());
                 }
             }
         }
@@ -128,12 +132,13 @@ pub fn vault_load(app: tauri::AppHandle) -> Vec<VaultNote> {
     notes
 }
 
-/// Grava uma nota (cria ou sobrescreve seu .md).
+/// Grava uma nota (cria ou sobrescreve seu .md) de forma atomica: nunca trunca
+/// o arquivo original se a escrita falhar no meio (hot path do autosave).
 #[tauri::command]
 pub fn vault_save(app: tauri::AppHandle, note: VaultNote) -> Result<(), String> {
     let dir = vault_dir(&app);
     let path = dir.join(format!("{}.md", sanitize(&note.id)));
-    fs::write(path, serialize_note(&note)).map_err(|e| e.to_string())
+    crate::atomic::write(&path, serialize_note(&note).as_bytes()).map_err(|e| e.to_string())
 }
 
 /// Remove uma nota do vault.

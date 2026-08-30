@@ -1,0 +1,125 @@
+/* liveMarkup.css — tipografia do editor vivo (CodeMirror 6).
+ * Global, escopado por .cm-* (classes que o proprio CodeMirror gera).
+ * Reusa os tokens de src/styles/tokens.css (nao declara cor/tamanho novo
+ * fora do que ja existia, exceto os dois abaixo, marcados como LOCAL). */
+
+/* Base do editor — mesma tipografia que o EasyMDE usava (easymde-dott.css). */
+.cm-dott.cm-editor {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+.cm-dott .cm-scroller {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  line-height: 1.75;
+  font-family: inherit;
+}
+.cm-dott .cm-content {
+  padding: 14px 28px;
+  caret-color: var(--accent);
+}
+.cm-dott.cm-focused { outline: none; }
+.cm-dott .cm-cursor { border-left-color: var(--accent); border-left-width: 2px; }
+.cm-dott .cm-selectionBackground,
+.cm-dott.cm-focused .cm-selectionBackground { background: var(--accent-s) !important; }
+.cm-dott .cm-placeholder { color: var(--fg3); font-style: normal; }
+
+/* Titulo 1 / 2 — LOCAL: nao existe token de tamanho de titulo de editor
+   ainda em tokens.css. Espelha o md-view (markdown.css h1/h2) em em, que
+   ja usa var(--font-ui) + peso 700 do design vigente. */
+.cm-dott .cm-line.cm-livemd-h1 {
+  font-family: var(--font-ui);
+  font-size: 1.7em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+.cm-dott .cm-line.cm-livemd-h2 {
+  font-family: var(--font-ui);
+  font-size: 1.35em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+/* Negrito — usa o mesmo padrao de md-view strong (peso 700, cor --fg). */
+.cm-dott .cm-livemd-strong {
+  font-weight: 700;
+  color: var(--fg);
+}
+
+/* Item de lista — indentacao + marcador, espelha md-view ul/li. */
+.cm-dott .cm-line.cm-livemd-li {
+  padding-left: 1.1em;
+  text-indent: -1.1em;
+}
+.cm-dott .cm-livemd-bullet {
+  display: inline-block;
+  width: 1.1em;
+  color: var(--accent);
+}
+
+/* Citacao — espelha md-view blockquote (borda + fundo + itálico), so a
+   marca ">" some (igual titulo/lista acima). */
+.cm-dott .cm-line.cm-livemd-quote {
+  border-left: 2px solid var(--accent);
+  background: var(--surface2);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  padding: 6px 12px;
+  color: var(--fg2);
+  font-style: italic;
+}
+
+/* Item de checklist (TASK-359, CEO: "o item checklist esta estranho, nao
+   parece checklist nada, ta feio e mal feito"). Indentacao no mesmo espirito
+   de .cm-livemd-li acima (a caixa ocupa a coluna do marcador). */
+.cm-dott .cm-line.cm-livemd-checklist {
+  padding-left: 1.6em;
+  text-indent: -1.6em;
+}
+.cm-dott .cm-livemd-checklist-strike {
+  text-decoration: line-through;
+  color: var(--fg3);
+}
+
+/* Caixa de marcar — REUSO 1:1 de .check/.check.done
+   (features/tasks/TasksPanel.module.css): mesma medida, mesmo raio, mesmo
+   check desenhado. O app ja tinha essa peca aprovada; isto NAO e uma
+   segunda caixa, e a mesma receita reaplicada aqui (o editor e DOM puro do
+   CodeMirror, entao nao da pra importar o componente React direto). */
+.cm-livemd-checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  text-indent: 0;
+  margin-right: 8px;
+  vertical-align: -3px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border-control);
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
+}
+.cm-livemd-checkbox:hover { border-color: var(--success); }
+.cm-livemd-checkbox-done {
+  background: var(--success);
+  border-color: var(--success);
+}
+.cm-livemd-checkbox-done::after {
+  content: '';
+  width: 9px; height: 5px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-45deg) translate(1px, -1px);
+}

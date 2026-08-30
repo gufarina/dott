@@ -1,0 +1,318 @@
+/* CaptureBox.module.css — a "roupa" nova da caixa de captura (TASK-343):
+   container proprio, largo, abaixo dos 4 quadrantes do PARA, forma de caixa
+   de conversa (preview/captura-conversacional.html, aprovado pelo CEO). Todo
+   token abaixo ja existia em tokens.css - nenhum numero novo foi inventado. */
+
+/* TASK-378 (29/08/2026): o padding que dava respiro INTERNO ao painel
+   .captureShell (TASK-346) foi pra zero - aquele painel nao existe mais
+   (ver App.module.css, comentario em .captureShell). .convoBox agora
+   senta rente as bordas de .centralColumn, do mesmo jeito que .central (o
+   painel do PARA) ja senta - os dois viram irmaos de verdade, sem um
+   segundo respiro encaixado entre eles. Isso tambem evita esquina viva:
+   se sobrasse matting aqui, o retangulo reto de .centralColumn (ela nao
+   tem raio - ver comentario la) apareceria com canto QUADRADO contra a
+   mesa, quebrando a linguagem squircle do app inteiro. Rente, a unica
+   fresta que aparece e nos 4 cantos arredondados de .convoBox (poucos px,
+   onde a curva do poco corta o retangulo reto de .centralColumn por
+   baixo) - detalhe aceito, nao bug: le como o chao aparecendo pela
+   dobradica do poco, coerente com a metafora. */
+.convoWrap {
+  flex-shrink: 0;
+}
+
+/* TASK-346: fundo sobe de --surface pra --surface2 - o painel que envolve
+   esta caixa (.captureShell) agora e --surface (mesma receita de
+   panelLeft/panelRight), entao a caixa precisa de UM degrau de contraste
+   pra continuar se destacando do painel (a mesma logica de --surface2 nos
+   inputs dentro de InboxPanel/TasksPanel - ver .addRow em
+   TasksPanel.module.css, DESIGN.md secao "Input"). Raio/borda continuam os
+   mesmos da proposta aprovada. */
+.convoBox {
+  position: relative;
+  /* HISTORICO (TASK-375/378, ver comentario completo em DESIGN.md secao
+     "campo protagonista"): a caixa passou de --surface2 pra --bg pra
+     --desk, cada rodada tentando fazer a caixa ler como POCO (mais escura
+     que o entorno). --desk (TASK-378) era o ponto mais escuro possivel -
+     e so funcionava porque o entorno (.centralColumn) tinha um "chao
+     proprio" em --surface por baixo.
+
+     CORRECAO (TASK-380, 29/08/2026 - CEO: "voce criou um container atras
+     do PARA e do box.. sem sentido, apague isso agora"): o "chao proprio"
+     de .centralColumn ERA a camada nova que a ordem original da TASK-378
+     ("sem o painel intermediario") tinha mandado tirar. Removido
+     (App.module.css). Isso REABRE o conflito que a TASK-378 tinha
+     resolvido: sem chao proprio, o entorno de .convoBox volta a ser o
+     PISO REAL do app (.body, --desk) - o MESMO token que a caixa ja
+     usava. Duas superficies no mesmo tom = a caixa some (o defeito que o
+     CEO apontou).
+
+     RESOLVIDO subindo a caixa um degrau, pra --surface (a MESMA receita
+     ja usada por .panelLeft/.panelRight/.central sentados direto em
+     --desk): nao ha token mais escuro que --desk pra puxar (e o piso de
+     verdade do sistema - secao 2 do DESIGN.md), entao a UNICA saida
+     honesta pra continuar visivel sem inventar container e a caixa ficar
+     um degrau ACIMA do piso - mais clara que o chao, nao mais o ponto
+     mais escuro da tela (perde a metafora de "poco", registrado sem
+     maquiagem). --bg (o degrau entre --desk e --surface) foi descartado:
+     a diferenca contra --desk seria de so ~2,0 L* no escuro - MENOR que
+     os ~2,7 L* que ja foram reprovados tres vezes por insuficientes (ver
+     historico da TASK-377/378). --surface reusa um tom que ja prova
+     funcionar nesta MESMA relacao com --desk (os outros tres paineis) e
+     entrega a MESMA magnitude que a TASK-378 ja validou como suficiente.
+     Medido (formula WCAG, relative luminance -> L*):
+       Escuro: --surface (caixa) `#141417` L*≈6,4 vs --desk (piso, agora o
+       entorno de verdade) `#060609` L*≈1,7 - diferenca ≈4,7 L*.
+       Claro: --surface `#fbfbfc` L*≈98,6 vs --desk `#dde0e4` L*≈89,0 -
+       diferenca ≈9,6 L*. Os dois batem a MESMA magnitude ja aprovada na
+       TASK-378 (4,7/9,6) - so a DIRECAO inverteu: a caixa e a mais CLARA
+       agora, nao a mais escura. */
+  background: var(--surface);
+  /* Borda: MESMA receita de sempre (nenhuma cor nova) - so o fundo atras
+     dela mudou de novo, pra --surface (TASK-380). Recalculado:
+       Escuro: borda rgb(132,132,139) contra --surface rgb(20,20,23) =
+       ~4,95:1 (era ~5,45:1 contra --desk - cai um pouco porque o fundo
+       ficou mais claro e mais perto do cinza da propria borda, mas segue
+       bem acima do piso, folga de +65%). Claro: borda ~rgb(105,109,120)
+       contra --surface `#fbfbfc` = ~5,0:1 (era ~3,91:1 contra --desk -
+       MELHOROU, o fundo mais claro da mais espaco pra borda escura se
+       destacar). Piso de controle nao-textual e 3:1 (DESIGN.md secao 2) -
+       os dois cruzam com folga grande nos dois temas. */
+  border: 1.5px solid color-mix(in srgb, var(--border-control) 75%, var(--fg) 25%);
+  /* Sombra de recesso (TASK-380): o token --recess-shadow (tokens.css)
+     nasceu na TASK-378 pra um caso especifico - a caixa sentando em
+     --desk, sem token de superficie mais escuro abaixo pra reciclar como
+     base. Esse caso nao existe mais (--surface tem --bg e --desk mais
+     escuros abaixo dela), mas a receita (cor final ja com alfa) nao
+     depende de qual token esta por baixo - continua funcionando, medido
+     de novo, nao assumido:
+       Escuro: `rgba(0,0,0,.45)` misturado com --surface (L*≈6,4) derruba
+       o topo da caixa pra ≈L*3,1 - queda de ≈3,3 L*, MAIOR que a queda de
+       ≈0,84 L* que a mesma receita dava contra --desk (a caixa antes ja
+       estava quase preta, sobrava pouco L* pra cair) - o recesso fica
+       MAIS legivel agora, nao menos, e a area afetada continua sendo so a
+       faixa de 1-3px do inset, nao estoura.
+       Claro: `rgba(20,20,35,.14)` misturado com --surface claro (L*≈98,6)
+       derruba pra ≈L*87,3 - queda de ≈11,3 L*, mesma ordem de grandeza da
+       queda que a receita ja dava contra --desk (≈10,2 L*).
+     Veredito: nenhuma recalibracao necessaria - o token sobrevive a troca
+     de fundo sem sumir nem estourar. */
+  box-shadow: inset 0 1px 3px var(--recess-shadow);
+  /* Raio: TASK-378 - .captureShell (o "de fora" da formula de raio
+     aninhado, secao 22.3 do DESIGN.md) nao tem mais raio nem mask proprios
+     (App.module.css) - o par aninhado ".captureShell -> .convoBox" que
+     motivava --r-shell-inset-12 (8px) deixou de existir, nao ha mais curva
+     de fora pra ficar concentrica. RECALCULADO (restricao da propria
+     TASK-378 pedia isso se um par aninhado fosse afetado): a caixa vira um
+     PAINEL de primeiro nivel agora (irma de .central/.panelLeft/
+     .panelRight, sentada direto no piso) - usa o raio de PORTE que esses
+     tres ja usam, --r-shell (20px), em vez do raio de aninhamento antigo.
+     --r-shell-inset-12 fica sem este consumidor (o outro consumidor,
+     .imageContainer do ImageViewer, continua igual - token nao fica
+     orfao). */
+  border-radius: var(--r-shell);
+  --sq-r: var(--r-shell);
+  -webkit-mask-image: paint(squircle);
+  mask-image: paint(squircle);
+  padding: var(--space-4) var(--space-5) var(--space-3);
+  transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+/* Mesmo sinal de foco unico do InboxPanel de origem (.captureCaixa:focus-within) -
+   a CAIXA avisa foco sozinha, o textarea nao duplica outro contorno.
+   TASK-369: o anel era box-shadow PRA FORA (0 0 0 3px) - com mask-image
+   aplicado acima, sombra/anel que nasce FORA da border-box do elemento
+   mascarado corre risco de ser cortado pelo worklet (o canvas da mascara
+   so cobre o tamanho do proprio elemento, geom.width/height em
+   squircle.js). Trocado por INSET: nasce DENTRO da border-box, nunca sai
+   da area que a mascara ja revela - nao ha corte pra acontecer. A borda
+   (border-color: var(--accent), 1px, sempre esteve DENTRO da mascara)
+   continua sendo o sinal primario; o anel inset reforca.
+   TASK-375 (2a rodada): box-shadow agora e uma LISTA de duas sombras, nao
+   uma so - o anel de foco (--accent-s) e a sombra de recesso do repouso
+   (ver comentario em .convoBox acima) precisam coexistir, senao o foco
+   apaga a leitura de "campo rebaixado" que acabou de ser criada. */
+.convoBox:focus-within {
+  border-color: var(--accent);
+  /* Mesmo token de sombra do repouso (--recess-shadow, tokens.css), so
+     lado a lado com o anel de foco - ver comentario em .convoBox. */
+  box-shadow: inset 0 0 0 2px var(--accent-s), inset 0 1px 3px var(--recess-shadow);
+}
+/* Arrastando arquivo por cima: o alvo inteiro se acende (mesma receita de
+   .captureSoltando em InboxPanel.module.css). */
+.convoSoltando { background: var(--accent-s); }
+.convoSolte {
+  position: absolute; inset: var(--space-2);
+  display: flex; align-items: center; justify-content: center; gap: var(--space-2);
+  border: 1.5px dashed var(--accent); border-radius: var(--r-lg);
+  background: color-mix(in oklab, var(--bg) 82%, transparent);
+  color: var(--accent); font-size: var(--text-xs); font-weight: 600;
+  pointer-events: none;
+}
+
+/* Linha meta: chip de tipo + contador (mesma gramatica de InboxPanel .captureMeta) */
+.convoMeta {
+  display: flex; align-items: center; gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.convoChip {
+  font-size: var(--pill-font-size); font-weight: var(--pill-font-weight);
+  letter-spacing: var(--pill-letter-spacing); text-transform: uppercase;
+  line-height: var(--pill-line-height); padding: var(--pill-padding);
+  border-radius: var(--r-full);
+  display: inline-flex; align-items: center; gap: 3px;
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+/* REVERTIDO (TASK-375, 29/08/2026): a TASK-369 tinha trocado pra
+   var(--surface) so porque .convoBox tinha virado --surface3 (mesmo tom -
+   selo some). Agora que .convoBox voltou a --surface2 (ver comentario
+   acima), --surface3 volta a ser o acento certo: e o MESMO par que
+   InboxPanel.module.css ja usa pra .type-nota/etc (chip neutro sobre um
+   card --surface2) - .convoChipNeutral so espelha essa fonte-da-verdade
+   de novo, sem excecao propria. */
+.convoChipNeutral {
+  font-size: var(--pill-font-size); font-weight: var(--pill-font-weight);
+  letter-spacing: var(--pill-letter-spacing); text-transform: uppercase;
+  line-height: var(--pill-line-height); padding: var(--pill-padding);
+  border-radius: var(--r-full);
+  display: inline-flex; align-items: center; gap: 3px;
+  background: var(--surface3); color: var(--fg3);
+}
+.convoCounter {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-3xs); font-weight: 500; color: var(--fg3);
+}
+.convoCounterFull { color: var(--danger); }
+
+/* Texto: agora protagonista do painel central, corpo em --text-base (nao
+   mais --text-sm do InboxPanel apertado) - o container tem espaco de sobra. */
+.convoInput {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0 0 var(--space-2);
+  color: var(--fg);
+  font-size: var(--text-base);
+  line-height: 1.55;
+  resize: none;
+  outline: none;
+  min-height: 40px;
+  max-height: 150px;
+  overflow-y: auto;
+  font-family: inherit;
+}
+.convoInput::placeholder { color: var(--fg3); }
+.convoInput:disabled { opacity: .5; cursor: not-allowed; }
+.convoInput::-webkit-scrollbar { width: 3px; }
+.convoInput::-webkit-scrollbar-thumb { background: var(--border2); }
+/* TASK-347 (CEO: "bizarrice visual" - dois aneis laranja acesos ao mesmo
+   tempo, um no painel e outro no campo). Mesma causa raiz da TASK-308/339:
+   o `outline: none` normal do bloco acima perde pra `:focus-visible`
+   (reset.css) quando as duas regras tem a MESMA especificidade e a ordem de
+   carga no bundle favorece o reset - o campo acendia o proprio anel global
+   em cima do anel do .convoBox (acima). O campo nao duplica o anel do
+   conjunto - quem avisa foco e o CONJUNTO (.convoBox:focus-within, acima),
+   um sinal so. Ver regra "um foco por conjunto" no DESIGN.md, secao Input. */
+.convoInput:focus-visible { outline: none; }
+
+/* Palpite de destino — copia fiel de .capturePalpite (InboxPanel.module.css),
+   so renomeado; mesma mecanica, nao redesenhada. */
+.convoPalpite {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 2px; padding: 0 2px var(--space-2);
+  font-size: 11.5px; color: var(--fg3); line-height: 1.35;
+  animation: appearUp var(--dur-base) var(--ease-out) both;
+}
+.convoPalpite svg { color: var(--accent); flex-shrink: 0; }
+.convoPalpite b { color: var(--fg2); font-weight: 600; }
+.convoPalpiteQuad { color: var(--fg3); }
+
+.convoFooter {
+  display: flex; align-items: center; gap: var(--space-2);
+  margin-top: var(--space-2); padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+}
+.convoIconBtn {
+  width: var(--icon-btn-md); height: var(--icon-btn-md); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: transparent; color: var(--fg3);
+  border-radius: var(--r-sm); cursor: pointer;
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+/* REVERTIDO (TASK-375, 29/08/2026): volta a var(--surface3) agora que
+   .convoBox voltou a --surface2 (ver comentario no topo do arquivo) - o
+   hover ganha o mesmo acento que o selo/chips vizinhos (.convoChipNeutral),
+   uma linguagem so de "acento claro dentro da caixa --surface2". */
+.convoIconBtn:hover:not(:disabled) { background: var(--surface3); color: var(--fg); }
+.convoIconBtn:disabled { opacity: .4; cursor: not-allowed; }
+
+.convoDica {
+  flex: 1; min-width: 0;
+  font-size: var(--text-2xs); color: var(--fg3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+.convoDicaVisivel { opacity: 1; }
+
+/* Botao de enviar: aqui NAO e mais o icone sozinho de 28px do hot path
+   apertado do InboxPanel (ver comentario TASK-306/330 em
+   InboxPanel.module.css - la o botao ficava pequeno de proposito por causa
+   da faixa estreita de .captureAcoes). Este container e largo e o botao
+   ganha ROTULO ("Capturar"), como a proposta aprovada mostrou - isso muda o
+   porte certo pra --btn-h-lg (44px), a regra vigente do DESIGN.md pra botao
+   com texto (secao 17.1: "nucleo abaixo da linha de texto exige 44px+").
+   Usa a geometria PADRAO de .hoverGlow (reset.css, pensada pra 44px) - sem
+   overrides de --tag-h/--tag-inset-x, ao contrario do .btnCapture antigo. */
+/* REVERTIDO (TASK-375, 29/08/2026): as 3 regras abaixo voltam a
+   var(--surface3) agora que .convoBox voltou a --surface2 (ver comentario
+   no topo do arquivo) - o CTA "Capturar" volta a ter o mesmo acento do
+   selo/chips vizinhos (.convoChipNeutral, .type-*, .convoIconBtn:hover),
+   uma linguagem so de "acento claro dentro da caixa --surface2". */
+.convoSend {
+  --glow-intensity: .85;
+  margin-left: auto; flex-shrink: 0; height: var(--btn-h-lg); padding: 0 var(--space-5);
+  background: var(--surface3);
+  border: none;
+  border-radius: var(--r-btn); color: var(--fg);
+  font-size: var(--text-xs); font-weight: 600; cursor: pointer;
+  white-space: nowrap;
+  display: flex; align-items: center; gap: var(--space-2);
+  transition: opacity var(--dur-base) var(--ease-out), scale var(--dur-instant) var(--ease-out);
+}
+.convoSend:hover:not(:disabled) { opacity: .88; }
+.convoSend:active:not(:disabled) { scale: .975; }
+.convoSend:disabled {
+  cursor: not-allowed; opacity: 1;
+  background: var(--surface3); color: var(--fg3);
+}
+.convoSendFull {
+  background: var(--surface3); border-color: var(--border2);
+  color: var(--fg3); font-size: var(--text-xs); font-weight: 600;
+}
+
+/* Espelho das cores de tipo — MESMO criterio ja usado em Widget.module.css
+   ("mesmas do InboxPanel"): fonte-da-verdade em InboxPanel.module.css
+   .type-*, CaptureBox e um segundo consumidor no mesmo bundle, mas CSS
+   Modules escopam por arquivo - nao ha como referenciar a classe de outro
+   modulo sem virar CSS global. O MAPA (CardType -> sufixo) ja e unico, em
+   src/lib/cardTypeClass.ts - so a cor (13 linhas) e espelhada aqui.
+   REVERTIDO (TASK-375, 29/08/2026): a TASK-369 tinha divergido do espelho
+   (var(--surface) em vez de var(--surface3)) so porque .convoBox tinha
+   virado --surface3 (mesmo tom do parente). Agora que .convoBox voltou a
+   --surface2 (ver comentario no topo do arquivo), o espelho fiel de
+   InboxPanel volta a fazer sentido - var(--surface3), sem divergencia. */
+.type-nota,
+.type-imagem,
+.type-audio,
+.type-video,
+.type-arquivo,
+.type-prompt,
+.type-contato { background: var(--surface3); color: var(--fg3); }
+.type-url,
+.type-link    { background: color-mix(in oklab, var(--accent) 15%, transparent); color: var(--accent); }
+.type-codigo,
+.type-tarefa  { background: color-mix(in oklab, var(--green) 15%, transparent); color: var(--green); }
+.type-ideia   { background: color-mix(in oklab, var(--warn) 15%, transparent); color: var(--warn); }
+.type-shell   { background: color-mix(in oklab, var(--danger) 15%, transparent); color: var(--danger); }

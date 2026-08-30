@@ -9,8 +9,9 @@ import {
 import { useStore, type InboxCard } from './store'
 import { showToast } from './components/Toast'
 import { imageFromEvent, saveImageFile } from './lib/attachments'
-import { invoke } from '@tauri-apps/api/core'
-import { Titlebar } from './components/Titlebar'
+import { addInbox } from './lib/inboxService'
+import { getCurrentWindow } from '@tauri-apps/api/window'
+import { Titlebar, closeMainWindow } from './components/Titlebar'
 import { BootLoader } from './components/BootLoader'
 import { ToastArea } from './components/Toast'
 import { SearchModal } from './components/SearchModal'
@@ -18,15 +19,20 @@ import { Settings } from './components/Settings'
 import { Breadcrumb } from './components/Breadcrumb'
 import { InboxPanel } from './features/inbox/InboxPanel'
 import { PARAGrid, CategoryView } from './features/para/PARAGrid'
+import { CaptureBox } from './features/capture/CaptureBox'
 import { TasksPanel } from './features/tasks/TasksPanel'
 import { TaskDetail } from './features/tasks/TaskDetail'
 import { NoteEditor } from './features/editor/NoteEditor'
 import { FolderNotesView } from './features/folder/FolderNotesView'
 import { Constellation } from './features/graph/Constellation'
 import { Onboarding } from './features/onboarding/Onboarding'
+import { useHoverGlowCursor } from './hooks/useHoverGlowCursor'
 import s from './App.module.css'
 
 export default function App() {
+  // TASK-319: um unico laco pra todos os botoes `.hoverGlow` desta janela
+  // (FolderNotesView, Modal, Onboarding, InboxPanel) - ver o hook.
+  useHoverGlowCursor()
   const view = useStore(st => st.view)
   const folder = useStore(st => st.folder)
   const booting = useStore(st => st.booting)
@@ -111,7 +117,15 @@ export default function App() {
       showToast('warn', 'Erro', 'Não foi possível salvar a imagem.')
       return
     }
-    await invoke('inbox_add', { content: url, kind: 'IMAGEM' })
+    const result = await addInbox(url, 'IMAGEM')
+    if (result === 'FULL') {
+      showToast('warn', 'Inbox cheio (10/10)', 'Processe alguns cards antes.')
+      return
+    }
+    if (!result) {
+      showToast('warn', 'Erro', 'Não foi possível guardar a imagem no inbox.')
+      return
+    }
     await useStore.getState().reloadInbox()
     showToast('info', 'Imagem capturada', 'Card adicionado ao inbox.')
   }
@@ -124,9 +138,42 @@ export default function App() {
       const wait = Math.max(0, 800 - (Date.now() - t0))
       setTimeout(() => useStore.setState({ booting: false }), wait)
     })
+    let unlistenInbox: (() => void) | undefined
+    let unlistenAtalho: (() => void) | undefined
+    import('@tauri-apps/api/event').then(({ listen }) => {
+      listen('inbox-changed', () => useStore.getState().reloadInbox())
+        .then(fn => { unlistenInbox = fn })
+        .catch(() => {})
+      // AVISO DE ATALHO: o lado Rust tenta registrar Ctrl+Shift+Space no
+      // boot e emite este evento quando outro programa ja tomou o atalho -
+      // sem isto o usuario so descobria que a captura rapida nao funciona
+      // sozinho, sem entender por que. O payload e a mensagem de erro
+      // tecnica: fica so no console, nunca aparece na tela.
+      listen<string>('shortcut-register-failed', e => {
+        console.error('[shortcut-register-failed]', e.payload)
+        showToast(
+          'warn', 'Atalho de captura ocupado',
+          'O atalho Ctrl+Shift+Space já está em uso por outro programa no seu computador. Você ainda pode capturar clicando na bolinha flutuante do Dott.',
+        )
+      })
+        .then(fn => { unlistenAtalho = fn })
+        .catch(() => {})
+    }).catch(() => {})
+    return () => { unlistenInbox?.(); unlistenAtalho?.() }
+  }, [])
+
+  // CORRIGIR item 3: Alt+F4 e o menu da barra de tarefas fecham a janela
+  // principal sem passar pelo botao da Titlebar - sem isto, nenhum desses
+  // caminhos dava flush no autosave pendente. onCloseRequested previne o
+  // fechamento padrao e reusa o MESMO closeMainWindow do botao (que faz o
+  // flush e so entao chama destroy(), que nao reemite este evento).
+  useEffect(() => {
     let unlisten: (() => void) | undefined
-    import('@tauri-apps/api/event')
-      .then(({ listen }) => listen('inbox-changed', () => useStore.getState().reloadInbox()))
+    getCurrentWindow()
+      .onCloseRequested(event => {
+        event.preventDefault()
+        void closeMainWindow()
+      })
       .then(fn => { unlisten = fn })
       .catch(() => {})
     return () => { unlisten?.() }
@@ -174,7 +221,7 @@ export default function App() {
         showToast('info', 'Processado', 'Card virou nota na pasta.')
         useStore.getState().setView('editor', { category: categoryId, folder: folderId, note: noteId })
       } else {
-        showToast('warn', 'Nao consegui processar', 'O card nao foi encontrado no inbox.')
+        showToast('warn', 'Não consegui processar', 'O card não foi encontrado no inbox.')
       }
     }
   }
@@ -203,28 +250,43 @@ export default function App() {
             <InboxPanel />
           </div>
 
-          <div className={s.central}>
-            {view !== 'board' && view !== 'graph' && <Breadcrumb />}
+          {/* TASK-346: a caixa de captura deixou de ser filha do painel do
+              PARA (.central) e virou IRMA dele - moldura, fundo e cantos
+              proprios, mesma receita de .panelLeft/.panelRight (ver
+              .captureShell em App.module.css). .centralColumn so existe pra
+              dar aos dois painel o mesmo pai flex-column com respiro real
+              (gap) entre eles - .central volta a fechar sozinho ao redor do
+              que ela hospeda em cada view. */}
+          <div className={s.centralColumn}>
+            <div className={s.central}>
+              {view !== 'board' && view !== 'graph' && <Breadcrumb />}
 
-            <div className={s.viewArea}>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={view}
-                  className={s.viewMotion}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
-                >
-                  {view === 'board' && <PARAGrid />}
-                  {view === 'graph' && <Constellation />}
-                  {/* canvas com pasta = notas da pasta; sem pasta = a categoria inteira */}
-                  {view === 'canvas' && (folder ? <FolderNotesView /> : <CategoryView />)}
-                  {view === 'editor' && <div className={s.canvasLayout}><NoteEditor /></div>}
-                  {view === 'task' && <TaskDetail />}
-                </motion.div>
-              </AnimatePresence>
+              <div className={s.viewArea}>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={view}
+                    className={s.viewMotion}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+                  >
+                    {view === 'board' && <PARAGrid />}
+                    {view === 'graph' && <Constellation />}
+                    {/* canvas com pasta = notas da pasta; sem pasta = a categoria inteira */}
+                    {view === 'canvas' && (folder ? <FolderNotesView /> : <CategoryView />)}
+                    {view === 'editor' && <div className={s.canvasLayout}><NoteEditor /></div>}
+                    {view === 'task' && <TaskDetail />}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
             </div>
+
+            {view === 'board' && (
+              <div className={s.captureShell}>
+                <CaptureBox />
+              </div>
+            )}
           </div>
 
           <div className={s.panelRight}>
@@ -239,7 +301,7 @@ export default function App() {
               <span className={s.dragGhostText}>{dragging.content}</span>
               {/* Diz o destino ANTES de soltar — sem adivinhacao. */}
               <span className={s.dragGhostAlvo}>
-                {alvo ? `Soltar em ${alvo}` : 'Arraste ate uma pasta'}
+                {alvo ? `Soltar em ${alvo}` : 'Arraste até uma pasta'}
               </span>
             </div>
           )}

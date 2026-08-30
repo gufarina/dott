@@ -317,7 +317,24 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, .6);
+  /* TASK-366: a sombra vazava nos 4 cantos. Causa medida: esta janela do
+     Tauri (label "widget", tauri.conf.json) e transparente e e redimensionada
+     por widget_set_geometry pra EXATAMENTE EXP_W x EXP_H — o .panel enche o
+     canvas inteiro, ZERO margem sobrando pra fora da caixa. Um box-shadow
+     comum precisa de pixels FORA da caixa pra desenhar o borrao; nas bordas
+     retas esses pixels ficam fora da janela e somem, mas no bolso do canto
+     (a fatia quadrada que o border-radius deixa de fora da curva, ainda
+     DENTRO do retangulo da janela) o navegador pinta a sombra normalmente —
+     e o unico lugar onde ela aparece, lendo como "vazamento". Nao e CSS que
+     nao acompanha o raio; e sombra pedindo canvas que a janela nao tem. Sem
+     margem pra reservar (isso seria geometria de janela, fora deste arquivo),
+     a correcao segura e nao pedir esse espaco: friso claro no topo (inset,
+     luz de cima — DESIGN.md 18.3) mais um contato bem curto, com spread
+     negativo maior que o blur, entao o alcance efetivo fica dentro da propria
+     caixa e nunca precisa pintar no bolso do canto. */
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / .05) inset,
+    0 6px 12px -12px rgb(0 0 0 / .6);
   /* O PAINEL E A BOLINHA CRESCIDA. A mascara comeca valendo exatamente a caixa
      dela e se abre ate a janela inteira.
 
@@ -598,17 +615,24 @@
   padding: 0 10px;
 }
 
-/* ─── Cores dos chips de tipo (mesmas do InboxPanel) ─── */
-.chip-nota    { background: rgba(74,143,217,.15);  color: #4a8fd9; }
-.chip-url     { background: rgba(155,108,219,.15); color: #9b6cdb; }
-.chip-codigo  { background: rgba(61,179,122,.15);  color: #3db37a; }
-.chip-ideia   { background: rgba(217,140,58,.15);  color: #d98c3a; }
-.chip-shell   { background: rgba(224,64,64,.15);   color: #e04040; }
-.chip-audio   { background: rgba(61,179,170,.15);  color: #3db3aa; }
-.chip-video   { background: rgba(224,90,160,.15);  color: #e05aa0; }
-.chip-imagem  { background: rgba(100,150,240,.15); color: #6496f0; }
-.chip-arquivo { background: rgba(180,150,90,.15);  color: #b4966e; }
-.chip-link    { background: rgba(90,180,180,.15);  color: #5ab4b4; }
-.chip-prompt  { background: rgba(160,90,220,.15);  color: #a05adc; }
-.chip-tarefa  { background: rgba(61,179,122,.15);  color: #3db37a; }
-.chip-contato { background: rgba(61,179,170,.15);  color: #3db3aa; }
+/* ─── Cores dos chips de tipo (mesmas do InboxPanel) ───
+   TASK-316 (27/08/2026): estavam dessincronizadas de proposito nenhum -
+   13 hex cravados (incluindo violeta/rosa/teal que NUNCA existiram na
+   paleta do Dott) copiados aqui como "espelho" do InboxPanel, mas o
+   InboxPanel corrigiu antes e este arquivo ficou pra tras. Mesmo criterio
+   de la: tipo com significado semantico usa o TOKEN (fundo = token a 15%
+   via color-mix); sem significado, neutro. Ver o comentario completo em
+   InboxPanel.module.css .type-*. */
+.chip-nota,
+.chip-imagem,
+.chip-audio,
+.chip-video,
+.chip-arquivo,
+.chip-prompt,
+.chip-contato { background: var(--surface3); color: var(--fg3); }
+.chip-url,
+.chip-link    { background: color-mix(in oklab, var(--accent) 15%, transparent); color: var(--accent); }
+.chip-codigo,
+.chip-tarefa  { background: color-mix(in oklab, var(--green) 15%, transparent); color: var(--green); }
+.chip-ideia   { background: color-mix(in oklab, var(--warn) 15%, transparent); color: var(--warn); }
+.chip-shell   { background: color-mix(in oklab, var(--danger) 15%, transparent); color: var(--danger); }

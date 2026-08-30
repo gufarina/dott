@@ -46,8 +46,13 @@
   letter-spacing: -.01em;
   color: var(--fg);
 }
+/* TASK-334 (Fase 3, DESIGN.md secao 17.2): era 26px - a mesma acao
+   "fechar modal" existia em 4 arquivos com tamanhos que ninguem decidiu
+   de proposito (24/24/26/26). Convergido pro `--icon-btn-md` (28px), o
+   mesmo porte que `.captureIconBtn`/`.coverBtn`/`.back` ja usam pra
+   icone-so em cabecalho/toolbar - nao um numero novo. */
 .close {
-  width: 26px; height: 26px; flex-shrink: 0;
+  width: var(--icon-btn-md); height: var(--icon-btn-md); flex-shrink: 0;
   display: inline-flex; align-items: center; justify-content: center;
   border: none; background: transparent; color: var(--fg3);
   border-radius: var(--r-sm); cursor: pointer;
@@ -104,11 +109,16 @@
 }
 
 .btn {
-  /* 44px (era 36px) - a receita vigente de --dott-gradient (opcao 3, CEO)
-     ancora o nucleo abaixo da linha de texto e exige essa altura pra nao
-     colidir. Ghost sobe junto so pra ficar alinhado ao lado do primario -
+  /* TASK-372 (29/08/2026): volta a 36px via `var(--btn-h-lg)` (tokens.css) -
+     era 44px "fixo" (nao token) por causa da receita ANTIGA de
+     `--dott-gradient` (radial cheio, nucleo perto da base, exigia altura
+     alta pra nao colidir com o texto). Essa receita nao preenche mais
+     NENHUM botao em repouso desde a TASK-319 - a marca vive na tag pequena
+     de `.hoverGlow` (reset.css), que nao precisa de 44px. CEO, TASK-372,
+     sobre a tarja: "reduz a altura dessa tarja e a altura dos botoes
+     tambem". Ghost sobe junto so pra ficar alinhado ao lado do primario -
      ghost nunca leva o gradiente. */
-  height: 44px;
+  height: var(--btn-h-lg);
   padding: 0 var(--space-4);
   display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
   border-radius: var(--r-btn);
@@ -128,19 +138,24 @@
 }
 .ghost:hover:not(:disabled) { background: var(--surface3); color: var(--fg); }
 
+/* TASK-320 (28/08/2026, corrige a TASK-319: preenchimento invertido virava
+   BRANCO no tema escuro, reprovado). Repouso escuro "como os vizinhos" -
+   mesma receita de FolderNotesView.module.css .btnNew (--surface3, sem
+   borda). A marca vira barra+ponto quente so no hover (classe global
+   `hoverGlow`, ver reset.css) e segue o cursor. */
 .primary {
   border: none;
-  background: var(--dott-gradient);
-  background-blend-mode: var(--dott-gradient-blend);
-  color: #fff;
+  background: var(--surface3);
+  color: var(--fg);
 }
-.primary:hover:not(:disabled) { opacity: .92; }
+.primary:hover:not(:disabled) { opacity: .88; }
 .primary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-/* Desabilitado nao carrega a marca: opacity:.45 na brasa vira lama marrom.
-   Superficie neutra, igual ao resto do sistema. */
+.primary:active:not(:disabled) { scale: .975; }
+/* Desabilitado nao carrega a marca: superficie neutra, igual ao resto do
+   sistema (a classe hoverGlow tambem nao acende - ver reset.css, o
+   seletor e :hover/:focus-visible do PROPRIO elemento habilitado). */
 .primary:disabled {
   background: var(--surface3);
-  background-blend-mode: normal;
   color: var(--fg3);
   opacity: 1;
 }

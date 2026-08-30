@@ -81,6 +81,6 @@ export function ModalButton({
   className,
   ...props
 }: { variant?: 'primary' | 'ghost' } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  const cls = `${s.btn} ${variant === 'primary' ? s.primary : s.ghost} ${className ?? ''}`
+  const cls = `${s.btn} hoverZoom ${variant === 'primary' ? `${s.primary} hoverGlow` : s.ghost} ${className ?? ''}`
   return <button className={cls} {...props} />
 }

@@ -7,12 +7,29 @@
   font-size: 14px;
 }
 
+/* Envelope da tela inteira — precisa ser `relative` pra SelectionToolbar e
+   SlashMenu (position:absolute, coordenadas convertidas em relacao a ele:
+   ver selectionToolbar.ts/SlashMenu.tsx) e `flex column` pra herdar o
+   layout que antes vinha do Fragment direto dentro de `.canvasLayout`
+   (App.module.css). */
+.wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Cabecalho "zero cromo" (proposta CANVAS, TASK-325/326): sem linha
+   dividindo do corpo — so espaco, o texto e a interface. */
 .header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 18px;
-  border-bottom: 1px solid var(--border);
+  /* TASK-361: 28px, nao mais 48px - ver comentario de .tags abaixo pra
+     explicacao completa (a coluna inteira agora usa a mesma margem). */
+  padding: 26px 28px 0;
   flex-shrink: 0;
   background: var(--surface);
 }
@@ -22,35 +39,49 @@
   background: transparent;
   border: none;
   color: var(--fg);
-  font-size: 22px;
+  font-size: 30px;
   font-weight: 700;
   outline: none;
   font-family: inherit;
   letter-spacing: -0.02em;
+  /* Respiro interno (pedido do CEO, urgente 28/08): sem isto o titulo
+     parece campo de formulario apertado, nao um TITULO - proposta aprovada
+     (preview/editor-nota-proposta.html) nunca desenhou moldura nenhuma. */
+  padding: var(--space-2) 0;
+  border-radius: var(--r-xs);
 }
 .titleInput::placeholder { color: var(--fg3); }
-
-.modeToggle {
-  flex-shrink: 0;
-  font-family: inherit;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--fg2);
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: var(--r-md);
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+/* Foco discreto: uma linha fina embaixo, nunca uma caixa fechando em volta
+   do texto (pedido explicito do CEO - :focus-visible global de reset.css
+   daria outline em caixa; aqui sobrescrevemos so pro titulo por uma marca
+   mais editorial, do tamanho do proprio token de foco). */
+.titleInput:focus-visible {
+  outline: none;
+  box-shadow: inset 0 -2px 0 0 var(--focus);
 }
-.modeToggle:hover { background: var(--surface3); color: var(--fg); border-color: var(--fg3); }
 
 .tags {
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 9px 18px;
-  border-bottom: 1px solid var(--border);
+  /* TASK-361 (28/08/2026, 3a reprovacao do CEO no mesmo elemento: "sem
+     margem, sem sentido"). A versao anterior emprestava o respiro de cima
+     do padding do proprio .titleInput (zero aqui) - lia como "colado no
+     titulo" na pratica, tres vezes seguidas. Agora a fileira tem folego
+     PROPRIO: --space-2 (8px) em cima soma aos 8px do .titleInput = 16px
+     percebidos ate o titulo; --space-3 (12px) embaixo mais o padding-top
+     do .toolbar (8px) dao 20px ate a barra de formatacao - a borda
+     inferior do toolbar ja separa visualmente, sem precisar de outra
+     linha aqui (mesma filosofia "zero cromo" do .header, acima).
+     Margem horizontal: 28px, nao mais 48px - 48px so alinhava com o
+     titulo, nunca com a barra de formatacao nem com o corpo do editor,
+     que ficam presos ao ponto fixo de liveMarkup.css `.cm-content`
+     (padding 28px, documentado no comentario de EditorToolbar.module.css:
+     "a tela da nota alinha a 28px, o mesmo ponto onde o texto do editor
+     comeca"). A coluna inteira (titulo, etiquetas, barra, corpo) agora
+     compartilha os mesmos 28px - a raiz do defeito era esta coluna nunca
+     ter tido UMA margem so. */
+  padding: var(--space-2) 28px var(--space-3);
   flex-shrink: 0;
   flex-wrap: wrap;
 }
@@ -58,7 +89,10 @@
 .tagChip {
   height: 24px;
   padding: 0 9px;
-  border-radius: 12px;
+  /* TASK-361: --r-full, nao mais 12px cravado - mesmo token de pilula que
+     o resto do app (.chip de Conexoes, .metaTag do modal do Inbox), pra
+     .tagInput poder ser irma de verdade (regra da pilula, DESIGN.md 22.1). */
+  border-radius: var(--r-full);
   background: var(--surface3);
   border: 1px solid var(--border2);
   font-size: 12px;
@@ -69,18 +103,70 @@
 }
 .tagRm { cursor: pointer; color: var(--fg3); font-size: 13px; line-height: 1; }
 
-.tagInput {
-  background: transparent;
+/* TASK-351 (28/08/2026, CEO: "botao tag sem proposito ali" — regressao da
+   TASK-338 de hoje mais cedo). A moldura tracejada abaixo lia bem ao lado
+   de um `.tagChip` (espaco vazio pra somar mais), mas numa nota SEM
+   nenhuma Etiqueta ficava orfa: uma caixa pontilhada sozinha embaixo do
+   titulo. Dois estados agora — nunca os dois ao mesmo tempo:
+   - SEM Etiqueta (`.tagAdd`): convite de TEXTO, sem borda nem fundo, peso
+     de coisa opcional — quem nao quer etiquetar nem repara nele. Vira
+     `.tagInput` (abaixo) so depois do clique.
+   - COM Etiqueta: `.tagInput` mora direto na fileira ao lado do
+     `.tagChip`, mesma altura/padding/raio dele — le como "espaco pra
+     somar mais uma". Input isolado (nao ha container por fora), entao um
+     so anel de foco na regra abaixo nunca fere "foco por conjunto, nunca
+     aninhado" (DESIGN.md, secao Input). Receita visual do campo revista
+     na TASK-361 - ver comentario proprio em `.tagInput`. */
+.tagAdd {
+  height: 24px;
+  padding: 0 4px;
   border: none;
+  background: transparent;
+  color: var(--fg3);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color var(--dur-micro) var(--ease-out);
+}
+.tagAdd:hover, .tagAdd:focus-visible { color: var(--fg2); }
+
+/* TASK-361: o tracejado antigo lia como alvo de arrastar/estado desligado,
+   nao campo pra digitar - e foi reprovado 3x no mesmo elemento ("sem
+   sentido"). Troca pela receita de Input do DESIGN.md (fundo --surface2,
+   borda solida --border-control com piso de contraste, anel de foco
+   --accent + --accent-s) - so o raio muda pra --r-full: aqui o campo em
+   edicao e IRMA do .tagChip ao lado, no mesmo bloco de pilulas (regra da
+   pilula, DESIGN.md 22.1), nao um campo solto com o raio generico --r-btn
+   da receita. Foco unico: este input nao mora dentro de outro container
+   com foco proprio (sem wrapper por fora), entao o proprio anel aqui e o
+   UNICO sinal aceso - nunca fere "um foco por conjunto, nunca aninhado"
+   (DESIGN.md, secao Input). */
+.tagInput {
+  height: 24px;
+  padding: 0 9px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--border-control);
+  background: var(--surface2);
   color: var(--fg);
   font-size: 12px;
   outline: none;
-  width: 130px;
+  width: 96px;
   font-family: inherit;
 }
 .tagInput::placeholder { color: var(--fg3); }
+.tagInput:focus-visible { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-s); }
 
-/* Editor EasyMDE — preenche o espaço (toolbar fixa + área rolável) */
+.hintRow {
+  /* TASK-361: 28px, mesma margem do resto da coluna (ver .tags acima) -
+     antes ficava presa nos 48px antigos do titulo, sozinha desalinhada
+     da fileira de etiquetas logo acima e da barra/corpo logo abaixo. */
+  padding: 0 28px;
+  flex-shrink: 0;
+}
+
+/* Editor vivo (CodeMirror), area rolavel — a barra por selecao e o menu de
+   "/" flutuam por cima (position:absolute ANCORADO em `.wrap`, o ancestral
+   posicionado — nao aqui; ver containerRef em NoteEditor.tsx). */
 .editorWrap {
   flex: 1;
   min-height: 0;
@@ -88,86 +174,88 @@
   display: flex;
   flex-direction: column;
 }
-.editorWrap > :global(.EasyMDEContainer) {
-  flex: 1;
-  min-height: 0;
+
+/* Barra de formatacao (EditorToolbar.tsx, TASK-338) — so declara o padding
+   horizontal deste contexto: 28px, o MESMO ponto onde `.cm-content`
+   (liveMarkup.css) comeca o texto, pra ficar alinhada com a area de
+   escrita logo abaixo dela. */
+.toolbar {
+  --toolbar-px: 28px;
 }
 
-/* painel de notas conectadas (grafo automatico) */
-.backlinks {
+/* Notas conectadas (TASK-315) — rodape de UMA LINHA, nunca compete com o
+   texto da nota. O Motivo fica escondido por padrao e so aparece no HOVER
+   do chip, via `title` NATIVO (nao CSS custom): `.connChips` usa
+   overflow-x:auto pra nunca quebrar linha com muitas Conexoes, e por regra
+   do CSS Overflow Module um pai com overflow-x != visible forca overflow-y
+   pra auto tambem — um tooltip customizado (position:absolute saindo pra
+   cima do chip) seria CLIPADO por esse overflow do proprio pai. O tooltip
+   do sistema operacional nao tem esse problema (renderiza fora da arvore
+   de layout da pagina). */
+.connections {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 18px;
   border-top: 1px solid var(--border);
-  padding: 12px 18px;
   flex-shrink: 0;
   background: var(--surface);
+  min-width: 0;
 }
 
-.backlinksLabel {
-  font-size: 11px;
+.connLabel {
+  font-size: var(--text-2xs);
   font-weight: 700;
   color: var(--fg3);
-  letter-spacing: .05em;
+  letter-spacing: .04em;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  flex-shrink: 0;
 }
 
-.backlinksList {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.backlinkItem {
+.connChips {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 13px;
-  color: var(--fg2);
-  cursor: pointer;
-  padding: 4px 6px;
-  border-radius: var(--r-sm);
-  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  min-width: 0;
 }
-.backlinkItem:hover { background: var(--surface2); color: var(--accent); }
 
-.backlinkIcon { font-size: 12px; color: var(--fg3); }
-
-/* Uma conexao nunca aparece sem dizer de onde veio. */
-.connItem {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: baseline;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--fg2);
-  cursor: pointer;
-  padding: 5px 6px;
-  border-radius: var(--r-sm);
-  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
-}
-.connItem:hover { background: var(--surface2); color: var(--accent); }
-.connTitle { font-weight: 600; color: var(--fg); }
-.connItem:hover .connTitle { color: var(--accent); }
-.connWhy {
-  grid-column: 2;
-  font-size: 11.5px;
-  line-height: 1.4;
-  color: var(--fg3);
-}
-.connMark {
-  font-size: var(--pill-font-size);
-  font-weight: var(--pill-font-weight);
-  line-height: var(--pill-line-height);
-  letter-spacing: var(--pill-letter-spacing);
-  text-transform: uppercase;
-  display: inline-flex;
+/* Cada Conexao vira um chip; o Motivo mora no `title` (tooltip do SO). */
+.chip {
+  flex-shrink: 0;
+  display: flex;
   align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 9px;
   border: 1px solid var(--border2);
   border-radius: var(--r-full);
-  padding: var(--pill-padding);
-  color: var(--fg3);
-  flex: none;
+  background: var(--surface2);
+  color: var(--fg2);
+  font-family: inherit;
+  font-size: var(--text-3xs);
+  cursor: pointer;
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
 }
-.connMark.achada { color: var(--accent); border-color: var(--accent); }
+.chip:hover, .chip:focus-visible { background: var(--surface3); color: var(--fg); border-color: var(--fg3); }
+
+/* Sinal discreto ACHADA/INFERIDA (a pill grande virou um ponto). */
+.chipDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--fg3);
+  flex-shrink: 0;
+}
+.chipDot.achada { background: var(--accent); }
+
+.chipTitle {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .saveStatus {
   margin-left: auto;
@@ -205,4 +293,7 @@
   font-family: inherit;
   transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
 }
-.btnDelete:hover { background: rgba(224,64,64,.12); color: var(--danger); border-color: var(--danger); }
+/* --danger-s (tokens.css, criado pelo CANVAS): o vermelho de rgba(224,64,64,X)
+   era cravado do tema ESCURO e ficava errado no tema claro - --danger-s
+   acompanha o token certo em cada tema (TASK-333 item 6). */
+.btnDelete:hover { background: var(--danger-s); color: var(--danger); border-color: var(--danger); }

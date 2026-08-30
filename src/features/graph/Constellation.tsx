@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useStore } from '../../store'
+import { useScrollEdgeFade } from '../../hooks/useScrollEdgeFade'
 import s from './Constellation.module.css'
 
 const W = 900
@@ -63,6 +64,11 @@ export function Constellation() {
   const destaque = alvo ? new Set([alvo, ...(graph.byNote[alvo] ?? []).map(v => v.id)]) : null
   const noAlvo = alvo ? byId[alvo] : null
   const vizinhosAlvo = alvo ? (graph.byNote[alvo] ?? []) : []
+
+  /** Fade de rolagem na base (TASK-349) - troca de conteudo inteiro (painel
+   *  de um no vs. lista de temas) toda vez que `alvo` muda. */
+  const painelRef = useRef<HTMLElement>(null)
+  useScrollEdgeFade(painelRef, [alvo, vizinhosAlvo.length, graph.communities.length])
 
   if (notes.length === 0) {
     return (
@@ -129,7 +135,7 @@ export function Constellation() {
           })}
         </svg>
 
-        <aside className={s.painel}>
+        <aside ref={painelRef} className={`${s.painel} scrollFadeBottom`}>
           {noAlvo ? (
             <>
               <div className={s.painelTitulo}>{noAlvo.title}</div>

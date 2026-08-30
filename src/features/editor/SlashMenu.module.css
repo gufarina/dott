@@ -1,0 +1,59 @@
+/* SlashMenu.module.css — menu de "/" para estrutura de bloco (TASK-325/326). */
+.menu {
+  position: absolute;
+  width: 200px;
+  z-index: 30;
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow);
+  /* 5px, nao 6px (TASK-357, achado nesta rodada - nunca auditado antes):
+     .menu (--r-md 12px) nao tem cabecalho/rodape embaixo do ultimo .item -
+     ele encosta direto no canto de baixo. Teto da formula = 12 - padding.
+     Com 6px o teto (6) ficava MENOR que o --r-xs (7px) do .item - 1px
+     furando. 5px fecha exato: 12 - 5 = 7 = --r-xs, encaixe concentrico. */
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.head {
+  font-size: var(--text-3xs);
+  color: var(--fg3);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 4px 8px 6px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 8px;
+  /* --r-xs, nao --r-sm - ver comentario em .menu acima (mesma correcao,
+     mesma formula). */
+  border-radius: var(--r-xs);
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--text-xs);
+  color: var(--fg2);
+  text-align: left;
+  cursor: pointer;
+}
+.item .ic,
+.item svg { color: var(--fg3); flex-shrink: 0; }
+.item.active { background: var(--surface); color: var(--fg); }
+.item.active svg { color: var(--fg); }
+
+.glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  font-size: 10.5px;
+  color: var(--fg3);
+  flex-shrink: 0;
+}
+.item.active .glyph { color: var(--fg); }

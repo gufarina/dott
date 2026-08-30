@@ -14,7 +14,7 @@ export const SEED_NOTES: Note[] = [
     updatedAt: '10/06/2026',
     img: false,
     folderId: 'start',
-    tags: ['tutorial', 'inicio'],
+    tags: ['tutorial', 'início'],
     body: [
       '# Bem-vindo ao Dott',
       '',
@@ -37,7 +37,7 @@ export const SEED_NOTES: Note[] = [
     updatedAt: '10/06/2026',
     img: false,
     folderId: 'start',
-    tags: ['tutorial', 'para', 'metodo'],
+    tags: ['tutorial', 'para', 'método'],
     body: [
       '# O método PARA',
       '',
@@ -64,7 +64,7 @@ export const SEED_NOTES: Note[] = [
     updatedAt: '10/06/2026',
     img: false,
     folderId: 'start',
-    tags: ['tutorial', 'conexoes', 'constelacao'],
+    tags: ['tutorial', 'conexões', 'constelação'],
     body: [
       '# Como o Dott conecta suas notas',
       '',

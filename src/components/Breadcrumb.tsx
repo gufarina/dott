@@ -17,7 +17,7 @@ export function Breadcrumb() {
   const quad = category ? para[category] : null
   const folderObj = folder && quad ? quad.folders.find(f => f.id === folder) : null
   /** Na tela da tarefa o caminho termina nela, com o titulo encurtado. */
-  const tarefa = view === 'task' ? tasks.flatMap(g => g.items).find(t => t.id === taskId) : null
+  const tarefa = view === 'task' ? tasks.find(t => t.id === taskId) : null
   const tituloCurto = tarefa
     ? (tarefa.text.length > 42 ? tarefa.text.slice(0, 40).trim() + '…' : tarefa.text)
     : null

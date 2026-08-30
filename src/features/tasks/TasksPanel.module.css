@@ -1,65 +1,11 @@
-.header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 14px;
-  height: 44px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.title {
-  font-size: 14px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-}
-
-.badge {
-  background: var(--accent);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 10px;
-  padding: 0 6px;
-  line-height: 18px;
-  min-width: 18px;
-  text-align: center;
-}
-
-.filter {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 9px 14px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.filterToggle {
-  height: 26px;
-  padding: 0 11px;
-  border-radius: var(--r-sm);
-  background: transparent;
-  border: 1px solid var(--border2);
-  color: var(--fg2);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
-  letter-spacing: .03em;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.filterToggle.active {
-  background: var(--accent-s);
-  border-color: var(--accent);
-  color: var(--accent);
-}
+/* TASK-333 (28/08/2026): PRAZO/Tudo migrou pro componente compartilhado
+   `TabBar` (variant="inline") - mesmo desenho de sublinhado+barrinha do
+   Inbox/Tags, nao mais a pilula com contorno que só esta tela tinha.
+   `.filter`/`.filterToggle` saem daqui, sem consumidor.
+   TASK-373 (29/08/2026): `.header`/`.title`/`.badge` saem daqui - o rotulo
+   "Tarefas" era ruido (a aba ja se explica sozinha, igual Inbox/Tags) e o
+   TabBar virou variant="standalone" (o padrao), que ja traz seu proprio
+   44px/borda/padding - chrome duplicado a menos. */
 
 .list {
   flex: 1;
@@ -80,11 +26,11 @@
 .checkIcon {
   width: 36px; height: 36px;
   border-radius: 50%;
-  background: rgba(61,179,122,.15);
-  color: #3db37a;
+  background: color-mix(in oklab, var(--success) 15%, transparent);
+  color: var(--success);
   display: flex; align-items: center; justify-content: center;
 }
-.empty p { font-size: 14px; color: var(--fg2); }
+.empty p { font-size: var(--text-sm); color: var(--fg2); }
 
 .group { margin-bottom: 14px; }
 
@@ -95,19 +41,56 @@
   padding: 5px 5px 7px;
 }
 .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-.groupName { font-size: 12px; font-weight: 700; color: var(--fg2); flex: 1; letter-spacing: .01em; }
-.groupProg { font-size: 11px; color: var(--fg3); }
+/* TASK-322 (28/08/2026, CEO: "o titulo do grupo eh menor que o conteudo da
+   task, a hierarquia ta cagada"). Era --text-2xs (11px/13.2px real) contra
+   --text-xs (11.5px/13.8px real) do item - titulo perdia do proprio
+   conteudo. Invertido: titulo pesa mais que item, --text-sm (12.5px/15px
+   real), mesmo peso 700 de antes. */
+.groupName { font-size: var(--text-sm); font-weight: 700; color: var(--fg2); flex: 1; letter-spacing: .01em; }
+.groupProg { font-size: var(--text-3xs); color: var(--fg3); }
 
+/* TASK-323 (28/08/2026, CEO: "trocar de aba nao anima... entre todos e
+   prazo tambem nao"). O filtro PRAZO/TODOS nao troca de tela - ele
+   REMOVE/ACRESCENTA `<div key={task.id}>` do DOM (o array `items` e
+   filtrado antes do `.map`), entao cada item que aparece de novo e um
+   NODE NOVO pro React - `animation: appearUp ... both` (a mesma keyframe
+   global ja usada em cards/sugestoes no resto do app) dispara sozinha no
+   mount, sem precisar de JS. `prefers-reduced-motion` ja zera isso
+   globalmente (tokens.css). */
 .item {
   display: flex;
   align-items: flex-start;
   gap: 9px;
   padding: 8px;
+  /* TASK-357: era --r-sm (9px) - .panelRight (App.module.css) era --r-shell
+     18px; .list (acima) tem padding:10px - teto da formula era 8px
+     (DESIGN.md secao 22/7). --r-sm ficava 1px acima do teto - fechado pra
+     --r-xs (7px) naquela rodada.
+     TASK-369: --r-shell subiu pra 20px - novo teto = 20-10 = 10px. --r-sm
+     (9px) volta a caber (1px de folga) - restaura o raio original em vez
+     de deixar o valor artificialmente pequeno de quando o teto era mais
+     apertado. */
   border-radius: var(--r-sm);
   transition: background var(--dur-micro) var(--ease-out);
+  animation: appearUp .18s var(--ease-out) both;
 }
 .item:hover { background: var(--surface2); }
 
+/* TASK-322 (28/08/2026, CEO: "o item de to-do nao tem alinhamento nenhum,
+   o texto ta muito mais perto da parte superior"). Causa medida: a
+   TASK-309 reduziu --text-xs de 13px pra 11,5px sem reajustar quem
+   convivia com ele - a folga entre a caixa de marcar (16px, fixa) e a
+   caixa de linha do texto (`line-height` x fonte) caiu de ~2,85px pra
+   ~0,68px. Com quase nenhuma folga sobrando, a caixa (um retangulo duro)
+   e a primeira linha do texto (que tem espaco assimetrico entre o topo da
+   caixa de linha e o glifo, comum em fontes variaveis como a Manrope)
+   deixam de coincidir visualmente - antes a folga absorvia essa diferenca,
+   agora nao. Reposto: `line-height` do item sobe pra 1.7 (era 1.45,
+   devolve ~3,55px de folga, perto do que havia antes) e a caixa ganha
+   `align-self: flex-start` explicito (o pai ja e `flex-start` - isto so
+   deixa por escrito que a caixa tem que alinhar com a PRIMEIRA linha do
+   texto, nunca com o centro do bloco inteiro, mesmo quando o texto quebra
+   em duas linhas ou ganha a linha de metadado embaixo). */
 .check {
   width: 16px; height: 16px;
   border-radius: 6px;
@@ -115,7 +98,8 @@
   background: transparent;
   padding: 0;
   flex-shrink: 0;
-  margin-top: 1px;
+  align-self: flex-start;
+  margin-top: 2px;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
@@ -143,7 +127,10 @@
 }
 .corpoTarefa:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--r-xs); }
 
-.text { font-size: 13px; color: var(--fg); line-height: 1.45; }
+/* line-height 1.7 (era 1.45) - ver comentario grande em .check acima:
+   devolve a folga que a reducao de escala da TASK-309 comeu, pra caixa de
+   marcar e primeira linha do texto voltarem a alinhar. */
+.text { font-size: var(--text-xs); color: var(--fg); line-height: 1.7; }
 
 .tarefaMeta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 
@@ -184,7 +171,7 @@
 
 .completedToggle {
   padding: 6px 9px;
-  font-size: 12px;
+  font-size: var(--text-2xs);
   color: var(--fg3);
   cursor: pointer;
   display: flex;
@@ -196,16 +183,9 @@
 }
 .completedToggle:hover { color: var(--fg2); background: var(--surface2); }
 
-/* Excluir grupo — aparece no hover do cabeçalho */
-.groupDel {
-  width: 18px; height: 18px; border: none; background: transparent;
-  color: var(--fg3); cursor: pointer; border-radius: var(--r-xs);
-  line-height: 1; opacity: 0; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  transition: opacity var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
-}
-.groupHeader:hover .groupDel { opacity: 1; }
-.groupDel:hover { background: rgba(224,64,64,.15); color: var(--danger); }
+/* TASK-374 (29/08/2026): "Excluir grupo" saiu daqui - o conceito de grupo
+   morreu (o CEO derrubou a segunda hierarquia paralela a Pasta). Apagar uma
+   Pasta e acao da tela da Pasta (FolderNotesView/PARAGrid), nunca daqui. */
 
 /* Botão de prazo (calendário) + input de data escondido por cima */
 /* ── Acoes da linha ────────────────────────────────────────────────────────
@@ -248,15 +228,18 @@
 
 /* Prazo definido: o botao fica aceso mesmo sem hover - a linha precisa dizer
    que tem prazo mesmo quando o cursor esta longe. */
-.acaoAtiva { opacity: 1 !important; color: var(--accent); }
-.acaoAtiva:hover { background: var(--accent-s); color: var(--accent); border-color: var(--accent); }
+/* TASK-334 (Fase 4): idem, token semantico de estado. */
+.acaoAtiva { opacity: 1 !important; color: var(--state-active-fg); }
+.acaoAtiva:hover { background: var(--state-active-bg); color: var(--state-active-fg); border-color: var(--state-active-border); }
 
-/* Destruir e vermelho SO no hover: em repouso nao pode competir com o resto. */
+/* Destruir e vermelho SO no hover: em repouso nao pode competir com o resto.
+   TASK-329: era rgba(224,64,64,X) cravado (RGB do --danger ESCURO, errado
+   no tema claro) - --danger-s e color-mix() acompanham o token certo. */
 .acaoPerigo:hover,
 .acaoPerigo:focus-visible {
-  background: rgba(224,64,64,.15);
+  background: var(--danger-s);
   color: var(--danger);
-  border-color: rgba(224,64,64,.4);
+  border-color: color-mix(in oklab, var(--danger) 40%, transparent);
 }
 
 .dateInput {
@@ -266,7 +249,7 @@
 
 /* Edição inline da tarefa */
 .editInput {
-  flex: 1; font-family: inherit; font-size: 13px; color: var(--fg);
+  flex: 1; font-family: inherit; font-size: var(--text-xs); color: var(--fg);
   background: var(--surface3); border: 1px solid var(--accent);
   border-radius: var(--r-xs); padding: 2px 6px; outline: none;
 }
@@ -279,7 +262,7 @@
    de cima, entao a fileira inteira se le como um lugar vazio esperando virar
    tarefa. Em repouso e discreto; no hover ganha superficie e o "+" acende. */
 .addTask {
-  width: 100%; text-align: left; font-family: inherit; font-size: 13px;
+  width: 100%; text-align: left; font-family: inherit; font-size: var(--text-xs);
   color: var(--fg3); background: transparent;
   border: 1px solid transparent; cursor: pointer;
   padding: 7px 8px; border-radius: var(--r-sm); margin-top: 2px;
@@ -292,59 +275,85 @@
 .addTask:hover .addMais { border-color: var(--accent); color: var(--accent); }
 .addTask:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 
-/* O "+" na casa da caixa de marcar: mesma medida, mesmo raio, tracejado -
-   "ainda nao existe". */
+/* O "+" na casa da caixa de marcar: mesma medida, mesmo raio (--r-xs, o
+   degrau "minusculo" da regua TASK-332 - era 6px cravado, nao o token),
+   tracejado - "ainda nao existe". */
 .addMais {
   width: 16px; height: 16px; flex-shrink: 0;
-  border-radius: 6px;
+  border-radius: var(--r-xs);
   border: 1.5px dashed var(--border-control);
   color: var(--fg3);
   display: flex; align-items: center; justify-content: center;
   transition: border-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 
+/* TASK-339 (28/08/2026, CEO: "arruma essa bizarrice visual" - captura da
+   linha com "teste" digitado). Causa raiz medida: a mesma familia de bug
+   da TASK-308 (ver .captureCaixa/.captureInput em InboxPanel.module.css),
+   nunca consertada aqui. Este container carregava um `border: accent`
+   FIXO (nao condicionado a foco) enquanto o <input> filho, focado por
+   autoFocus, tambem recebia o anel global `:focus-visible` (reset.css) -
+   o WebView2 aplica esse anel em QUALQUER foco de <input>, nao so
+   teclado. Resultado: DOIS aneis laranja acesos ao mesmo tempo (o do
+   container e o do campo), um raio cravado a mais no "+" (--accent
+   tambem acendia sozinho) e o "Enter" cravado como chip cinza com raio
+   proprio - quatro bordas/raios competindo na mesma linha.
+   Consertado com a MESMA receita que ja resolveu o caso gemeo: UM sinal
+   de foco so, no CONJUNTO (a linha), via :focus-within - nunca no "+"
+   isolado nem duplicado no campo. Repouso fica neutro (a linha so existe
+   enquanto esta em edicao, mas a regra e explicita: nao se assume aceso
+   sempre, se declara a condicao). */
 .addRow {
   display: flex; align-items: center; gap: 8px;
   margin-top: 2px; padding: 6px 8px;
   background: var(--surface2);
-  border: 1px solid var(--accent);
+  border: 1px solid var(--border-control);
+  /* TASK-357: mesma correcao de .item acima, era --r-xs (7px) - teto da
+     epoca (--r-shell 18px, .list padding 10px) = 8px.
+     TASK-369: --r-shell subiu pra 20px - novo teto = 10px. --r-sm (9px)
+     cabe com 1px de folga - mesma logica de .item, restaura o raio. */
   border-radius: var(--r-sm);
+  transition: border-color var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out);
 }
-.addRow .addMais { border-style: solid; border-color: var(--accent); color: var(--accent); }
+.addRow:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-s);
+}
+/* O "+" fica neutro e so troca de tracejado pra solido (agora e real, nao
+   mais um placeholder) - NUNCA acende sozinho. Quem sinaliza foco e a
+   linha inteira (.addRow:focus-within acima), um sinal so. */
+.addRow .addMais { border-style: solid; }
 .addInput {
   flex: 1; min-width: 0;
-  font-family: inherit; font-size: 13px; color: var(--fg);
+  font-family: inherit; font-size: var(--text-xs); color: var(--fg);
   background: transparent; border: none; padding: 1px 0; outline: none;
 }
 .addInput::placeholder { color: var(--fg3); }
+/* O campo nao duplica o anel do conjunto - mesma correcao da TASK-308
+   (.captureInput:focus-visible, InboxPanel.module.css): a LINHA (.addRow
+   acima) ja avisa foco sozinha. */
+.addInput:focus-visible { outline: none; }
+/* Dica de tecla discreta - o mesmo padrao que a captura rapida ja usa
+   (.captureDica, InboxPanel.module.css): texto simples, sem borda, sem
+   fundo, sem raio proprio. Era um chip cinza com borda e raio cravados -
+   um quarto desenho competindo na mesma linha; agora e so texto. */
 .addDica {
   flex-shrink: 0;
-  font-family: var(--font-mono); font-size: 10px;
-  color: var(--fg3); background: var(--surface3);
-  border: 1px solid var(--border2); border-radius: 5px;
-  padding: 1px 5px; line-height: 1.5;
+  font-family: inherit; font-size: 10.5px; color: var(--fg3);
 }
 
-.addGroup {
-  width: 100%; font-family: inherit; font-size: 12.5px; font-weight: 600;
-  color: var(--fg3); background: transparent; border: 1px dashed var(--border2);
-  border-radius: var(--r-sm); cursor: pointer; padding: 9px; margin-top: 4px;
-  display: flex; align-items: center; justify-content: center; gap: 7px;
-  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
-}
-.addGroup:hover { background: var(--surface2); color: var(--fg); border-color: var(--fg3); }
-.addGroupInput {
-  width: 100%; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--fg);
-  background: var(--surface2); border: 1px solid var(--accent);
-  border-radius: var(--r-sm); padding: 9px; margin-top: 4px; outline: none;
-}
+/* TASK-374 (29/08/2026): `.addGroup`/`.addGroupInput` saem daqui - o botao
+   "Novo grupo" que a TASK-372 estava convergindo pro tokenizado (nota
+   anterior, deste mesmo dia) NAO EXISTE MAIS: o CEO derrubou o conceito de
+   grupo (segunda hierarquia competindo com a Pasta). O pendente de
+   `hoverGlow` daquela nota fica obsoleto - nao ha mais botao pra receber a
+   classe. */
 
 /* ── Tela sem hover (toque) ────────────────────────────────────────────────
    Regra do emilkowalski/skills: hover precisa de `@media (hover: hover)`.
    Estes controles so existem no hover (opacity: 0). Num aparelho de toque nao
    existe hover — eles ficariam INALCANCAVEIS. Aqui viram sempre visiveis.
-   Prazo, excluir grupo e excluir tarefa. */
+   Prazo e excluir tarefa. */
 @media (hover: none) {
   .acaoBtn { opacity: 1; }
-  .groupDel { opacity: 1; }
 }

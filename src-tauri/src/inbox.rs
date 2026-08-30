@@ -54,10 +54,11 @@ fn read_all(app: &tauri::AppHandle) -> Vec<InboxCard> {
         .unwrap_or_default()
 }
 
-fn write_all(app: &tauri::AppHandle, cards: &[InboxCard]) {
-    if let Ok(s) = serde_json::to_string_pretty(cards) {
-        let _ = fs::write(inbox_file(app), s);
-    }
+/// Grava o inbox inteiro de forma atomica. Propaga falha de escrita — o
+/// chamador nunca pode devolver Ok() com o card so na memoria.
+fn write_all(app: &tauri::AppHandle, cards: &[InboxCard]) -> Result<(), String> {
+    let s = serde_json::to_string_pretty(cards).map_err(|e| e.to_string())?;
+    crate::atomic::write(&inbox_file(app), s.as_bytes()).map_err(|e| e.to_string())
 }
 
 /// Heurística leve de tipo — sem IA, só padrões de texto.
@@ -101,7 +102,7 @@ pub fn inbox_list(app: tauri::AppHandle) -> Vec<InboxCard> {
 /// Sobrescreve o inbox (usado no primeiro uso para semear os exemplos).
 #[tauri::command]
 pub fn inbox_set(app: tauri::AppHandle, cards: Vec<InboxCard>) -> Result<(), String> {
-    write_all(&app, &cards);
+    write_all(&app, &cards)?;
     Ok(())
 }
 
@@ -111,7 +112,7 @@ pub fn inbox_remove(app: tauri::AppHandle, id: String) -> Result<(), String> {
     let _guard = LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let mut cards = read_all(&app);
     cards.retain(|c| c.id != id);
-    write_all(&app, &cards);
+    write_all(&app, &cards)?;
     let _ = app.emit("inbox-changed", ());
     Ok(())
 }
@@ -144,7 +145,7 @@ pub fn inbox_add(
         ts: now_ms(),
     };
     cards.insert(0, card.clone());
-    write_all(&app, &cards);
+    write_all(&app, &cards)?;
     let _ = app.emit("inbox-changed", ());
     Ok(card)
 }

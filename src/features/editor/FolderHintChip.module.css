@@ -1,0 +1,64 @@
+/* FolderHintChip.module.css — ajudante de pasta (TASK-325/326, item 4).
+ * Pill quieta, nunca modal. `flex-wrap` garante que em tela estreita a
+ * quebra de linha nunca engula o botao de aceitar (ver stateGrid "Tela
+ * estreita" da proposta: o "Agora não" some antes do "Mover"). */
+.hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 4px;
+  background: var(--accent-s);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-full);
+  padding: 5px 6px 5px 10px;
+  max-width: 100%;
+  flex-wrap: wrap;
+  color: var(--accent);
+}
+
+.txt {
+  font-size: var(--text-2xs);
+  color: var(--fg2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.txt b { color: var(--fg); font-weight: 700; }
+
+.actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  /* Ordem invertida no DOM (ver FolderHintChip.tsx: Mover vem antes de
+     "Agora não") ja garante que, ao quebrar linha, "Mover" nunca some. */
+}
+
+.aceitar {
+  font-family: inherit;
+  font-size: var(--text-3xs);
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  /* --r-full, nao --r-sm (TASK-357): o .hint que envolve e pilula
+     (border-radius: var(--r-full)) - regra da pilula, DESIGN.md secao 22.
+     Dentro de pilula, so pilula; --r-full clampa sozinho pra metade da
+     altura real do botao, entao a curva de dentro fica sempre concentrica
+     com a de fora, em qualquer tamanho. */
+  border-radius: var(--r-full);
+  padding: 4px 10px;
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.ignorar {
+  font-family: inherit;
+  font-size: var(--text-3xs);
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  border-radius: var(--r-full);
+  padding: 4px 10px;
+  background: transparent;
+  color: var(--fg3);
+}
+.ignorar:hover { color: var(--fg2); }

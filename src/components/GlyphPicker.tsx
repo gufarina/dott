@@ -4,9 +4,11 @@
  * combina com o resto da interface e e igual em qualquer maquina.
  */
 
+import { useRef } from 'react'
 import { GLYPH_ORDER, GLYPH_LABEL, NoteGlyph, type GlyphId } from './NoteGlyphs'
 import { Icon } from './Icon'
 import { ModalPortal } from './ModalPortal'
+import { useScrollEdgeFade } from '../hooks/useScrollEdgeFade'
 import s from './GlyphPicker.module.css'
 
 export function GlyphPicker({
@@ -18,6 +20,11 @@ export function GlyphPicker({
   onEscolher: (g: GlyphId | undefined) => void
   onFechar: () => void
 }) {
+  /** Fade de rolagem na base (TASK-349). GLYPH_ORDER e fixo (nao muda em
+   *  runtime), entao so precisa medir uma vez no mount + resize. */
+  const gridRef = useRef<HTMLDivElement>(null)
+  useScrollEdgeFade(gridRef)
+
   return (
     <ModalPortal>
     <div className={s.overlay} onClick={e => e.target === e.currentTarget && onFechar()}>
@@ -31,7 +38,7 @@ export function GlyphPicker({
 
         <p className={s.hint}>Marcas do próprio Dott — iguais em qualquer computador.</p>
 
-        <div className={s.grid}>
+        <div ref={gridRef} className={`${s.grid} scrollFadeBottom`}>
           {GLYPH_ORDER.map(g => (
             <button
               key={g}

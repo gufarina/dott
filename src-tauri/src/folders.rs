@@ -16,19 +16,27 @@ fn folders_file(app: &tauri::AppHandle) -> PathBuf {
 }
 
 /// Carrega folders.json; retorna null (Value::Null) se não existe ainda.
+/// Se o arquivo existe mas o parse falha (corrompido), coloca em quarentena
+/// (renomeia) antes de cair no estado vazio — nunca apaga o dado original.
 #[tauri::command]
 pub fn folders_load(app: tauri::AppHandle) -> serde_json::Value {
     let p = folders_file(&app);
-    fs::read_to_string(&p)
-        .ok()
-        .and_then(|s| serde_json::from_str(&s).ok())
-        .unwrap_or(serde_json::Value::Null)
+    match fs::read_to_string(&p) {
+        Ok(s) => match serde_json::from_str(&s) {
+            Ok(v) => v,
+            Err(_) => {
+                crate::corrupt::quarantine(&p);
+                serde_json::Value::Null
+            }
+        },
+        Err(_) => serde_json::Value::Null,
+    }
 }
 
-/// Sobrescreve folders.json com o estado completo de `para`.
+/// Sobrescreve folders.json com o estado completo de `para`, de forma atomica.
 #[tauri::command]
 pub fn folders_save(app: tauri::AppHandle, data: serde_json::Value) -> Result<(), String> {
     let p = folders_file(&app);
     let s = serde_json::to_string_pretty(&data).map_err(|e| e.to_string())?;
-    fs::write(&p, s).map_err(|e| e.to_string())
+    crate::atomic::write(&p, s.as_bytes()).map_err(|e| e.to_string())
 }

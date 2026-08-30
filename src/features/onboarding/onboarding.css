@@ -37,7 +37,7 @@
 .ob-overlay .ob-badge{ font-size:var(--pill-font-size); font-weight:var(--pill-font-weight); letter-spacing:var(--pill-letter-spacing); text-transform:uppercase; line-height:var(--pill-line-height); color:var(--accent); border:1px solid var(--accent); border-radius:var(--r-full); padding:var(--pill-padding); flex:none; display:inline-flex; align-items:center; }
 .ob-overlay .ob-note.is-tip .ob-badge{ color:var(--fg3); border-color:var(--border2); }
 .ob-overlay .ob-paralist{ margin-top:14px; display:grid; gap:7px; }
-.ob-overlay .ob-pl{ display:flex; gap:10px; align-items:baseline; font-size:13px; }
+.ob-overlay .ob-pl{ display:flex; gap:10px; align-items:baseline; font-size:var(--text-xs); }
 .ob-overlay .ob-pl .pd{ width:8px; height:8px; border-radius:var(--r-full); flex:none; transform:translateY(1px); }
 .ob-overlay .ob-pl strong{ font-weight:600; color:var(--fg); min-width:64px; }
 .ob-overlay .ob-pl span{ color:var(--fg3); }
@@ -47,15 +47,21 @@
 .ob-overlay .ob-dots{ display:flex; gap:6px; flex:1; }
 .ob-overlay .ob-dots i{ width:6px; height:6px; border-radius:var(--r-full); background:var(--border2); transition: background var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out); }
 .ob-overlay .ob-dots i.on{ width:20px; background:var(--accent); }
-/* height:44px (era so padding, ~32px) - a receita vigente de --dott-gradient
-   (opcao 3, CEO) ancora o nucleo abaixo da linha de texto e exige essa
-   altura. Ghost sobe junto por ser a mesma classe base - nunca leva o gradiente. */
-.ob-overlay .ob-btn{ height:44px; font-family:inherit; font-size:13.5px; font-weight:600; border-radius:var(--r-md); padding:0 15px; cursor:pointer; border:1px solid transparent; background:transparent; color:var(--fg3); display:inline-flex; align-items:center; justify-content:center; transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out); }
+/* height via var(--btn-h-lg) - 36px desde a TASK-372 (era 44px fixo; a
+   receita antiga de --dott-gradient que exigia essa altura nao preenche
+   mais nenhum botao em repouso desde a TASK-319 - ver Modal.module.css
+   `.btn` pro raciocinio completo). Ghost sobe junto por ser a mesma classe
+   base - nunca leva o gradiente. */
+.ob-overlay .ob-btn{ height:var(--btn-h-lg); font-family:inherit; font-size:13.5px; font-weight:600; border-radius:var(--r-md); padding:0 15px; cursor:pointer; border:1px solid transparent; background:transparent; color:var(--fg3); display:inline-flex; align-items:center; justify-content:center; transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out); }
 .ob-overlay .ob-btn:hover{ color:var(--fg); background:var(--surface3); }
-/* Botao primario da PRIMEIRA tela do app — e onde a marca mais deveria
-   aparecer. Gradiente da marca, sem sombra (nao e superficie flutuante). */
-.ob-overlay .ob-btn.primary{ background:var(--dott-gradient); background-blend-mode:var(--dott-gradient-blend); color:#fff; border-color:transparent; }
-.ob-overlay .ob-btn.primary:hover{ filter:brightness(1.07); }
+/* Botao primario da PRIMEIRA tela do app. TASK-320 (28/08/2026, corrige a
+   TASK-319: preenchimento invertido virava BRANCO no escuro, reprovado).
+   Repouso escuro "como os vizinhos" (--surface3, mesma receita de
+   FolderNotesView.module.css .btnNew) - a marca vira barra+ponto quente
+   so no hover (classe `hoverGlow` no JSX, ver reset.css). */
+.ob-overlay .ob-btn.primary{ background:var(--surface3); color:var(--fg); border-color:transparent; transition: filter var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), scale var(--dur-instant) var(--ease-out); }
+.ob-overlay .ob-btn.primary:hover{ filter:brightness(1.15); }
+.ob-overlay .ob-btn.primary:active{ scale:.975; }
 .ob-overlay .ob-btn.ghost{ color:var(--fg2); }
 
 .ob-overlay .ob-step{ display:none; }
@@ -74,10 +80,10 @@
 /* Passo 2 — captura */
 .ob-overlay .s2{ position:relative; width:230px; height:150px; }
 .ob-overlay .s2-keys{ position:absolute; top:6px; left:50%; transform:translateX(-50%); display:flex; gap:6px; animation:obFadeUp .4s ease both; }
-.ob-overlay .s2-keys .k{ font-family:var(--font-mono); font-size:12px; color:var(--fg); background:var(--surface3); border:1px solid var(--border2); border-bottom-width:2px; border-radius:7px; padding:5px 9px; }
+.ob-overlay .s2-keys .k{ font-family:var(--font-mono); font-size:var(--text-2xs); color:var(--fg); background:var(--surface3); border:1px solid var(--border2); border-bottom-width:2px; border-radius:7px; padding:5px 9px; }
 .ob-overlay .s2-card{ position:absolute; top:0; left:50%; width:150px; margin-left:-75px; background:var(--surface2); border:1px solid var(--border2); border-radius:var(--r-md); padding:8px 10px; font-size:11.5px; color:var(--fg2); animation:obDropIn 1s var(--ease-spring) .55s both; }
 .ob-overlay .s2-card .tag{ font-size:var(--pill-font-size); font-weight:var(--pill-font-weight); letter-spacing:var(--pill-letter-spacing); text-transform:uppercase; line-height:var(--pill-line-height); color:var(--warn); background:rgba(217,140,58,.14); padding:var(--pill-padding); border-radius:var(--r-full); display:inline-flex; align-items:center; }
-.ob-overlay .s2-tray{ position:absolute; bottom:0; left:50%; width:190px; margin-left:-95px; height:54px; border:1.5px dashed var(--border2); border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; color:var(--fg3); font-size:11px; font-weight:600; letter-spacing:.04em; }
+.ob-overlay .s2-tray{ position:absolute; bottom:0; left:50%; width:190px; margin-left:-95px; height:54px; border:1.5px dashed var(--border2); border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; color:var(--fg3); font-size:var(--text-3xs); font-weight:600; letter-spacing:.04em; }
 @keyframes obDropIn{ 0%{top:42px; opacity:0; transform:scale(.9)} 30%{opacity:1} 100%{top:86px; opacity:1; transform:scale(1)} }
 
 /* Passo 3 — PARA */
@@ -150,7 +156,7 @@
   transition: border-color var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out); }
 .ob-overlay .ob-choice:hover{ border-color:var(--fg3); }
 .ob-overlay .ob-choice.is-on{ border-color:var(--accent); background:var(--accent-s); }
-.ob-overlay .ob-ch-head{ display:flex; align-items:center; gap:8px; font-size:14px; color:var(--fg); }
+.ob-overlay .ob-ch-head{ display:flex; align-items:center; gap:8px; font-size:var(--text-sm); color:var(--fg); }
 .ob-overlay .ob-ch-head strong{ font-weight:600; }
 .ob-overlay .ob-ch-txt{ font-size:12.5px; line-height:1.45; color:var(--fg3); }
 .ob-overlay .ob-tag{ font-style:normal; font-size:var(--pill-font-size); font-weight:var(--pill-font-weight); letter-spacing:var(--pill-letter-spacing); text-transform:uppercase; line-height:var(--pill-line-height);
@@ -168,9 +174,9 @@
 .ob-overlay .ob-door-input:focus{ border-color:var(--accent); }
 .ob-overlay .ob-door-input::placeholder{ color:var(--fg3); }
 .ob-overlay .ob-btn:disabled{ opacity:.45; cursor:default; }
-/* Desabilitado nao carrega a marca: opacity na brasa vira lama marrom. */
-.ob-overlay .ob-btn.primary:disabled{ background:var(--surface3); background-blend-mode:normal; color:var(--fg3); opacity:1; }
+/* Desabilitado nao carrega a marca: superficie neutra. */
+.ob-overlay .ob-btn.primary:disabled{ background:var(--surface3); color:var(--fg3); opacity:1; }
 .ob-overlay .ob-btn.primary:disabled:hover{ filter:none; }
-.ob-overlay .ob-door-fine{ margin-top:8px; font-size:11px; color:var(--fg3); }
+.ob-overlay .ob-door-fine{ margin-top:8px; font-size:var(--text-3xs); color:var(--fg3); }
 
 @media (prefers-reduced-motion: reduce){ .ob-overlay *{ animation-duration:.001ms !important; } }

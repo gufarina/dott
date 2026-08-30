@@ -5,11 +5,15 @@ import { showToast } from '../../components/Toast'
 import s from './TaskDetail.module.css'
 
 /** Tela da tarefa. A lista da direita mostra o titulo; aqui mora o resto:
- *  prazo, pasta do PARA, grupo e a anotacao que nao cabe numa linha.
+ *  prazo, pasta do PARA e a anotacao que nao cabe numa linha.
  *
  *  Ate 25/08/2026 a tarefa nao tinha "dentro": clicar nela so editava o texto
  *  no lugar. Como tarefa agora pertence a uma pasta, ela precisava de um lugar
- *  proprio pra mostrar essa relacao. */
+ *  proprio pra mostrar essa relacao.
+ *
+ *  TASK-374 (29/08/2026): o campo "Lista" (grupo) saiu - competia com Pasta,
+ *  a unica hierarquia que sobrou (decisao do CEO: uma segunda hierarquia
+ *  paralela a Pasta nao faz sentido). */
 export function TaskDetail() {
   const taskId = useStore(st => st.task)
   const tasks = useStore(st => st.tasks)
@@ -22,10 +26,8 @@ export function TaskDetail() {
   const setTaskDeadline = useStore(st => st.setTaskDeadline)
   const setTaskFolder = useStore(st => st.setTaskFolder)
   const setTaskNotes = useStore(st => st.setTaskNotes)
-  const setTaskGroup = useStore(st => st.setTaskGroup)
 
-  const grupo = tasks.find(g => g.items.some(t => t.id === taskId))
-  const task = grupo?.items.find(t => t.id === taskId)
+  const task = tasks.find(t => t.id === taskId)
 
   const [titulo, setTitulo] = useState(task?.text ?? '')
   const [anotacao, setAnotacao] = useState(task?.notes ?? '')
@@ -37,7 +39,7 @@ export function TaskDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId])
 
-  if (!task || !grupo) {
+  if (!task) {
     return (
       <div className={s.wrap}>
         <div className={s.vazio}>
@@ -141,18 +143,6 @@ export function TaskDetail() {
             </div>
           </label>
 
-          <label className={s.campo}>
-            <span className={s.campoRotulo}><Icon name="grupo" size={13} /> Lista</span>
-            <div className={s.campoControle}>
-              <select
-                className={s.select}
-                value={grupo.id}
-                onChange={e => setTaskGroup(task.id, e.target.value)}
-              >
-                {tasks.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-              </select>
-            </div>
-          </label>
         </div>
 
         {/* Atalho pra pasta: a tarefa mora num lugar, e da pra ir la. */}

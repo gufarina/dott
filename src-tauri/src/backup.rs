@@ -1,9 +1,11 @@
 // backup.rs — Exportar/restaurar TODOS os dados do Dott (notas, inbox, pastas,
 // tarefas e imagens). Copia a pasta de dados inteira pra Documentos\Dott Backups.
-// Dependency-free (std::fs), sem zip. Restauracao sobrescreve o estado atual.
+// Dependency-free (std::fs), sem zip. Restauracao troca o estado atual de forma
+// atomica: so mexe no data_dir depois que a copia inteira do backup tiver dado certo.
 
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::time::{SystemTime, UNIX_EPOCH};
 use tauri::Manager;
 
 fn data_dir(app: &tauri::AppHandle) -> PathBuf {
@@ -34,6 +36,13 @@ fn copy_dir(from: &Path, to: &Path) -> std::io::Result<()> {
         }
     }
     Ok(())
+}
+
+fn now_ms() -> u128 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_millis())
+        .unwrap_or(0)
 }
 
 /// Faz um backup completo. `label` vem do frontend (data legivel). Devolve o caminho.
@@ -78,17 +87,46 @@ pub fn backups_list(app: tauri::AppHandle) -> Vec<String> {
     names
 }
 
-/// Restaura um backup pelo nome: copia o conteudo de volta pra pasta de dados.
+/// Restaura um backup pelo nome: copia pra uma pasta temporaria e so troca o
+/// data_dir depois que a copia inteira tiver sucesso (evita vault hibrido se
+/// a copia falhar no meio).
 #[tauri::command]
 pub fn backup_restore(app: tauri::AppHandle, name: String) -> Result<(), String> {
-    if name.contains("..") {
-        return Err("nome invalido".into());
-    }
-    let src = backups_root(&app).join(&name);
+    let root = backups_root(&app);
+    let _ = fs::create_dir_all(&root);
+    let src = crate::path_safety::safe_join(&root, &name).ok_or_else(|| "nome invalido".to_string())?;
     if !src.exists() {
         return Err("backup nao encontrado".into());
     }
     let dest = data_dir(&app);
-    copy_dir(&src, &dest).map_err(|e| e.to_string())?;
+    let ts = now_ms();
+    let base_name = dest
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("dott-data");
+    let tmp = dest.with_file_name(format!("{}.restoring-{}", base_name, ts));
+
+    if let Err(e) = copy_dir(&src, &tmp) {
+        let _ = fs::remove_dir_all(&tmp);
+        return Err(e.to_string());
+    }
+
+    if dest.exists() {
+        let old = dest.with_file_name(format!("{}.old-{}", base_name, ts));
+        if let Err(e) = fs::rename(&dest, &old) {
+            let _ = fs::remove_dir_all(&tmp);
+            return Err(e.to_string());
+        }
+        if let Err(e) = fs::rename(&tmp, &dest) {
+            // tenta reverter pro estado anterior antes de devolver o erro.
+            let _ = fs::rename(&old, &dest);
+            let _ = fs::remove_dir_all(&tmp);
+            return Err(e.to_string());
+        }
+        let _ = fs::remove_dir_all(&old);
+    } else if let Err(e) = fs::rename(&tmp, &dest) {
+        let _ = fs::remove_dir_all(&tmp);
+        return Err(e.to_string());
+    }
     Ok(())
 }

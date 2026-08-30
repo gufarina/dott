@@ -1,0 +1,37 @@
+/* SelectionToolbar.module.css — barra flutuante por selecao (TASK-325/326).
+ * position:fixed porque as coordenadas vem de `view.coordsAtPos` (mesmo
+ * sistema de getBoundingClientRect) — ver selectionToolbar.ts. */
+.toolbar {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow);
+  padding: 4px;
+  z-index: 30;
+}
+
+.btn {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: var(--r-xs);
+  color: var(--fg2);
+  cursor: pointer;
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.btn:hover { background: var(--surface); color: var(--fg); }
+
+.sep {
+  width: 1px;
+  height: 15px;
+  background: var(--border2);
+  margin: 0 2px;
+}

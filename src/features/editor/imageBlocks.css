@@ -1,0 +1,87 @@
+/** imageBlocks.css — o bloco de imagem dentro do editor vivo (TASK-325/326,
+ * item 3). Escopado por `.cm-livemd-*` (mesma convencao de liveMarkup.css).
+ * So tokens ja existentes — nada cravado aqui. */
+
+.cm-livemd-imgblock {
+  position: relative;
+  margin: 0.9em 0;
+}
+
+.cm-livemd-img {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+}
+
+.cm-livemd-img-cap {
+  font-size: var(--text-2xs);
+  color: var(--fg3);
+  text-align: center;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* Chips de acao — so aparecem no hover do bloco (item 2 da proposta: nunca
+   abrem menu, nunca competem com o texto quando a pessoa nao esta olhando). */
+.cm-livemd-img-tools {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  gap: 3px;
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  /* 2px, nao 3px (TASK-357, achado nesta rodada - nunca auditado antes):
+     mini-toolbar flutuante (--r-sm 9px) sem folga nenhuma alem do proprio
+     padding - os botoes (--r-xs 7px, abaixo) encostam nos 4 lados. Teto da
+     formula = 9 - padding. Com 3px o teto (6) furava 1px contra o raio 7
+     do botao. 2px fecha exato: 9 - 2 = 7 = --r-xs. */
+  padding: 2px;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transition: opacity var(--dur-micro) var(--ease-out);
+}
+.cm-livemd-imgblock:hover .cm-livemd-img-tools,
+.cm-livemd-img-tools:focus-within {
+  opacity: 1;
+}
+
+.cm-livemd-img-btn {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: var(--r-xs);
+  color: var(--fg2);
+  cursor: pointer;
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.cm-livemd-img-btn:hover { background: var(--surface); color: var(--fg); }
+.cm-livemd-img-btn-danger:hover { background: color-mix(in srgb, var(--danger) 16%, transparent); color: var(--danger); }
+
+/* Carregando (SHIMMER) — o mesmo estado aprovado na proposta CANVAS: textura
+   suave em vez do quadrado cinza morto, enquanto o anexo salva no disco. */
+.cm-livemd-imgblock-pending .cm-livemd-img-cap { opacity: .7; }
+.cm-livemd-img-shimmer {
+  height: 180px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: linear-gradient(120deg, var(--surface2) 30%, var(--surface3) 50%, var(--surface2) 70%);
+  background-size: 220% 100%;
+  animation: cm-livemd-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes cm-livemd-shimmer {
+  0% { background-position: 0% 0; }
+  100% { background-position: -220% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cm-livemd-img-shimmer { animation: none; }
+}

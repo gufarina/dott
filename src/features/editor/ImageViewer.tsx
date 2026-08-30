@@ -59,7 +59,7 @@ export function ImageViewer({ noteId, title, url, onSave }: Props) {
         />
       </div>
       <div className={s.toolbar}>
-        <button className={s.btnEdit} onClick={openEditor}>
+        <button className={`${s.btnEdit} hoverGlow`} onClick={openEditor}>
           Editar imagem
         </button>
       </div>

@@ -1,0 +1,44 @@
+/* EditorToolbar.module.css — TASK-338: geometria e cor 100% em tokens.css -
+ * --icon-btn-md (altura/largura do botao), --r-sm (raio), --fg2/--fg/
+ * --surface3 (cor de repouso/hover), --dur-micro/--ease-out (transicao).
+ * O gap entre botoes (2px) e o separador (1px/16px/margem 4px) sao geometria
+ * de CHROME desta barra especifica - a mesma classe de decisao que
+ * SelectionToolbar.module.css ja toma pro proprio separador (numero local,
+ * nao existe hoje um token de app pra "gap entre icones de toolbar").
+ *
+ * `--toolbar-px` (custom property, default --space-4/16px): o padding
+ * horizontal muda por CONTEXTO (o modal do Inbox alinha a 16px do proprio
+ * header; a tela da nota alinha a 28px, o mesmo ponto onde o texto do
+ * editor comeca - liveMarkup.css `.cm-content`). Quem usa a peca DECLARA a
+ * variavel no proprio wrapper; a peca so LE - e a variante sem virar um
+ * segundo componente. */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-2) var(--toolbar-px, var(--space-4));
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.btn {
+  width: var(--icon-btn-md);
+  height: var(--icon-btn-md);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--fg2);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.btn:hover { background: var(--surface3); color: var(--fg); }
+.sep {
+  width: 1px;
+  height: 16px;
+  background: var(--border2);
+  margin: 0 4px;
+  flex-shrink: 0;
+}

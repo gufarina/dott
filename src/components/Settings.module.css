@@ -21,12 +21,12 @@
   display: flex; align-items: center; padding: 16px 20px;
   border-bottom: 1px solid var(--border); flex-shrink: 0;
 }
-.title { font-size: 16px; font-weight: 700; flex: 1; letter-spacing: -.01em; }
+.title { font-size: var(--text-base); font-weight: 700; flex: 1; letter-spacing: -.01em; }
 .close {
   width: 28px; height: 28px; border: none; background: transparent; color: var(--fg3);
   cursor: pointer; border-radius: var(--r-sm); line-height: 1;
   display: flex; align-items: center; justify-content: center;
-  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), scale var(--dur-instant) var(--ease-out);
 }
 .close:hover { background: var(--surface3); color: var(--fg); }
 
@@ -37,22 +37,46 @@
 
 .row { display: flex; align-items: center; gap: 14px; padding: 7px 0; }
 .row > div:first-child { flex: 1; }
-.label { font-size: 14px; font-weight: 600; color: var(--fg); }
-.hint { font-size: 12px; color: var(--fg3); margin-top: 2px; line-height: 1.35; }
+.label { font-size: var(--text-sm); font-weight: 600; color: var(--fg); }
+.hint { font-size: var(--text-2xs); color: var(--fg3); margin-top: 2px; line-height: 1.35; }
 
 .btn {
-  flex-shrink: 0; font-family: inherit; font-size: 13px; font-weight: 600;
+  flex-shrink: 0; font-family: inherit; font-size: var(--text-xs); font-weight: 600;
   color: var(--fg2); background: var(--surface2); border: 1px solid var(--border2);
   border-radius: var(--r-md); padding: 8px 14px; cursor: pointer;
   display: flex; align-items: center; gap: 7px;
-  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), scale var(--dur-instant) var(--ease-out);
 }
 .btn:hover { background: var(--surface3); color: var(--fg); }
+/* TASK-334 (28/08/2026): fecha a cobertura de hoverZoom desta tela (CEO
+   pediu "em todas as pecas do app" - Settings nunca tinha recebido).
+   Aplicado direto na classe (nao a classe global .hoverZoom) porque esta
+   rodada nao pode tocar .tsx - efeito IDENTICO (mesmo --hover-scale de
+   reset.css). Quando o RUSTLINE puder mexer no JSX, isto vira so a classe
+   global no componente. `.restoreItem` fica de fora de proposito - e
+   linha de lista de largura total (mesma excecao de reset.css), ja tem
+   sinal proprio (fundo no hover). */
+@media (hover: hover) and (pointer: fine) {
+  .close:hover, .close:focus-visible,
+  .btn:hover, .btn:focus-visible {
+    scale: var(--hover-scale);
+  }
+}
 .btn:disabled { opacity: .5; cursor: default; }
-.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-.primary:hover { filter: brightness(1.07); background: var(--accent); color: #fff; }
+/* TASK-329 (DESIGN.md secao 17.2): era preenchimento solido --accent -
+   receita de ANTES da TASK-319/320, nunca migrada. Fill vira --surface3;
+   brilho-no-hover (hoverGlow) fica pendente de JSX (RUSTLINE). */
+.primary { background: var(--surface3); color: var(--fg); border-color: transparent; }
+.primary:hover { opacity: .88; }
 
-.restoreBox { margin-top: 8px; padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-md); }
+/* padding 12px, nao 10px (TASK-357, achado nesta rodada): .restoreItem
+   (abaixo) e linha de largura total encostando direto nos 4 lados deste
+   box - sem cabecalho/rodape proprio disputando o canto. --restoreBox usa
+   --r-md (12px); com 10px de padding o teto da formula era 2px contra o
+   --r-sm (9px) do item - bem fora. 12px (== o proprio raio) zera a formula:
+   espacamento >= raio de fora, as curvas nunca se tocam - zona segura pra
+   qualquer raio razoavel de dentro (DESIGN.md secao 22). */
+.restoreBox { margin-top: 8px; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-md); }
 .restoreItem {
   width: 100%; display: flex; align-items: center; justify-content: space-between;
   font-family: inherit; font-size: 12.5px; color: var(--fg2);
@@ -61,9 +85,9 @@
   transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
 }
 .restoreItem:hover { background: var(--surface2); color: var(--fg); }
-.restoreAction { font-size: 11px; color: var(--accent); font-weight: 600; }
+.restoreAction { font-size: var(--text-3xs); color: var(--accent); font-weight: 600; }
 
 .pathRow { padding-top: 10px; }
 .path { display: block; margin-top: 6px; font-family: var(--font-mono); font-size: 11.5px; color: var(--fg3); background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 7px 9px; word-break: break-all; }
-.kbd { font-family: var(--font-mono); font-size: 12px; background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 3px 8px; color: var(--fg); }
+.kbd { font-family: var(--font-mono); font-size: var(--text-2xs); background: var(--surface3); border: 1px solid var(--border2); border-radius: 6px; padding: 3px 8px; color: var(--fg); }
 .foot { margin-top: 12px; font-size: 11.5px; color: var(--faint); text-align: center; }

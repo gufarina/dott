@@ -1,12 +1,32 @@
-import { useRef, useState } from 'react'
-import { useStore } from '../../store'
+import { useMemo, useRef, useState } from 'react'
+import { useStore, type Note } from '../../store'
 import { saveImageFile } from '../../lib/attachments'
 import { showToast } from '../../components/Toast'
 import { Icon } from '../../components/Icon'
 import { Modal, ModalField, ModalInput, ModalFooter, ModalButton } from '../../components/Modal'
 import { GlyphPicker } from '../../components/GlyphPicker'
 import { NoteGlyph } from '../../components/NoteGlyphs'
+import { hojeISO, amanhaISO } from '../../lib/localDate'
+import { useScrollEdgeFade } from '../../hooks/useScrollEdgeFade'
+// Mesma gramatica que o editor ja usa pro bloco de imagem (imageBlocks.ts) -
+// nao inventa um segundo parser so pra esta previa (TASK-362).
+import { matchImageLine } from '../editor/imageLine'
 import s from './FolderNotesView.module.css'
+
+/** Previa de UMA nota (TASK-362): capa explicita vence; sem capa, a
+ *  PRIMEIRA imagem embutida no corpo (mesma linha `![legenda](url)` que o
+ *  editor ja reconhece - matchImageLine de imageLine.ts, nao um parser
+ *  novo). Upload ainda pendente (`hit.pending`) nunca vira previa - a URL
+ *  provisoria nao aponta pra arquivo nenhum no disco. Pura: so olha texto
+ *  ja em memoria, nunca le arquivo. Exportada para teste isolado (TDD). */
+export function notePreviewUrl(note: Pick<Note, 'cover' | 'body'>): string | null {
+  if (note.cover) return note.cover
+  for (const line of note.body.split('\n')) {
+    const hit = matchImageLine(line)
+    if (hit && !hit.pending) return hit.url
+  }
+  return null
+}
 
 export function FolderNotesView() {
   const folder = useStore(st => st.folder)
@@ -19,7 +39,7 @@ export function FolderNotesView() {
   const createFolder = useStore(st => st.createFolder)
   const tasks = useStore(st => st.tasks)
   const addTask = useStore(st => st.addTask)
-  const addGroup = useStore(st => st.addGroup)
+  const setTaskDeadline = useStore(st => st.setTaskDeadline)
   const toggleTask = useStore(st => st.toggleTask)
   const setFolderCover = useStore(st => st.setFolderCover)
   const setNoteCover = useStore(st => st.setNoteCover)
@@ -33,17 +53,44 @@ export function FolderNotesView() {
   const [nomePasta, setNomePasta] = useState('')
   const [novaTarefa, setNovaTarefa] = useState(false)
   const [textoTarefa, setTextoTarefa] = useState('')
+  /** Prazo escolhido AINDA na criacao (YYYY-MM-DD ou null) - antes so dava
+   *  pra definir depois, editando a tarefa ja criada. */
+  const [prazoTarefa, setPrazoTarefa] = useState<string | null>(null)
 
   const folderNotes = notes.filter(n => n.folderId === folder)
-  /** Tarefas desta pasta, achatadas dos grupos e com o grupo junto. */
-  const folderTasks = tasks.flatMap(g => g.items
-    .filter(t => t.folderId === folder)
-    .map(t => ({ ...t, grupo: g })))
+
+  /** Previa de cada nota desta pasta (TASK-362): a capa explicita (n.cover)
+   *  vence; sem capa, usa a PRIMEIRA imagem embutida no corpo (mesma linha
+   *  `![legenda](url)` que o editor ja reconhece - nao inventa um criterio
+   *  novo). So recalcula quando o vault (`notes`) ou a pasta mudam - nao a
+   *  cada digitacao nos modais desta tela. So acha a URL (string ja em
+   *  memoria, vault inteiro ja carregado); nenhum arquivo e lido aqui. */
+  const notePreviews = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const n of notes) {
+      if (n.folderId !== folder) continue
+      const url = notePreviewUrl(n)
+      if (url) map.set(n.id, url)
+    }
+    return map
+  }, [notes, folder])
+
+  /** URLs de previa que falharam ao carregar (arquivo sumiu do disco) - cai
+   *  pro simbolo/estado neutro em vez de icone de imagem quebrada. */
+  const [brokenPreviews, setBrokenPreviews] = useState<Set<string>>(new Set())
+  const marcarQuebrada = (url: string) =>
+    setBrokenPreviews(prev => (prev.has(url) ? prev : new Set(prev).add(url)))
+  /** Tarefas desta pasta (TASK-374: sem grupo - a Pasta e a unica hierarquia). */
+  const folderTasks = tasks.filter(t => t.folderId === folder)
   const tarefasAbertas = folderTasks.filter(t => !t.done).length
   const tarefasFeitas = folderTasks.length - tarefasAbertas
   const folderObj = category && folder
     ? para[category]?.folders.find(f => f.id === folder)
     : undefined
+
+  /** Fade de rolagem na base (TASK-349) - tarefas e notas da pasta juntas. */
+  const bodyRef = useRef<HTMLDivElement>(null)
+  useScrollEdgeFade(bodyRef, [folderNotes.length, folderTasks.length])
 
   const openNote = (id: string) => setView('editor', { note: id })
 
@@ -54,19 +101,17 @@ export function FolderNotesView() {
     setView('editor', { note: id })
   }
 
-  /** Cria a tarefa JA amarrada nesta pasta. Se nao houver nenhuma lista ainda,
-   *  cria uma com o nome da propria pasta - assim a tarefa nunca fica orfa. */
+  /** Cria a tarefa JA amarrada nesta pasta (TASK-374: sem grupo - antes
+   *  criava/reusava uma "lista" que so copiava o nome da pasta, puro
+   *  duplicado ja que a Pasta e a hierarquia real). */
   const criarTarefa = () => {
     const texto = textoTarefa.trim()
     if (!texto || !folder) return
-    const nomeLista = folderObj?.name ?? 'Tarefas'
-    // A lista espelha a pasta: se ja existe uma com esse nome, usa; senao cria.
-    // Cair em tasks[0] jogaria a tarefa de "Habitos" dentro de "Comece aqui".
-    const grupoId = tasks.find(g => g.name === nomeLista)?.id ?? addGroup(nomeLista)
-    if (!grupoId) return
-    addTask(grupoId, texto, folder)
+    const id = addTask(texto, folder)
+    if (prazoTarefa) setTaskDeadline(id, prazoTarefa)
     setTextoTarefa('')
-    showToast('info', 'Tarefa criada', `Em "${nomeLista}", na pasta e na lista de tarefas.`)
+    setPrazoTarefa(null)
+    showToast('info', 'Tarefa criada', `Em "${folderObj?.name ?? 'Tarefas'}".`)
   }
 
   const criarPasta = () => {
@@ -130,19 +175,19 @@ export function FolderNotesView() {
             <> · {tarefasAbertas} de {folderTasks.length} tarefa{folderTasks.length === 1 ? '' : 's'} aberta{tarefasAbertas === 1 ? '' : 's'}</>
           )}
         </span>
-        <button className={s.btnNew} onClick={newNote} title="Criar uma nota nesta pasta">
+        <button className={`${s.btnNew} hoverZoom hoverGlow`} onClick={newNote} title="Criar uma nota nesta pasta">
           <Icon name="nota" size={14} /> Nova nota
         </button>
-        <button className={s.btnNewAlt} onClick={() => setNovaTarefa(true)} title="Criar uma tarefa nesta pasta">
+        <button className={`${s.btnNewAlt} hoverZoom hoverGlow`} onClick={() => setNovaTarefa(true)} title="Criar uma tarefa nesta pasta">
           <Icon name="tarefa" size={14} /> Nova tarefa
         </button>
-        <button className={s.btnNewAlt} onClick={() => setNovaPasta(true)} title="Criar outra pasta nesta categoria">
+        <button className={`${s.btnNewAlt} hoverZoom hoverGlow`} onClick={() => setNovaPasta(true)} title="Criar outra pasta nesta categoria">
           <Icon name="pasta" size={14} /> Nova pasta
         </button>
       </div>
 
       {novaTarefa && (
-        <Modal title="Nova tarefa" onClose={() => { setNovaTarefa(false); setTextoTarefa('') }}>
+        <Modal title="Nova tarefa" onClose={() => { setNovaTarefa(false); setTextoTarefa(''); setPrazoTarefa(null) }}>
           <ModalField label={`Em ${folderObj?.name ?? 'nesta pasta'}`}>
             <ModalInput
               placeholder="O que precisa ser feito?"
@@ -152,8 +197,44 @@ export function FolderNotesView() {
               onKeyDown={e => { if (e.key === 'Enter') criarTarefa() }}
             />
           </ModalField>
+
+          {/* Gesto secundario: sem prazo, o Enter no campo acima ja basta.
+              Quem quer prazo resolve aqui, sem o modal virar formulario. */}
+          <div className={s.novaTarefaPrazo}>
+            <label
+              className={`${s.novaTarefaPrazoBtn} ${prazoTarefa ? s.novaTarefaPrazoBtnAtivo : ''}`}
+              title={prazoTarefa ? `Prazo: ${prazoTarefa}` : 'Definir prazo'}
+            >
+              <Icon name="prazo" size={13} />
+              {prazoTarefa ? prazoTarefa.slice(5).replace('-', '/') : 'Prazo'}
+              <input
+                type="date"
+                className={s.novaTarefaPrazoInput}
+                value={prazoTarefa ?? ''}
+                onChange={e => setPrazoTarefa(e.target.value || null)}
+              />
+            </label>
+            <button type="button" className={s.novaTarefaPrazoAtalho} onClick={() => setPrazoTarefa(hojeISO())}>
+              Hoje
+            </button>
+            <button type="button" className={s.novaTarefaPrazoAtalho} onClick={() => setPrazoTarefa(amanhaISO())}>
+              Amanhã
+            </button>
+            {prazoTarefa && (
+              <button
+                type="button"
+                className={s.novaTarefaPrazoLimpar}
+                onClick={() => setPrazoTarefa(null)}
+                title="Tirar o prazo"
+                aria-label="Tirar o prazo"
+              >
+                <Icon name="fechar" size={11} />
+              </button>
+            )}
+          </div>
+
           <ModalFooter>
-            <ModalButton variant="ghost" onClick={() => { setNovaTarefa(false); setTextoTarefa('') }}>Cancelar</ModalButton>
+            <ModalButton variant="ghost" onClick={() => { setNovaTarefa(false); setTextoTarefa(''); setPrazoTarefa(null) }}>Cancelar</ModalButton>
             <ModalButton variant="primary" onClick={criarTarefa}>
               <Icon name="tarefa" size={13} /> Criar tarefa
             </ModalButton>
@@ -181,7 +262,7 @@ export function FolderNotesView() {
         </Modal>
       )}
 
-      <div className={s.body}>
+      <div ref={bodyRef} className={`${s.body} scrollFadeBottom`}>
         {/* As tarefas da pasta vem ANTES das notas: sao o que tem prazo. */}
         {folderTasks.length > 0 && (
           <section className={s.secaoTarefas}>
@@ -205,17 +286,13 @@ export function FolderNotesView() {
                     title="Abrir a tarefa"
                   >
                     <span className={`${s.tarefaTexto} ${t.done ? s.tarefaTextoFeito : ''}`}>{t.text}</span>
-                    <span className={s.tarefaMeta}>
-                      <span className={s.tarefaGrupo}>
-                        <span className={s.tarefaPonto} style={{ background: t.grupo.color }} />
-                        {t.grupo.name}
-                      </span>
-                      {t.deadline && (
+                    {t.deadline && (
+                      <span className={s.tarefaMeta}>
                         <span className={`${s.tarefaPrazo} ${t.over ? s.prazoAtrasado : t.urgent ? s.prazoHoje : ''}`}>
                           {t.over ? 'atrasado' : t.urgent ? 'hoje' : t.deadline.slice(5).replace('-', '/')}
                         </span>
-                      )}
-                    </span>
+                      </span>
+                    )}
                   </button>
                 </div>
               ))}
@@ -227,11 +304,11 @@ export function FolderNotesView() {
           <div className={s.empty}>
             <p>{folderTasks.length > 0 ? 'Nenhuma nota nesta pasta ainda.' : 'Esta pasta está vazia.'}</p>
             <div className={s.emptyAcoes}>
-              <button className={s.btnNewBig} onClick={newNote}>
+              <button className={`${s.btnNewBig} hoverZoom hoverGlow`} onClick={newNote}>
                 <Icon name="nota" size={15} /> Criar primeira nota
               </button>
               {folderTasks.length === 0 && (
-                <button className={s.btnNewBigAlt} onClick={() => setNovaTarefa(true)}>
+                <button className={`${s.btnNewBigAlt} hoverZoom hoverGlow`} onClick={() => setNovaTarefa(true)}>
                   <Icon name="tarefa" size={15} /> Criar primeira tarefa
                 </button>
               )}
@@ -239,16 +316,26 @@ export function FolderNotesView() {
           </div>
         ) : (
           <div className={s.grid}>
-            {folderNotes.map(n => (
-              <div key={n.id} className={s.card} onClick={() => openNote(n.id)}>
+            {folderNotes.map(n => {
+              const preview = notePreviews.get(n.id)
+              const previewOk = preview && !brokenPreviews.has(preview)
+              return (
+              <div key={n.id} className={`${s.card} hoverZoom`} onClick={() => openNote(n.id)}>
                 <div className={s.thumb}>
-                  {n.cover
-                    ? <img src={n.cover} className={s.thumbImg} alt="" />
+                  {previewOk
+                    ? <img
+                        src={preview}
+                        className={s.thumbImg}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        onError={() => marcarQuebrada(preview)}
+                      />
                     : n.glyph
                       ? <span className={s.thumbGlyph}><NoteGlyph id={n.glyph} size={34} /></span>
                       : null}
                   {(graph.byNote[n.id]?.length ?? 0) > 0 && (
-                    <span className={s.badge} title="Conexoes que o Dott achou sozinho">
+                    <span className={s.badge} title="Conexões que o Dott achou sozinho">
                       {graph.byNote[n.id].length} ligada{graph.byNote[n.id].length > 1 ? 's' : ''}
                     </span>
                   )}
@@ -288,7 +375,8 @@ export function FolderNotesView() {
                   <div className={s.cardDate}>{n.updatedAt || n.date}</div>
                 </div>
               </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

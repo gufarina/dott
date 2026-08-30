@@ -12,6 +12,10 @@ npm run tauri dev      # app em janela, com hot reload
 npm run tauri build    # release + instalador NSIS em src-tauri/target/release/bundle/nsis
 ```
 
+Ao abrir o instalador gerado, o Windows vai avisar "editor desconhecido". Isso e esperado: o
+instalador ainda nao tem a assinatura digital paga que faz esse aviso sumir. Clique em "Mais
+informacoes" e depois em "Executar assim mesmo" para seguir com a instalacao.
+
 ## Onde as coisas estao
 
 | Caminho | O que e |

@@ -6,17 +6,26 @@ import s from './Toast.module.css'
  *  React reclamava de chave repetida e o timer de um matava o outro na tela. */
 let seq = 0
 
+interface ToastAction {
+  label: string
+  onClick: () => void
+}
+
 interface ToastItem {
   id: string
   type: 'info' | 'warn'
   title: string
   msg: string
+  action?: ToastAction
 }
 
 let addToast: (item: Omit<ToastItem, 'id'>) => void = () => {}
+let dismissToastById: (id: string) => void = () => {}
 
-export function showToast(type: 'info' | 'warn', title: string, msg: string) {
-  addToast({ type, title, msg })
+/** `action` e opcional (ex: "Desfazer" ao mover uma nota de pasta) — os
+ *  chamados existentes sem esse 4o argumento continuam identicos. */
+export function showToast(type: 'info' | 'warn', title: string, msg: string, action?: ToastAction) {
+  addToast({ type, title, msg, action })
 }
 
 export function ToastArea() {
@@ -28,6 +37,7 @@ export function ToastArea() {
       setToasts(ts => [...ts, { ...item, id }])
       setTimeout(() => setToasts(ts => ts.filter(t => t.id !== id)), 4000)
     }
+    dismissToastById = (id) => setToasts(ts => ts.filter(t => t.id !== id))
   }, [])
 
   return (
@@ -40,6 +50,14 @@ export function ToastArea() {
           <div className={s.body}>
             <div className={s.title}>{t.title}</div>
             <div className={s.msg}>{t.msg}</div>
+            {t.action && (
+              <button
+                className={s.action}
+                onClick={() => { t.action!.onClick(); dismissToastById(t.id) }}
+              >
+                {t.action.label}
+              </button>
+            )}
           </div>
           <button className={s.close} title="Fechar aviso" onClick={() => setToasts(ts => ts.filter(x => x.id !== t.id))}>
             <Icon name="fechar" size={12} />

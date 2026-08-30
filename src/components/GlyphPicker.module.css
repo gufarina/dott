@@ -33,9 +33,12 @@
   flex-shrink: 0;
 }
 .title { font-size: var(--text-sm); font-weight: 700; color: var(--fg); flex: 1; }
+/* TASK-334 (Fase 3, DESIGN.md secao 17.2): era 24px - convergido pro
+   `--icon-btn-md` (28px), mesmo porte de `.close` em Modal.module.css e
+   dos demais icone-so md do app. */
 .close {
-  width: 24px;
-  height: 24px;
+  width: var(--icon-btn-md);
+  height: var(--icon-btn-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -44,13 +47,13 @@
   color: var(--fg3);
   border-radius: var(--r-sm);
   cursor: pointer;
-  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), scale var(--dur-instant) var(--ease-out);
 }
 .close:hover { background: var(--surface3); color: var(--fg); }
 
 .hint {
   padding: 0 16px 12px;
-  font-size: 12px;
+  font-size: var(--text-2xs);
   color: var(--fg3);
   line-height: 1.4;
   flex-shrink: 0;
@@ -80,10 +83,12 @@
   color: var(--fg2);
   cursor: pointer;
   font-family: inherit;
-  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), scale var(--dur-instant) var(--ease-out);
 }
 .cell:hover { background: var(--surface3); color: var(--fg); border-color: var(--border2); }
-.cellAtiva { border-color: var(--accent); color: var(--accent); background: var(--accent-s); }
+/* TASK-334 (Fase 4): token semantico de estado ativo, nao mais
+   --accent-s/--accent direto - ver tokens.css. */
+.cellAtiva { border-color: var(--state-active-border); color: var(--state-active-fg); background: var(--state-active-bg); }
 
 .cellLabel {
   font-size: 10.5px;
@@ -103,7 +108,12 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  border-radius: var(--r-md);
+  /* --r-sm, nao --r-md (TASK-357, achado nesta rodada): e o ULTIMO elemento
+     do .modal (--r-2xl 26px, mascarado) - nada depois dele ate o canto de
+     baixo. margin:16px da teto = 26-16 = 10px; --r-md (12px) furava por
+     2px. --r-sm (9px) fecha com folga e ja e o mesmo raio do .close deste
+     modal (consistencia de familia). */
+  border-radius: var(--r-sm);
   border: 1px solid var(--border2);
   background: transparent;
   color: var(--fg3);
@@ -111,6 +121,17 @@
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), scale var(--dur-instant) var(--ease-out);
 }
 .limpar:hover { background: var(--surface3); color: var(--fg); }
+/* TASK-334 (28/08/2026): fecha cobertura de hoverZoom nesta tela (mesmo
+   efeito de reset.css .hoverZoom, aplicado direto na classe porque esta
+   rodada nao toca .tsx). `.cell`/`.close`/`.limpar` sao blocos isolados
+   (grid tile, icone, botao) - candidatos legitimos. */
+@media (hover: hover) and (pointer: fine) {
+  .close:hover, .close:focus-visible,
+  .cell:hover, .cell:focus-visible,
+  .limpar:hover, .limpar:focus-visible {
+    scale: var(--hover-scale);
+  }
+}

@@ -17,14 +17,14 @@
   color: var(--fg2);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  font-size: 17px;
+  font-size: var(--text-lg);
   transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
   margin-right: 4px;
 }
 .back:hover { background: var(--surface3); color: var(--fg); }
 
 .item {
-  font-size: 13px;
+  font-size: var(--text-xs);
   color: var(--fg2);
   cursor: pointer;
   transition: color var(--dur-micro) var(--ease-out);
@@ -36,4 +36,4 @@
 .item.active { color: var(--fg); font-weight: 600; cursor: default; }
 .item.active:hover { background: transparent; }
 
-.sep { color: var(--fg3); font-size: 12px; }
+.sep { color: var(--fg3); font-size: var(--text-2xs); }

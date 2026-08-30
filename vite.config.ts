@@ -1,12 +1,24 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 // @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
 
+// Versao exibida na barra de titulo (Titlebar.tsx) vem sempre do package.json -
+// nunca escrita a mao, pra nao divergir da versao real do build.
+const pkg = JSON.parse(
+  readFileSync(fileURLToPath(new URL("./package.json", import.meta.url)), "utf-8"),
+);
+
 // https://vite.dev/config/
 export default defineConfig(async () => ({
   plugins: [react()],
+
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
 
   // Quebra o bundle em pedaços (editor markdown, grafo, vendor) pra não
   // carregar 950kB num chunk só — primeira pintura mais rápida.
@@ -15,7 +27,7 @@ export default defineConfig(async () => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          editor: ["easymde", "react-simplemde-editor", "marked", "markerjs2"],
+          editor: ["markerjs2"],
           motion: ["framer-motion"],
           vendor: ["react", "react-dom", "zustand", "fuse.js"],
         },

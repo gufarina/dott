@@ -15,7 +15,16 @@
   background: var(--surface2);
   border: 1px solid var(--border2);
   margin: 12px 18px 0;
-  border-radius: var(--r-lg);
+  /* TASK-354: era --r-lg (16px) - quase do tamanho do --r-shell (18px na
+     epoca) do .central que envolve esta tela, com so 12px de folga
+     (margin-top, o lado mais apertado dos dois - 18px nas laterais). Ver
+     tokens.css, --r-shell-inset-12 = --r-shell - 12px.
+     TASK-369: --r-shell subiu pra 20px - --r-shell-inset-12 recalcula
+     sozinho pra 8px (era 6px). Nada aqui precisou mudar, o numero vem do
+     token. Sem mascara squircle aqui (so border-radius + overflow:hidden,
+     ver DESIGN.md secao 22 "Mascara squircle"), entao nao ha --sq-r pra
+     sincronizar. */
+  border-radius: var(--r-shell-inset-12);
   overflow: hidden;
 }
 
@@ -34,21 +43,29 @@
   flex-shrink: 0;
 }
 
+/* TASK-333 item 6: fora da fronteira do CANVAS na migracao dos
+   "botoes-acidente" - neutro em repouso, a marca so acende no hover via
+   `.hoverGlow` (reset.css, classe no JSX). Geometria da tag reduzida (mesma
+   conta de .btnCapture em InboxPanel.module.css): botao de 30px, nao 44px.
+   TASK-336 (28/08/2026): `--tag-h` dobrado (3px -> 6px, so a metade de
+   cima fica visivel - visivel = 3px, igual ao total antigo) e
+   `--tag-inset-b` removida (a tag agora vaza na base do botao, centrada
+   na borda - ver reset.css .hoverGlow pro mecanismo). `--tag-r` sem
+   mudanca. */
 .btnEdit {
+  --tag-h: 6px; --tag-inset-x: 8px; --tag-r: 2px;
   height: 30px;
   padding: 0 14px;
   border-radius: var(--r-md);
-  background: var(--accent-s);
-  border: 1px solid var(--accent);
-  color: var(--accent);
+  background: var(--surface3);
+  border: none;
+  color: var(--fg);
   font-size: var(--text-2xs);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
   letter-spacing: 0.01em;
-  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+  transition: opacity var(--dur-micro) var(--ease-out), scale var(--dur-instant) var(--ease-out);
 }
-.btnEdit:hover {
-  background: var(--accent);
-  color: #fff;
-}
+.btnEdit:hover { opacity: .88; }
+.btnEdit:active { scale: .975; }

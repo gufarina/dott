@@ -26,7 +26,7 @@
 }
 
 .logo {
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 700;
   letter-spacing: -.02em;
   color: var(--fg);
@@ -48,15 +48,17 @@
   cursor: pointer;
   background: transparent;
   color: var(--fg2);
-  font-size: 12px;
+  font-size: var(--text-2xs);
   display: flex;
   align-items: center;
   gap: 5px;
   transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
 }
 .btn:hover { background: var(--surface3); color: var(--fg); }
-.btnActive { background: var(--accent-s); color: var(--accent); }
-.btnActive:hover { background: var(--accent-s); color: var(--accent); }
+/* TASK-334 (Fase 4): token semantico de estado ativo, nao mais
+   --accent-s/--accent direto - ver tokens.css. */
+.btnActive { background: var(--state-active-bg); color: var(--state-active-fg); }
+.btnActive:hover { background: var(--state-active-bg); color: var(--state-active-fg); }
 .btn.accent { color: var(--accent); border: 1px solid var(--accent); }
 .btn.accent:hover { background: var(--accent-s); }
 
@@ -84,3 +86,17 @@
 
 /* Marca do Dott na barra de titulo */
 .mark { color: var(--accent); flex-shrink: 0; margin-right: 7px; }
+
+/* Versao do build (TASK-313): discreta, so pra identificar qual build esta
+   rodando. --text-3xs = 10px de token, mas a janela principal roda com zoom
+   nativo 1.2 (main.tsx), entao o tamanho real na tela e 12px - legivel sem
+   virar badge. Mono porque e a mesma linguagem visual usada pra outros
+   metadados tecnicos no app (ex.: .path em Settings.module.css). */
+.version {
+  margin-left: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  color: var(--fg3);
+  flex-shrink: 0;
+  cursor: default;
+}

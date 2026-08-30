@@ -19,19 +19,22 @@ fn attach_dir(app: &tauri::AppHandle) -> PathBuf {
 
 /// Remove um anexo (imagem) do disco a partir da sua URL (asset:// ou
 /// http://asset.localhost/...). So apaga dentro de attachments/ — extrai o nome
-/// do arquivo do fim da URL. Usado pra faxinar imagens orfas ao deletar nota/card.
+/// do arquivo do fim da URL (tratando '/' e '\') e recusa qualquer caminho que
+/// escape attachments/ (drive, raiz ou ".."). Usado pra faxinar imagens orfas
+/// ao deletar nota/card.
 #[tauri::command]
 pub fn attachment_remove(app: tauri::AppHandle, url: String) -> Result<(), String> {
     // Nome do arquivo = ultimo segmento, sem query/fragment.
     let tail = url.split(['?', '#']).next().unwrap_or(&url);
-    let name = tail.rsplit('/').next().unwrap_or("");
-    if name.is_empty() || name.contains("..") {
-        return Ok(()); // nada a fazer / caminho suspeito
+    let name = crate::path_safety::last_segment(tail);
+    let dir = attach_dir(&app);
+    if let Some(path) = crate::path_safety::safe_join(&dir, name) {
+        if path.exists() {
+            fs::remove_file(path).map_err(|e| e.to_string())?;
+        }
     }
-    let path = attach_dir(&app).join(name);
-    if path.exists() {
-        fs::remove_file(path).map_err(|e| e.to_string())?;
-    }
+    // nome vazio, suspeito (recusado pela validacao) ou arquivo inexistente:
+    // nada a fazer — best-effort, nunca apaga fora de attachments/.
     Ok(())
 }
 

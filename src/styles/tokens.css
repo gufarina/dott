@@ -27,57 +27,229 @@
      elemento nao-textual. Este token fica em 3.1:1. --border2 continua servindo
      pra divisoria decorativa, onde o piso nao se aplica. */
   --border-control: #63636b;
+  /* Borda de CONTROLE quando o fundo e --surface3 (nao --surface2).
+     TASK-370: --border-control foi calibrado contra --surface2 (3,1:1, ver
+     comentario acima) - contra --surface3 (#222228, mais claro que
+     --surface2) esse mesmo token cai pra ~2,66:1, abaixo do piso de 3:1
+     documentado. Nao e o mesmo token mais claro/escuro por opiniao: e um
+     PAR NOVO, calibrado pra ESTA superficie especifica, do mesmo jeito que
+     --border-control ja e um par dedicado a --surface2. Medido (formula
+     WCAG): #717179 sobre --surface3 (#222228) = ~3,27:1. */
+  --border-control-3: #717179;
+  /* TASK-378 (29/08/2026) - ink pronto (cor final, ja com alfa) pra sombra
+     de RECESSO de campo protagonista (ver CaptureBox.module.css, .convoBox)
+     quando o proprio campo senta em --desk - o piso de verdade, o token
+     mais escuro que existe nos dois temas (secao 2 do DESIGN.md). Nesse
+     caso nao sobra token de superficie mais escuro que o fundo do campo
+     pra servir de base da sombra (a receita anterior, TASK-375, usava
+     sempre "o mais escuro disponivel" - --bg ou --desk, dependendo de qual
+     token o campo usava). Preto puro aqui NAO e a mesma excecao proibida
+     na secao 18.3 ("nunca preto cravado" - regra pensada pra ESCALA DE
+     ELEVACAO, onde sempre ha token de superficie mais escuro disponivel);
+     e o piso do proprio sistema de token que foi alcancado - decisao do
+     CEO (TASK-378), registrada no DESIGN.md. Alfa (.45) igual ao da
+     receita anterior - mesma intensidade percebida, so a base mudou.
+     Medido: --desk escuro misturado com preto a 45% da uma queda de
+     ~0,84 L* no topo da caixa (proxima da queda ~0,9 L* que a receita
+     anterior ja produzia contra --surface2 - mesma familia de sutileza,
+     nao regressao).
+     ATUALIZACAO (TASK-380, 29/08/2026): o "chao proprio" que deixava
+     .convoBox sentado em --desk foi removido (CEO: container atras do
+     PARA/box sem sentido) - o consumidor agora senta em --surface, nao
+     mais --desk. A receita (cor final ja com alfa) nao depende de qual
+     token esta por baixo - remedido contra o fundo novo: a mesma mistura
+     derruba o topo da caixa em ~3,3 L* agora (era ~0,84 L* contra --desk,
+     que ja estava quase preto) - mais visivel, nao menos. Nenhum valor
+     mudou aqui, so o efeito no consumidor foi remedido. */
+  --recess-shadow: rgba(0, 0, 0, .45);
   /* Anel de foco de teclado */
   --focus: #ff8a63;
+
+  /* Groove da "tag" de marca (TASK-330) - ver DESIGN.md secao 8 e
+     reset.css `.hoverGlow`. E a forma em REPOUSO (apagada, so a caixa) -
+     sempre um tom mais escuro que a superficie do botao (--surface3),
+     porque e uma FORMA RECUADA (leitura de "encaixe", nao de "adesivo por
+     cima"). Neutro sempre - nunca cor de marca em repouso. */
+  --tag-groove: rgba(0, 0, 0, .22);
+
+  /* ── Escala de elevacao (TASK-329, 28/08/2026) — ver DESIGN.md secao 18.
+     No escuro, sombra preta contra um fundo quase-preto some (0 contraste) —
+     por isso a profundidade aqui NAO e "a mesma sombra do claro, so mais
+     fraca": e uma receita diferente pro MESMO degrau. Fonte de luz unica e
+     coerente com o claro (de cima pra baixo): um friso de luz sutil no topo
+     do elemento (`inset`, simula o canto pegando luz) + uma sombra de
+     contato suave embaixo (contra --bg/--desk, que nao sao pretos puros, ha
+     luminancia o bastante pra uma sombra preta suave aparecer). Nenhuma cor
+     de marca entra aqui — e neutro sempre, a marca tem o gradiente pra ela
+     (secao 2). E1 (repouso) e E4 (modal) reaproveitam --elevation-card e
+     --shadow ja existentes, que viram ALIAS de --elev-1/--elev-4 (nao
+     removidos, nada que ja consome os dois precisa mudar). */
+  --elev-0: none;
+  --elev-1: none;
+  --elev-2: 0 1px 0 rgba(255, 255, 255, .04) inset, 0 6px 14px -8px rgba(0, 0, 0, .55);
+  --elev-3: 0 1px 0 rgba(255, 255, 255, .06) inset, 0 12px 28px -10px rgba(0, 0, 0, .6);
+  --elev-4: 0 4px 24px rgba(0, 0, 0, .5);
+  --elev-5: 0 1px 0 rgba(255, 255, 255, .08) inset, 0 20px 48px -8px rgba(0, 0, 0, .65), 0 0 24px rgba(0, 0, 0, .35);
 }
 
+/* TEMA CLARO — reescrito por completo em 27/08/2026 (TASK-318, CEO: "o
+   white mode eh algo nojento, quero algo parecido com o codex desktop").
+   O erro antigo era branco puro + os MESMOS laranjas saturados do escuro
+   por cima - a mesma doença que a TASK-313 curou no escuro, so que mais
+   feia em fundo claro. Fio condutor (a mesma regra gravada na secao 8):
+   PREENCHIMENTO da marca so na acao principal; todo o resto neutro. Aqui
+   isso vira: quase monocromatico (cinzas + quase-preto), separacao de
+   superficie por SOMBRA difusa fraca (--elevation-card, novo token) em vez
+   de borda, e acento so em texto/indicador minusculo - nunca preenchendo
+   botao secundario, badge ou etiqueta (ver .type-* e .badge, ja neutros
+   desde a TASK-313/316, cascade automatico pros dois temas).
+   Contrastes calculados (formula WCAG, relative luminance) e registrados
+   aqui pra quem remedir no pixel conferir contra o mesmo numero:
+     --fg   (#1c1e22) sobre --surface (#fbfbfc) = 16,15:1
+     --fg2  (#52565e) sobre --surface (#fbfbfc) =  7,13:1
+     --fg3  (#65696f) sobre --surface (#fbfbfc) =  5,33:1
+     --fg3  (#65696f) sobre --surface2(#f2f3f5) =  4,96:1  <- o caso que
+       mais aperta o piso de 4,5:1 (texto terciario sobre superficie
+       "dentro" de um card) - com margem, nao no fio.
+     --border-control (#838794) sobre --surface2 = 3,23:1 (piso de
+       controle nao-textual e 3:1 - passa com folga pequena de proposito,
+       e decorativo demais pra ficar mais escuro sem parecer borda dura). */
 :root[data-theme="light"] {
-  --bg: #f4f4f7;
-  --surface: #ffffff;
-  --surface2: #f0f0f4;
-  --surface3: #e8e8ef;
-  --border: #e0e0ea;
-  --border2: #d0d0dc;
-  --fg: #18181f;
-  --fg2: #54546a;
-  --fg3: #666678;
-  --accent: #d94428;
-  --accent-s: rgba(217, 68, 40, .10);
+  --bg: #eceef1;
+  --surface: #fbfbfc;
+  --surface2: #f2f3f5;
+  --surface3: #e8eaed;
+  /* Divisoria decorativa - "borda quase imperceptivel" da referencia.
+     rgba sobre preto neutro (nao cinza puro) pra se adaptar a qualquer
+     superficie por baixo sem precisar de piso de contraste (e decorativo,
+     ver DESIGN.md secao 2). */
+  --border: rgba(20, 20, 35, .07);
+  --border2: rgba(20, 20, 35, .12);
+  --fg: #1c1e22;
+  --fg2: #52565e;
+  --fg3: #65696f;
+  /* Acento reservado a TEXTO/indicador minusculo (link, ponto de dado) -
+     nunca preenchendo botao secundario/badge/etiqueta (essas ja sao
+     neutras desde TASK-313/316 e herdam este tema automaticamente).
+     Mais escuro que o --accent do tema escuro de proposito: em fundo
+     claro o mesmo tom fica estridente (a licao que abriu esta tarefa). */
+  --accent: #b5431f;
+  --accent-s: rgba(181, 67, 31, .10);
   --blue: #2f6fcc;
-  --green: #29945e;
+  --green: #1f7a4d;
   --q-p: #c83030;
   --q-a: #2f6fcc;
   --q-r: #29945e;
   --q-ar: #888899;
-  --warn: #b86c1a;
-  --danger: #c83030;
-  --success: #29945e;
-  --shadow: 0 4px 24px rgba(0, 0, 0, .12);
-  --border-control: #8b8b99;
+  --warn: #a15c14;
+  --danger: #c0392b;
+  --success: #1f7a4d;
+  /* Sombra de superficie FLUTUANTE (modal/toast/drag) - larga e fraca,
+     nunca escura e apertada (a "sombra difusa" da referencia). */
+  --shadow: 0 20px 48px -14px rgba(20, 20, 35, .16), 0 4px 14px rgba(20, 20, 35, .06);
+  --border-control: #838794;
+  /* Par de --border-control pra fundo --surface3 (ver comentario espelho no
+     bloco escuro acima, TASK-370). Contra --surface3 (#e8eaed) o
+     --border-control padrao (calibrado pra --surface2) cai pra ~2,97:1,
+     abaixo do piso. Medido: #7D818E sobre --surface3 = ~3,23:1. */
+  --border-control-3: #7d818e;
+  /* TASK-378 (29/08/2026) - par claro do `--recess-shadow` (ver comentario
+     completo no bloco escuro acima). NAO reusa o mesmo preto puro do
+     escuro: o "ink" ja estabelecido pro tema claro em toda sombra/divisoria
+     desta paleta e rgb(20,20,35) - ver `--border`, `--shadow`,
+     `--elevation-card`, `--elev-2..5` claros, todos usam este mesmo tom.
+     Alfa BEM mais baixa que o par escuro (.14 contra .45): misturar preto
+     puro a 45% aqui pintaria uma mancha escura pesada no topo da caixa (o
+     fundo, --desk claro, e MUITO mais claro que o do tema escuro - a mesma
+     porcentagem de preto derruba a luminancia muito mais). .14 fica perto
+     da faixa que a propria escala de sombra clara ja usa (--elevation-card
+     usa .04/.12; aqui um pouco mais forte por ser recesso de campo
+     protagonista, nao elevacao comum). Medido: --desk claro misturado com
+     este ink a .14 da uma queda de ~10,2 L* no topo da caixa - visivel,
+     coerente com "a sombra FAZ o trabalho" no claro
+     (secao 18.3), sem virar mancha. */
+  --recess-shadow: rgba(20, 20, 35, .14);
   --focus: #b8341a;
-  --hairline: rgba(0, 0, 0, .08);
+  --hairline: rgba(0, 0, 0, .06);
+  /* Groove da tag (TASK-330) - ver bloco escuro acima. No claro a mesma
+     ideia de "encaixe" fica mais fraca em alfa (fundo ja e claro, um preto
+     forte pareceria mancha) mas ainda escura - sombra e sempre neutra,
+     nao vira cinza-azulado igual --elevation-card (que e sombra de CARD
+     flutuante, papel diferente). */
+  --tag-groove: rgba(0, 0, 0, .09);
+  /* "Mesa" atras dos shells flutuantes - mais escura que --bg (mesma
+     logica invertida do tema escuro: --desk sempre um degrau abaixo). */
+  --desk: #dde0e4;
+  /* NOVO (TASK-318): separacao de CARD por sombra em vez de borda - a
+     referencia Codex nao usa borda escura, usa halo largo e fraco. `none`
+     no tema escuro (mantem a regra existente: card la e hairline-only,
+     nunca sombra - ver DESIGN.md secao 6). Consumido como
+     `box-shadow: var(--elevation-card);` nos cards que already usavam so
+     border/hairline - aditivo, nao substitui a borda (a referencia ainda
+     tem um fio "quase imperceptivel", por isso --border acima e tao fraco
+     em vez de zero). */
+  --elevation-card: 0 1px 2px rgba(20, 20, 35, .04), 0 10px 28px -12px rgba(20, 20, 35, .12);
+  /* Brasa em variante CLARA (TASK-318): a receita original depende de
+     `background-blend-mode: screen` sobre uma base quase-preta
+     (#070103) - screen contra um FUNDO CLARO lava a cor pro branco e
+     perde o brilho ("suja", como o CEO avisou). Aqui a marca vira um
+     preenchimento radial em blend NORMAL (sem screen), reusando os TRES
+     tons de pico da propria receita/`--dott-gradient-linear` (nunca uma
+     segunda paleta) - mesmo formato "nucleo quente perto da base" pra
+     continuar reconhecivel como a MESMA brasa, so sem o truque que exige
+     fundo escuro. O botao continua com texto branco: o tom mais escuro do
+     range (oklch(.40...)) e escuro o bastante pra sustentar 4,5:1+ sozinho,
+     sem depender de soma de luz. */
+  --dott-gradient:
+    radial-gradient(70% 55% at 50% 88% in oklch,
+      oklch(.80 .22 50) 0%, oklch(.60 .21 40) 45%, oklch(.42 .16 34) 100%);
+  --dott-gradient-blend: normal;
+
+  /* Escala de elevacao (TASK-329) — ver comentario espelho no bloco escuro
+     e DESIGN.md secao 18. Aqui a sombra FAZ o trabalho (fundo claro separa
+     por sombra difusa, nao por friso de luz): cresce em raio/alcance a cada
+     degrau, nunca fica mais escura/dura (isso pareceria sujeira, nao
+     profundidade). E1 e o mesmo valor de --elevation-card (que continua
+     existindo, agora um alias); E4 e o mesmo valor de --shadow (idem). */
+  --elev-0: none;
+  --elev-1: 0 1px 2px rgba(20, 20, 35, .04), 0 10px 28px -12px rgba(20, 20, 35, .12);
+  --elev-2: 0 2px 4px rgba(20, 20, 35, .05), 0 14px 32px -12px rgba(20, 20, 35, .14);
+  --elev-3: 0 4px 10px rgba(20, 20, 35, .08), 0 20px 40px -16px rgba(20, 20, 35, .16);
+  --elev-4: 0 20px 48px -14px rgba(20, 20, 35, .16), 0 4px 14px rgba(20, 20, 35, .06);
+  --elev-5: 0 28px 64px -12px rgba(20, 20, 35, .22), 0 10px 24px rgba(20, 20, 35, .12);
 }
 
-/* Typography — Manrope na UI inteira (titulo, botao, label, navegacao);
-   Merriweather so no corpo de leitura da nota (.md-view, ver markdown.css).
-   MiSans Latin (fonts.css) fica declarada mas sai de uso — reprovada pelo CEO
-   como "amador"; nao apago o @font-face pra nao quebrar quem ainda referencia. */
+/* Typography — Manrope na UI inteira (titulo, botao, label, navegacao).
+   MiSans Latin (fonts.css) foi removida do import em main.tsx (TASK-316,
+   27/08/2026) - zero consumidor, so pesava bundle; nunca fez parte da
+   escala/paleta e era um resto de design system anterior ("fontes
+   antigas", CEO). Arquivo + 8 .otf continuam em disco (delecao fisica fora
+   do alcance desta ferramenta), so o import morreu.
+   Merriweather foi removida em paralelo (TASK-330, 27/08/2026): MarkdownView.tsx
+   foi deletado em rodada anterior, zero consumidor em runtime. */
 :root {
   --font-ui: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --font-reading: 'Merriweather', Georgia, 'Times New Roman', serif;
   --font-body: var(--font-ui);
   --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
 
   /* Escala. O corpo estava em 15px, abaixo do piso de 16px/1rem — texto de
-     leitura nao desce disso. */
-  --text-2xl:  24px;
-  --text-xl:   22px;
-  --text-lg:   17px;
-  --text-base: 16px;
-  --text-sm:   14px;
-  --text-xs:   13px;
-  --text-2xs:  12px;
-  --text-3xs:  11px;
+     leitura nao desce disso.
+     REDUZIDA em 27/08/2026 (TASK-309, ordem do CEO: "diminui o tamanho das
+     fontes no geral do app"). Degrau uniforme de -10% em cada passo, exceto
+     --text-3xs: 11*.9 = 9,9px, que FURA o piso de 10px pra rotulo/etiqueta -
+     parado em 10px (reducao de ~9,1% nesse degrau, nao 10%). Nenhum outro
+     degrau bateu piso: --text-base (corpo/leitura) ficou em 14,5px, acima do
+     piso de 13px pra leitura corrida. Lembrete: a janela principal roda com
+     zoom nativo de 1.2 (main.tsx) - o tamanho REAL na tela do CEO e este
+     valor x1.2 (--text-base vira 17,4px na tela, nao 14,5px). */
+  --text-2xl:  21.5px;
+  --text-xl:   20px;
+  --text-lg:   15.5px;
+  --text-base: 14.5px;
+  --text-sm:   12.5px;
+  --text-xs:   11.5px;
+  --text-2xs:  11px;
+  --text-3xs:  10px;
 
   /* Grid de espacamento — 4/8/12/16/24/32. O que parecia "amador" era
      padding inconsistente entre card/painel/modal; toda superficie nova
@@ -113,6 +285,80 @@
   --pill-line-height: 1.4;
   --pill-padding: 3px 8px;
 
+  /* Tinta de estado (TASK-327/329) — o par de --accent-s pra warn/success/
+     danger, que faltava. `color-mix` em vez de rgba cravado: acompanha o
+     TOKEN de cada tema sozinho (o defeito que motivou isto: 7 lugares no
+     app escreviam `rgba(224,64,64,.12..22)` a mao — o RGB do --danger do
+     tema ESCURO — e continuavam pintando esse vermelho mesmo no tema claro,
+     onde --danger e outro hex. Ver DESIGN.md secao 17.4/18.6). 15% pra
+     bater a mesma intensidade que TASK-316 ja usa nos chips de tipo
+     (`--green`/`--warn`/`--danger` a 15% via color-mix) — um numero so pra
+     "fundo de estado, discreto" em vez de .12/.13/.14/.15/.16/.18/.22
+     espalhados. */
+  --danger-s: color-mix(in oklab, var(--danger) 15%, transparent);
+  --warn-s: color-mix(in oklab, var(--warn) 15%, transparent);
+  --success-s: color-mix(in oklab, var(--success) 15%, transparent);
+
+  /* Estado "ativo/selecionado" (TASK-334, Fase 4 da migracao de botao -
+     DESIGN.md secao 17.2). A MESMA receita (`--accent-s` de fundo,
+     `--accent` de borda/texto) estava copiada a mao em 5 arquivos
+     diferentes (TasksPanel .filterToggle.active/.acaoAtiva, Titlebar
+     .btnActive, FolderNotesView .novaTarefaPrazoBtnAtivo, GlyphPicker
+     .cellAtiva). Aqui vira UM ponto de origem semantico - os 5 lugares
+     passam a referenciar isto em vez de --accent-s/--accent direto, entao
+     "o que e estado ativo" fica decidido num lugar so (hoje sao alias de
+     --accent-s/--accent; se um dia o ativo precisar ser outra cor, muda
+     aqui, nao caca 5 arquivos). Nao fundido numa classe unica porque isso
+     exigiria tocar o .tsx de cada consumidor (fora do alcance desta
+     rodada) ou `composes` entre CSS modules (nao verificavel sem build
+     real neste posto de trabalho) - ver DESIGN.md secao 17.6 pra o
+     raciocinio completo. */
+  --state-active-bg: var(--accent-s);
+  --state-active-border: var(--accent);
+  --state-active-fg: var(--accent);
+
+  /* Porte de botao (TASK-327, recalibrado TASK-372) — a regua que faltava.
+     Ver DESIGN.md secao 17.1: 3 portes, nunca mais. `--btn-h-*` e pra botao
+     COM rotulo; `--icon-btn-*` pra botao SO icone (md/sm coincidem em valor
+     com btn-h-md/sm de proposito — mesma escala, dois nomes porque um botao
+     com texto e um icone sozinho tem padding/regra de largura diferentes,
+     mesmo na mesma altura).
+
+     TASK-372 (29/08/2026, CEO sobre o botao "Capturar" com a tarja: "ta
+     muito alto, reduz a altura dessa tarja e a altura dos botoes tambem, ta
+     ridiculo"). --btn-h-lg volta de 44 pra 36px - o valor que o app usava
+     ANTES da TASK-306. A razao dos 44px so existia enquanto a marca
+     preenchia o botao inteiro com `--dott-gradient` (o radial cheio, nucleo
+     ancorado perto da base, exigindo altura pra nao colidir com o texto -
+     ver comentario historico junto de `--dott-gradient` abaixo). A TASK-319
+     (28/08/2026) tirou esse preenchimento do repouso: hoje NENHUM botao usa
+     `--dott-gradient` puro (grep confirma zero consumidor) - a marca vive
+     inteira dentro da "tag" pequena de `.hoverGlow` (reset.css), que so
+     precisa de poucos px de altura, nao mais 44. A restricao que forcava
+     44px nao existe mais - reverter pro valor historico e REUSE, nao
+     invencao. Consumidores: `.btn`/`.primary`/`.ghost` (Modal.tsx via
+     `ModalButton`), `.btnNew`/`.btnNewAlt`/`.btnNewBig`/`.btnNewBigAlt`
+     (FolderNotesView), `.ob-btn`/`.ob-btn.primary` (onboarding), `.convoSend`
+     (CaptureBox - o botao "Capturar", que usa `var(--btn-h-lg)` desde a
+     TASK-343/375; herda o novo valor automaticamente, sem editar aquele
+     arquivo). */
+  --btn-h-lg: 36px;
+  --btn-h-md: 28px;
+  --btn-h-sm: 20px;
+  --icon-btn-md: 28px;
+  --icon-btn-sm: 20px;
+
+  /* Brilho de carregamento / shimmer (TASK-329) — ver DESIGN.md secao 18.4
+     e a classe `.shimmer` em reset.css. Gradiente definido UMA vez aqui
+     (nao por tema): usa --surface2/--surface3, que ja variam por tema
+     sozinhos via cascata — nao precisa de bloco escuro/claro separado.
+     Duracao unica e fixa: nenhum consumidor pode escrever a propria
+     duracao ou um delay aleatorio (é isso que causa "varios blocos fora de
+     sincronia" — nunca physics de sincronizar relogios, so a regra de
+     nunca variar o numero). */
+  --shimmer-gradient: linear-gradient(100deg, var(--surface2) 30%, var(--surface3) 50%, var(--surface2) 70%);
+  --shimmer-duration: 1.5s;
+
   /* Gradiente da marca — HISTORICO CURTO (26/08/2026, 4 rodadas na mesma
      sessao, cada uma medida no pixel real, nao em opiniao):
      1) linear chapado (2 vermelhos quase iguais) — CEO: "nao tem o
@@ -144,14 +390,40 @@
      Quick Capture de 28px no hot path de captura) usa
      `--dott-gradient-linear` no lugar — ver comentario em cada consumidor.
      SEMPRE usar `--dott-gradient` junto de `--dott-gradient-blend`
-     (background-blend-mode nao entra dentro de um custom property). */
+     (background-blend-mode nao entra dentro de um custom property).
+
+     ATUALIZACAO (TASK-372, 29/08/2026): a TASK-319 (28/08/2026, ver reset.css
+     `.hoverGlow`) tirou este preenchimento CHEIO do repouso de todo botao -
+     a marca hoje vive so dentro da tag pequena (`--dott-gradient-linear` +
+     `--dott-gradient-glow`). Confirmado por grep: ZERO consumidor de
+     `var(--dott-gradient)` puro em `src/` nesta rodada. O paragrafo acima
+     ("EXIGE caixa de botao alta, 44px+") descreve uma restricao que ja nao
+     se aplica a nenhum botao real do app - por isso `--btn-h-lg` pode voltar
+     a 36px sem reabrir o defeito de contraste medido aqui (aquele defeito so
+     existe SE este gradiente cheio voltar a preencher um botao). Historico
+     mantido como estava, nao reescrito - so este aviso, pra quem for reusar
+     `--dott-gradient` inteiro num botao no futuro saber que precisa repor a
+     altura alta junto. */
+  /* TASK-312 (27/08/2026, CEO: "nesse gradiente quero mais blur, ta mto
+     delineado"): as 3 camadas radiais tinham a MESMA porcentagem de parada
+     do widget (.luz3/.luz1/.luz4), mas o botao e um retangulo baixo e largo,
+     nao um circulo quase quadrado como a bolinha (56x56) - a mesma
+     porcentagem vira uma distancia em PIXEL muito mais curta no eixo da
+     altura (44px+), e a luz recorta em vez de dissolver. Ancoras (`at 50%
+     90%` / `50% 95%` / `50% 48%`) NAO mudaram - e a geometria aprovada que
+     protege o contraste do texto. O que mudou: raio de cada elipse maior
+     (mais espaco pra cair) e a parada quente empurrada mais cedo enquanto a
+     parada transparente foi empurrada quase ate a borda - a cauda de queda
+     ficou de 42/44/42 pontos percentuais pra 62/60/56, sobre uma elipse
+     maior, entao a distancia REAL de dissolucao mais que dobrou. As cores do
+     pico (0%) NAO mudaram - o ponto mais claro e o mesmo de antes. */
   --dott-gradient:
-    radial-gradient(45% 30% at 50% 90% in oklch,
-      oklch(.97 .05 62) 0%, oklch(.80 .22 50 / .70) 36%, oklch(.24 .10 40 / 0) 78%),
-    radial-gradient(60% 50% at 50% 95% in oklch,
-      oklch(.74 .21 45) 0%, oklch(.54 .20 37 / .76) 42%, oklch(.22 .10 30 / 0) 86%),
-    radial-gradient(112% 92% at 50% 48% in oklch,
-      oklch(.40 .12 34 / .44) 0%, oklch(.27 .10 30 / .20) 48%, oklch(.13 .05 28 / 0) 90%),
+    radial-gradient(58% 42% at 50% 90% in oklch,
+      oklch(.97 .05 62) 0%, oklch(.80 .22 50 / .70) 30%, oklch(.24 .10 40 / 0) 92%),
+    radial-gradient(74% 62% at 50% 95% in oklch,
+      oklch(.74 .21 45) 0%, oklch(.54 .20 37 / .76) 34%, oklch(.22 .10 30 / 0) 94%),
+    radial-gradient(128% 106% at 50% 48% in oklch,
+      oklch(.40 .12 34 / .44) 0%, oklch(.27 .10 30 / .20) 40%, oklch(.13 .05 28 / 0) 96%),
     #070103;
   --dott-gradient-blend: screen, screen, screen, normal;
   /* FRONTEIRA superficie vs border-image: `border-image` NAO aceita
@@ -164,6 +436,35 @@
     oklch(.54 .20 37) 0%, oklch(.80 .22 50) 55%, oklch(.97 .05 62) 100%);
   --dott-gradient-soft: linear-gradient(135deg,
     oklch(.54 .20 37 / .14) 0%, oklch(.80 .22 50 / .14) 55%, oklch(.97 .05 62 / .14) 100%);
+  /* TASK-330 (28/08/2026) - O CEO viu de novo uma captura de uma rodada
+     ANTERIOR (os botoes "Nova tarefa"/"Nova pasta" com a forma antiga) e
+     preferiu aquilo: "quero o highlight como nessa img anexa, que eh uma
+     forma contida com o gradiente dentro dele, tipo uma tag" - ao contrario
+     da luz sem aresta (a "fresta de luz por baixo de uma porta") que a
+     TASK-320 escolheu. Ele e o dono do gosto - a receita muda de novo, sem
+     tentar reconciliar as duas. NAO e um retorno ao defeito que a TASK-320
+     corrigiu (retangulo de 60% da altura, cantos vivos, cortado a pique
+     pela borda do botao) - a nova forma e deliberadamente BAIXA, RECUADA
+     (com folga dos 4 lados) e com RAIO PROPRIO menor que o do botao (ver
+     `.hoverGlow` em reset.css pra geometria exata, DESIGN.md secao 8).
+
+     `--dott-gradient-bar` (a barrinha antiga) fica sem consumidor nesta
+     rodada - nao apagada (pode voltar a fazer sentido num contexto
+     diferente), so documentada como nao usada agora.
+
+     `--dott-gradient-glow` MUDOU DE FORMA: antes era achatada e ancorada
+     na base de uma caixa OVERSIZED que se movia inteira via `translate`
+     (o "leito" era o proprio limite do botao). Agora a tag e a propria
+     caixa (pequena, com raio proprio) e o ponto quente se move por
+     `background-position` DENTRO dela (`--glow-x`/`--glow-y`, escritos por
+     `useHoverGlowCursor.ts` - hook intocado, so a formula que consome os
+     dois valores mudou). Virou um circulo simples porque agora so precisa
+     preencher um pedaco pequeno e fixo (a tag), nao mais desenhar a propria
+     forma alongada de antes - simetria caiu, a tag e quem define a forma.
+     Reusa as MESMAS 3 paradas de matiz de --dott-gradient-linear (nunca
+     uma paleta nova). */
+  --dott-gradient-glow: radial-gradient(circle at 50% 50%,
+    oklch(.97 .05 62 / .95) 0%, oklch(.80 .22 50 / .7) 40%, oklch(.40 .16 34 / 0) 100%);
 
   /* Borda "sutil" pedida pro passe premium: rgba branca/preta bem baixa,
      separada de --border/--border2 (que sao hex opacos e ja usados em todo
@@ -179,8 +480,43 @@
   --r-xl:  20px;
   --r-2xl: 26px;
   --r-3xl: 30px;
-  --r-shell: 18px;
+  /* TASK-369, 28/08/2026: era 18px. O CEO reclamou de novo do canto de
+     dentro da captura ("nao ta tao arredondado") depois que a TASK-354/357
+     ja tinham provado que 6px era o TETO exato pra --r-shell=18 - nao dava
+     pra abrir mais o raio de dentro sem quebrar a formula (secao 22). O
+     unico jeito CERTO de dar mais canto pra caixa de dentro e abrir o raio
+     de FORA e recalcular - e foi isso que este numero faz.
+     Por que 20, nao mais: 20 e o mesmo valor de --r-xl (linha acima),
+     ja aprovado no app como "canto generoso, mas nao bolha" (identidade do
+     .folderCard, PARAGrid, DESIGN.md secao 7) - reusa um numero que ja
+     provou nao ficar redondo demais em elemento grande. Testado contra os
+     9 pares aninhados do app que dependem de --r-shell (DESIGN.md secao
+     22.3): em TODOS eles o espacamento real ja e >= 20 OU a correcao so
+     pede token (nao arquivo) - nenhum novo estouro, nenhum arquivo de
+     outra frente (PARAGrid/FolderNotesView) precisou ser tocado. Um numero
+     maior (--r-2xl 26, --r-3xl 30 - escala de modal) estouraria pares que
+     hoje sobrevivem exatamente por ficar abaixo de 20 (PARAGrid .qCards e
+     FolderNotesView .body, ambos com folga de exatamente 20px) - --r-shell
+     maior que isso exigiria abrir espacamento em arquivos de outra frente,
+     o que nao foi autorizado nesta rodada. */
+  --r-shell: 20px;
   --r-full: 9999px;
+
+  /* Pares de raio ANINHADO (TASK-354, 28/08/2026) - a escala acima e por
+     PORTE (elemento solto); nao serve pra escolher o raio de um elemento
+     que vive DENTRO de outro com raio, porque ignora quanto espaco de fato
+     sobra ate a curva de fora. Regra (DESIGN.md secao 7, "regra de
+     aninhamento"): raio_interno = raio_externo - espacamento real ate a
+     borda de fora. Auditoria desta rodada achou 3 lugares que escolheram
+     um raio de "porte" (--r-lg/--r-2xl) sem checar o --r-shell que
+     os envolve de perto - a curva de dentro ficava MAIOR que a de fora,
+     nunca concentrica. Os dois espacamentos medidos, nomeados pelo proprio
+     espacamento (nao pelo valor - assim quem for medir um caso novo sabe
+     qual usar so olhando o padding/margin real do container).
+     TASK-369: recalculados com --r-shell=20 (era 18) - os dois SOBEM
+     porque o externo subiu e o espacamento real de cada par nao mudou. */
+  --r-shell-inset-10: 10px;  /* --r-shell(20) - 10px (.list padding, literal, nao token): .card do InboxPanel */
+  --r-shell-inset-12: 8px;  /* --r-shell(20) - 12px: .imageContainer do visualizador de imagem (ImageViewer, margin-top 12px). TASK-378 (29/08/2026): .convoBox deixou de consumir este token - .captureShell (o "de fora" da formula, App.module.css) perdeu raio e mask proprios, entao o par aninhado com a caixa de captura acabou; .convoBox agora usa --r-shell direto (raio de porte, painel de primeiro nivel) - ver CaptureBox.module.css */
 
   /* Expoente do squircle (worklet Houdini): 3 = round suave, 4 = Apple, 5+ = boxy */
   --sq-smooth: 4;
@@ -212,6 +548,23 @@
      saindo o sistema so responde. Regra citada nas tres fontes. */
   --dur-exit:    120ms;
 
+  /* TASK-372 (29/08/2026): duracao dedicada ao acender/apagar da marca
+     dentro da tag do botao (`.hoverGlow`, reset.css). CEO: "quero que tenha
+     mais easy in and out de animacao, demore levemente pra acender, ta
+     muito com cara de software vagabundo". Nasce token PROPRIO em vez de
+     reusar `--dur-medium` (mesmo numero por coincidencia, nunca por
+     acoplamento - a mesma logica de `--icon-btn-md` duplicar o valor de
+     `--btn-h-md` com nome proprio): a brasa acender e um MOMENTO DE MARCA,
+     nao uma transicao de cena; se `--dur-medium` mudar de valor um dia (pra
+     afinar modal/troca de tela), a tag nao pode mudar junto por acidente.
+     Substitui o "220ms" que estava solto (nao token) direto nos dois
+     `transition` de `.hoverGlow::before`/`::after` - o numero magico que a
+     ordem desta task pediu pra eliminar. Simetrico por desenho: MESMO valor
+     pro acender (hover-in) e apagar (hover-out) - "easy in and out" e a
+     mesma curva ida e volta, no com --ease-inout (ver abaixo), nunca duas
+     velocidades diferentes pros dois sentidos. */
+  --dur-glow: 240ms;
+
   /* Curva unica da casa: ease-out exponencial.
      `cubic-bezier(0.16, 1, 0.3, 1)` e o valor literal do taste-skill
      (skills/taste-skill/SKILL.md, "Default transition") — VERIFICADO na fonte.
@@ -221,6 +574,14 @@
      `ease` puro (o padrao do navegador) e simetrico: comeca e termina no mesmo
      ritmo, e por isso tudo parecia molenga. */
   --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  /* TASK-372: primeiro consumidor real (`.hoverGlow`, reset.css) - ate aqui
+     este token existia declarado e SEM NENHUM lugar que o usasse (grep
+     confirmou zero consumidor antes desta rodada). Simetrica por natureza
+     (comeca devagar, acelera no meio, termina devagar OS DOIS LADOS) - e
+     exatamente o "easy in and out" que o CEO descreveu, e o oposto de
+     `--ease-out` (que comeca RAPIDO - o acender parecia um flash instantaneo
+     em vez de "a brasa ganhando forca aos poucos"). Reusada como esta,
+     nao reinventada - REUSE > CREATE. */
   --ease-inout: cubic-bezier(0.77, 0, 0.175, 1);  /* move/transforma de A pra B */
   --ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1); /* passa do ponto e volta */
 

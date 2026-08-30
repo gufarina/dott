@@ -1,6 +1,7 @@
 import { create } from 'zustand'
-import { extractTags } from './lib/tags'
+import { extractTags, mergeTags } from './lib/tags'
 import { SEED_NOTES } from './lib/seedNotes'
+import { INITIAL_PARA, INITIAL_INBOX, SEED_TASKS, planExampleCleanup, type ExamplePlan } from './lib/exampleContent'
 import { buildGraph, type DottGraph } from './lib/graphify'
 import { loadVault, saveNoteToVault, deleteNoteFromVault } from './lib/notesService'
 import { loadInbox, setInbox, addInbox, removeInbox } from './lib/inboxService'
@@ -15,8 +16,10 @@ import { showToast } from './components/Toast'
 const uid = (prefix: string): string =>
   prefix + (globalThis.crypto?.randomUUID?.().slice(0, 12) ?? `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`)
 
-/** Deriva um titulo limpo do conteudo de um card (1a linha, sem markdown/aspas). */
-function deriveTitle(content: string): string {
+/** Deriva um titulo limpo do conteudo de um card (1a linha, sem markdown/aspas).
+ *  Exportada (TASK-335): InboxCardEditor reusa pra dar titulo ao rascunho
+ *  antes dele virar Nota, na mesma forma que ele vai ganhar quando processado. */
+export function deriveTitle(content: string): string {
   const first = (content.split('\n').find(l => l.trim()) ?? content).trim()
   const clean = first
     .replace(/^#{1,6}\s*/, '')
@@ -73,13 +76,6 @@ export interface TaskItem {
   notes?: string
 }
 
-export interface TaskGroup {
-  id: string
-  name: string
-  color: string
-  items: TaskItem[]
-}
-
 export interface Tag {
   name: string
   color: string
@@ -95,6 +91,12 @@ export interface Note {
   img: boolean
   body: string
   tags: string[]
+  /** TASK-364: etiqueta que so existe no campo separado do frontmatter (dado
+   *  anterior a TASK-360, nunca escrita no corpo). `tags` acima ja e a UNIAO
+   *  com o que `extractTags(body)` acha - nada se perde na leitura. Este
+   *  campo existe so pra saber o que ainda falta convergir pro corpo e pra
+   *  remover pela interface sem o dado renascer no proximo carregamento. */
+  legacyTags?: string[]
   /** Simbolo do pacote proprio (NoteGlyphs). Vive no frontmatter do .md. */
   glyph?: GlyphId
   /** Capa da nota: url de imagem em attachments. Vive no frontmatter do .md. */
@@ -114,7 +116,7 @@ interface AppState {
   leftTab: 'inbox' | 'tags'
   para: Record<string, Quadrant>
   inbox: InboxCard[]
-  tasks: TaskGroup[]
+  tasks: TaskItem[]
   tags: Tag[]
   notes: Note[]
 
@@ -131,8 +133,10 @@ interface AppState {
   setLeftTab: (tab: 'inbox' | 'tags') => void
   captureCard: (content: string) => void
   toggleTask: (id: string) => void
-  /** Cria uma tarefa num grupo, opcionalmente ja amarrada a uma pasta */
-  addTask: (groupId: string, text: string, folderId?: string) => string
+  /** Cria uma tarefa, opcionalmente ja amarrada a uma pasta (TASK-374: o
+   *  "grupo" morreu - toda tarefa vive numa lista unica, organizada por
+   *  Pasta na tela, nunca por uma segunda hierarquia). */
+  addTask: (text: string, folderId?: string) => string
   /** Edita o texto de uma tarefa */
   editTask: (id: string, text: string) => void
   /** Remove uma tarefa */
@@ -143,19 +147,26 @@ interface AppState {
   setTaskFolder: (id: string, folderId: string | null) => void
   /** Anotacao livre da tarefa */
   setTaskNotes: (id: string, notes: string) => void
-  /** Move a tarefa para outro grupo */
-  setTaskGroup: (id: string, groupId: string) => void
-  /** Cria um grupo de tarefas. Devolve o id. */
-  addGroup: (name: string) => string
-  /** Remove um grupo de tarefas (e suas tarefas) */
-  deleteGroup: (id: string) => void
   createFolder: (categoryId: string, name: string) => void
   /** Define (ou remove, se cover='') a imagem de capa de uma pasta */
   setFolderCover: (categoryId: string, folderId: string, cover: string) => void
-  /** Salva corpo e título, extrai etiquetas, refaz o grafo, persiste */
-  saveNote: (id: string, title: string, body: string, tags?: string[]) => void
-  /** Cria nova nota numa pasta */
-  createNote: (folderId: string, title: string) => string
+  /** Salva corpo e título, refaz o grafo, persiste. Etiqueta nova nasce SO
+   *  no CORPO (TASK-360). `tags` visivel e a UNIAO de extractTags(body) com
+   *  o que ainda restar em legacyTags (TASK-364: dado anterior a esta task,
+   *  gravado so no frontmatter - nunca migrado, nunca perdido).
+   *  CORRIGIR item 1 (fechamento duravel): devolve a Promise da escrita em
+   *  disco (antes era void/fire-and-forget) - void->Promise<void> e
+   *  compativel com todo chamador existente que nao usa o retorno. */
+  saveNote: (id: string, title: string, body: string) => Promise<void>
+  /** Apaga uma Etiqueta que so existe no campo separado do frontmatter
+   *  (legacyTags) - nao mexe no corpo. Ver saveNote. */
+  dropLegacyTag: (id: string, tag: string) => void
+  /** Cria nova nota numa pasta. body opcional (TASK-corrigir): quando o
+   *  chamador ja sabe o conteudo final (ex.: processCard), evita nascer com
+   *  o .md vazio e precisar de um segundo salvamento pro conteudo real. */
+  createNote: (folderId: string, title: string, body?: string) => string
+  /** Move uma nota existente pra outra pasta (o "Mover" do ajudante de pasta) */
+  moveNote: (id: string, folderId: string) => void
   /** Define o simbolo do pacote proprio da nota (undefined limpa) */
   setNoteGlyph: (id: string, glyph?: GlyphId) => void
   /** Define a capa da nota (string vazia limpa) */
@@ -172,54 +183,40 @@ interface AppState {
   reloadInbox: () => Promise<void>
   /** Carrega o vault nativo no boot; semeia exemplos no primeiro uso */
   hydrate: () => Promise<void>
+  /** Calcula o que ainda e conteudo de exemplo, sem mexer em nada — a tela
+   *  usa isso pra mostrar a contagem antes de perguntar (TASK-367). */
+  previewExampleCleanup: () => ExamplePlan
+  /** Apaga SO o que ainda e exemplo puro (nunca o que a pessoa escreveu ou
+   *  editou). Ver lib/exampleContent.ts pra como a decisao e tomada. */
+  clearExamples: () => void
 }
-
-const INITIAL_PARA: Record<string, Quadrant> = {
-  projects: {
-    id: 'projects', label: 'Projetos', color: 'var(--q-p)',
-    suggestions: ['Trabalho', 'Pessoal', 'Produto', 'Lancamento', 'Migracao'],
-    folders: [
-      { id: 'start', name: 'Comece aqui', bg: 'oklch(24% 0.08 20)', notes: 0, tasks: 0, total: 0, stagnant: false },
-      { id: 'primeiro', name: 'Meu primeiro projeto', bg: 'oklch(22% 0.07 295)', notes: 0, tasks: 0, total: 0, stagnant: false },
-    ]
-  },
-  areas: {
-    id: 'areas', label: 'Areas', color: 'var(--q-a)',
-    suggestions: ['Desenvolvimento', 'Saude', 'Financas', 'Familia', 'Carreira'],
-    folders: [
-      { id: 'habitos', name: 'Habitos', bg: 'oklch(20% 0.08 258)', notes: 0, tasks: 0, total: 0, stagnant: false },
-      { id: 'saude', name: 'Saude', bg: 'oklch(20% 0.07 145)', notes: 0, tasks: 0, total: 0, stagnant: false },
-    ]
-  },
-  resources: {
-    id: 'resources', label: 'Recursos', color: 'var(--q-r)',
-    suggestions: ['Design', 'Desenvolvimento', 'Leituras', 'Referencias', 'Cursos'],
-    folders: [
-      { id: 'modelos', name: 'Modelos', bg: 'oklch(18% 0.08 295)', notes: 0, tasks: 0, total: 0, stagnant: false },
-      { id: 'leituras', name: 'Leituras', bg: 'oklch(18% 0.05 60)', notes: 0, tasks: 0, total: 0, stagnant: false },
-    ]
-  },
-  archives: {
-    id: 'archives', label: 'Arquivo', color: 'var(--q-ar)',
-    suggestions: ['Antigo', 'Concluido', 'Pausado'],
-    folders: [
-      { id: 'concluidos', name: 'Concluidos', bg: 'oklch(16% 0.02 260)', notes: 0, tasks: 0, total: 0, stagnant: false },
-    ]
-  },
-}
-
-const INITIAL_INBOX: InboxCard[] = [
-  { id: 'i1', type: 'IDEIA', content: 'E se eu capturasse todos os meus pensamentos num só lugar?', time: '2m' },
-  { id: 'i2', type: 'URL', content: 'https://fortelabs.com/blog/para', time: '15m' },
-  { id: 'i3', type: 'NOTA', content: 'Ler a nota "Bem-vindo ao Dott" na pasta Comece aqui', time: '1h' },
-  { id: 'i4', type: 'TAREFA', content: 'Criar minha primeira pasta no quadrante Projetos', time: '3h' },
-]
 
 /** Reconstroi o grafo inteiro a partir das notas. Deterministico e local. */
 function graphOf(notes: Note[]): DottGraph {
   return buildGraph(notes.map(n => ({
     id: n.id, title: n.title, body: n.body, tags: n.tags, folderId: n.folderId,
   })))
+}
+
+/** Agenda a reconstrucao do grafo (estado DERIVADO) fora do caminho sincrono
+ *  de escrita: salvar/mover/apagar nota nao pode esperar buildGraph() (O(N^2))
+ *  pra terminar. Chamadas seguidas no mesmo tick colapsam numa reconstrucao
+ *  so, sempre com as notas mais recentes no momento em que ela roda - nenhum
+ *  pedido se perde, so o ultimo agendado e o que efetivamente executa. */
+let graphRebuildTimer: ReturnType<typeof setTimeout> | null = null
+function scheduleGraphRebuild(): void {
+  if (graphRebuildTimer !== null) clearTimeout(graphRebuildTimer)
+  graphRebuildTimer = setTimeout(() => {
+    graphRebuildTimer = null
+    useStore.setState({ graph: graphOf(useStore.getState().notes) })
+  }, 0)
+}
+
+/** Uma imagem do vault so pode ser apagada do disco quando NENHUMA nota
+ *  (nem no corpo, nem como capa) ainda referencia a mesma url - senao a
+ *  faxina de uma nota apaga um anexo que outra nota ainda usa. */
+function isAttachmentOrfao(url: string, notes: Note[]): boolean {
+  return !notes.some(n => n.cover === url || n.body.includes(url))
 }
 
 /** Paleta fixa das tags — a cor sai do nome, entao nao dança entre sessoes. */
@@ -251,19 +248,17 @@ function deriveTags(notes: Note[]): Tag[] {
 function recountFolders(
   para: Record<string, Quadrant>,
   notes: Note[],
-  groups: TaskGroup[] = [],
+  tasks: TaskItem[] = [],
 ): Record<string, Quadrant> {
   const notasPor = new Map<string, number>()
   for (const n of notes) if (n.folderId) notasPor.set(n.folderId, (notasPor.get(n.folderId) ?? 0) + 1)
 
   const totalPor = new Map<string, number>()
   const feitasPor = new Map<string, number>()
-  for (const g of groups) {
-    for (const t of g.items) {
-      if (!t.folderId) continue
-      totalPor.set(t.folderId, (totalPor.get(t.folderId) ?? 0) + 1)
-      if (t.done) feitasPor.set(t.folderId, (feitasPor.get(t.folderId) ?? 0) + 1)
-    }
+  for (const t of tasks) {
+    if (!t.folderId) continue
+    totalPor.set(t.folderId, (totalPor.get(t.folderId) ?? 0) + 1)
+    if (t.done) feitasPor.set(t.folderId, (feitasPor.get(t.folderId) ?? 0) + 1)
   }
 
   const next: Record<string, Quadrant> = {}
@@ -287,12 +282,20 @@ function recountFolders(
 function comContagem(
   para: Record<string, Quadrant>,
   notes: Note[],
-  groups: TaskGroup[],
+  tasks: TaskItem[],
 ): Record<string, Quadrant> {
-  return recountFolders(para, notes, groups)
+  return recountFolders(para, notes, tasks)
 }
 
-const SEED_GRAPH = graphOf(SEED_NOTES)
+/** As notas de exemplo declaram `tags` mas nenhuma tem `#etiqueta` escrita no
+ *  corpo ainda - sem marcar como legacyTags, o primeiro salvamento (TASK-360)
+ *  apagaria essas etiquetas no primeiro uso do app, igual apagaria numa nota
+ *  antiga de verdade sem este cuidado (TASK-364). */
+const SEED_NOTES_WITH_LEGACY: Note[] = SEED_NOTES.map(n => ({
+  ...n,
+  legacyTags: n.tags.filter(t => !extractTags(n.body).includes(t)),
+}))
+const SEED_GRAPH = graphOf(SEED_NOTES_WITH_LEGACY)
 
 function loadTheme(): Theme {
   try {
@@ -301,25 +304,48 @@ function loadTheme(): Theme {
   } catch { return 'dark' }
 }
 
-const SEED_TASKS: TaskGroup[] = [
-  { id: 'g1', name: 'Comece aqui', color: '#e05a38', items: [
-    { id: 't1', done: false, text: 'Ler a nota de boas-vindas', folderId: 'start' },
-    { id: 't2', done: false, text: 'Capturar 3 pensamentos pelo widget', folderId: 'start' },
-    { id: 't3', done: false, text: 'Criar sua primeira pasta', folderId: 'start' },
-  ]},
-  { id: 'g2', name: 'Explorar o Dott', color: '#4a8fd9', items: [
-    { id: 't4', done: false, text: 'Abrir a Constelação e ver suas notas ligadas' },
-    { id: 't5', done: false, text: 'Arrastar um card do inbox para uma pasta' },
-    { id: 't6', done: false, text: 'Usar Ctrl+K para buscar uma nota' },
-  ]},
-]
-
 /** Recalcula urgent/over de uma tarefa a partir do prazo (YYYY-MM-DD). */
 function withDeadlineFlags(t: TaskItem): TaskItem {
   if (!t.deadline) return { ...t, urgent: false, over: false }
   const today = new Date(); today.setHours(0, 0, 0, 0)
   const due = new Date(t.deadline + 'T00:00:00')
   return { ...t, over: due < today, urgent: due.getTime() === today.getTime() }
+}
+
+/** Formato antigo de tarefa no disco (TASK-374, removido): tarefas viviam
+ *  dentro de um "grupo" (nome + cor + items) - uma segunda hierarquia que
+ *  competia com a Pasta. O grupo em si nunca guardava nada que a Pasta nao
+ *  guarde melhor; so as tarefas dentro dele importam. */
+interface LegacyTaskGroup {
+  id: string
+  name: string
+  color: string
+  items: TaskItem[]
+}
+
+/** Migra o formato antigo (grupos) pro novo (lista unica achatada), sem
+ *  perder NENHUM campo de tarefa nenhuma - id, texto, concluida, prazo,
+ *  pasta e anotacao sobrevivem intactos. So o wrapper (nome/cor do grupo)
+ *  some, porque ele so espelhava a Pasta ou era gerado automaticamente (ver
+ *  FolderNotesView e InboxPanel antes da TASK-374) - nunca informacao do
+ *  usuario. Tarefa que ja morava fora de qualquer pasta continua fora de
+ *  qualquer pasta (a tela agrupa essas visualmente num balde "Sem pasta",
+ *  nunca escrito no disco). Aceita `unknown[]` porque o arquivo em disco
+ *  pode estar no formato antigo OU no novo - cada entrada e testada por si. */
+export function flattenLegacyTasks(saved: unknown[]): TaskItem[] {
+  const out: TaskItem[] = []
+  for (const entry of saved as (TaskItem | LegacyTaskGroup)[]) {
+    if (entry && Array.isArray((entry as LegacyTaskGroup).items)) out.push(...(entry as LegacyTaskGroup).items)
+    else if (entry) out.push(entry as TaskItem)
+  }
+  return out
+}
+
+/** true se o array salvo ainda esta no formato antigo (grupos) - usado so
+ *  pra decidir se vale gravar de volta o formato novo depois de migrar
+ *  (nao ha necessidade de reescrever o arquivo se ele ja e o formato novo). */
+export function isLegacyTaskShape(saved: unknown[]): boolean {
+  return saved.some(entry => entry && typeof entry === 'object' && Array.isArray((entry as LegacyTaskGroup).items))
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -343,7 +369,7 @@ export const useStore = create<AppState>((set, get) => ({
     { name: 'inbox', color: '#3db3b3', count: 1 },
   ],
   tasks: SEED_TASKS,
-  notes: SEED_NOTES,
+  notes: SEED_NOTES_WITH_LEGACY,
   graph: SEED_GRAPH,
   booting: true,
 
@@ -436,29 +462,26 @@ export const useStore = create<AppState>((set, get) => ({
       title = deriveTitle(card.content)
       body = card.content
     }
-    const id = get().createNote(folderId, title)
-    get().saveNote(id, title, body)
+    // Uma unica escrita no disco: a nota ja nasce com o body final (senao
+    // createNote + saveNote disparavam dois vault_save concorrentes pro
+    // mesmo id, e o vazio podia resolver por ultimo - nota nascia em branco).
+    const id = get().createNote(folderId, title, body)
     get().removeCard(cardId) // mantém a imagem: agora a nota a usa
     return id
   },
 
   toggleTask: (id) => set(s => {
-    const tasks = s.tasks.map(g => ({
-      ...g,
-      items: g.items.map(t => t.id === id ? { ...t, done: !t.done } : t)
-    }))
+    const tasks = s.tasks.map(t => t.id === id ? { ...t, done: !t.done } : t)
     saveTasksFile(tasks)
     return { tasks, para: comContagem(s.para, s.notes, tasks) }
   }),
 
-  addTask: (groupId, text, folderId) => {
+  addTask: (text, folderId) => {
     const t = text.trim()
     if (!t) return ''
     const id = uid('t')
     set(s => {
-      const tasks = s.tasks.map(g => g.id === groupId
-        ? { ...g, items: [...g.items, { id, done: false, text: t, folderId }] }
-        : g)
+      const tasks = [...s.tasks, { id, done: false, text: t, folderId }]
       saveTasksFile(tasks)
       return { tasks, para: comContagem(s.para, s.notes, tasks) }
     })
@@ -467,77 +490,33 @@ export const useStore = create<AppState>((set, get) => ({
 
   editTask: (id, text) => set(s => {
     const t = text.trim()
-    const tasks = s.tasks.map(g => ({
-      ...g,
-      items: g.items.map(it => it.id === id ? { ...it, text: t || it.text } : it),
-    }))
+    const tasks = s.tasks.map(it => it.id === id ? { ...it, text: t || it.text } : it)
     saveTasksFile(tasks)
     return { tasks }
   }),
 
   deleteTask: (id) => set(s => {
-    const tasks = s.tasks.map(g => ({ ...g, items: g.items.filter(it => it.id !== id) }))
+    const tasks = s.tasks.filter(it => it.id !== id)
     saveTasksFile(tasks)
     return { tasks, para: comContagem(s.para, s.notes, tasks) }
   }),
 
   setTaskDeadline: (id, deadline) => set(s => {
-    const tasks = s.tasks.map(g => ({
-      ...g,
-      items: g.items.map(it => it.id === id ? withDeadlineFlags({ ...it, deadline }) : it),
-    }))
+    const tasks = s.tasks.map(it => it.id === id ? withDeadlineFlags({ ...it, deadline }) : it)
     saveTasksFile(tasks)
     return { tasks }
   }),
 
   setTaskFolder: (id, folderId) => set(s => {
-    const tasks = s.tasks.map(g => ({
-      ...g,
-      items: g.items.map(it => it.id === id ? { ...it, folderId: folderId ?? undefined } : it),
-    }))
+    const tasks = s.tasks.map(it => it.id === id ? { ...it, folderId: folderId ?? undefined } : it)
     saveTasksFile(tasks)
     return { tasks, para: comContagem(s.para, s.notes, tasks) }
   }),
 
   setTaskNotes: (id, notes) => set(s => {
-    const tasks = s.tasks.map(g => ({
-      ...g,
-      items: g.items.map(it => it.id === id ? { ...it, notes } : it),
-    }))
+    const tasks = s.tasks.map(it => it.id === id ? { ...it, notes } : it)
     saveTasksFile(tasks)
     return { tasks }
-  }),
-
-  setTaskGroup: (id, groupId) => set(s => {
-    let movida: TaskItem | undefined
-    const semEla = s.tasks.map(g => {
-      const achou = g.items.find(it => it.id === id)
-      if (achou) movida = achou
-      return { ...g, items: g.items.filter(it => it.id !== id) }
-    })
-    if (!movida) return s
-    const tasks = semEla.map(g => g.id === groupId ? { ...g, items: [...g.items, movida!] } : g)
-    saveTasksFile(tasks)
-    return { tasks }
-  }),
-
-  addGroup: (name) => {
-    const n = name.trim()
-    if (!n) return ''
-    const id = uid('g')
-    set(s => {
-      const colors = ['#e05a38', '#4a8fd9', '#9b6cdb', '#3db37a', '#d98c3a', '#3db3b3']
-      const tasks = [...s.tasks, { id, name: n, color: colors[s.tasks.length % colors.length], items: [] }]
-      saveTasksFile(tasks)
-      return { tasks }
-    })
-    return id
-  },
-
-  deleteGroup: (id) => set(s => {
-    const tasks = s.tasks.filter(g => g.id !== id)
-    saveTasksFile(tasks)
-    return { tasks, para: comContagem(s.para, s.notes, tasks) }
   }),
 
   createFolder: (categoryId, name) => {
@@ -579,37 +558,79 @@ export const useStore = create<AppState>((set, get) => ({
     })
   },
 
-  saveNote: (id, title, body, tagsOverride) => {
-    const tags = tagsOverride ?? extractTags(body)
+  saveNote: (id, title, body) => {
+    const bodyTags = extractTags(body)
     const now = new Date().toLocaleDateString('pt-BR')
     let saved: Note | undefined
     set(s => {
-      const notes = s.notes.map(n =>
-        n.id === id ? { ...n, title, body, tags, updatedAt: now } : n
-      )
+      const notes = s.notes.map(n => {
+        if (n.id !== id) return n
+        // Convergencia (TASK-364): etiqueta antiga que passou a existir
+        // tambem no corpo nao precisa mais do campo separado do frontmatter.
+        const legacyTags = (n.legacyTags ?? []).filter(t => !bodyTags.includes(t))
+        return { ...n, title, body, tags: mergeTags(bodyTags, legacyTags), legacyTags, updatedAt: now }
+      })
       saved = notes.find(n => n.id === id)
-      // O grafo e derivado: refaz inteiro a cada salvamento, nunca fica velho.
-      return { notes, graph: graphOf(notes), tags: deriveTags(notes) }
+      return { notes, tags: deriveTags(notes) }
     })
-    // Persiste só o arquivo .md alterado (as conexoes sao derivadas, nao gravadas).
+    // O grafo e derivado: refaz fora do caminho sincrono, nunca fica velho.
+    scheduleGraphRebuild()
+    // Persiste só o arquivo .md alterado (as conexoes sao derivadas, nao
+    // gravadas). Item 1: devolve a Promise em vez de disparar e esquecer -
+    // saveNoteToVault ja nunca rejeita (proprio try/catch, mostra toast),
+    // entao so estamos expondo o "quando terminou", nao criando risco novo.
+    return saved ? saveNoteToVault(saved) : Promise.resolve()
+  },
+
+  /** Apaga uma Etiqueta que so existe no campo separado do frontmatter (dado
+   *  anterior a TASK-360, nunca escrita no corpo). So mexe nesse campo -
+   *  nunca reescreve o corpo do usuario. Clicar em "remover" numa etiqueta
+   *  do corpo passa por saveNote (removeTagFromBody); esta acao cobre so o
+   *  outro lado, senao a etiqueta "antiga" voltava no proximo carregamento. */
+  dropLegacyTag: (id, tag) => {
+    const norm = tag.trim().replace(/^#/, '').toLowerCase()
+    let saved: Note | undefined
+    set(s => {
+      const notes = s.notes.map(n => {
+        if (n.id !== id) return n
+        const legacyTags = (n.legacyTags ?? []).filter(t => t !== norm)
+        return { ...n, legacyTags, tags: mergeTags(extractTags(n.body), legacyTags) }
+      })
+      saved = notes.find(n => n.id === id)
+      return { notes, tags: deriveTags(notes) }
+    })
+    scheduleGraphRebuild()
     if (saved) saveNoteToVault(saved)
   },
 
-  createNote: (folderId, title) => {
+  createNote: (folderId, title, body = '') => {
     const id = uid('n')
     const now = new Date().toLocaleDateString('pt-BR')
     const note: Note = {
       id, title, date: now, updatedAt: now,
-      folderId, img: false, body: '', tags: [],
+      folderId, img: false, body, tags: extractTags(body),
     }
     set(s => {
       const notes = [...s.notes, note]
       const para = recountFolders(s.para, notes, s.tasks)
       saveFolders(para)
-      return { notes, para }
+      return { notes, para, tags: deriveTags(notes) }
     })
+    scheduleGraphRebuild()
     saveNoteToVault(note)
     return id
+  },
+
+  moveNote: (id, folderId) => {
+    let saved: Note | undefined
+    set(s => {
+      const notes = s.notes.map(n => (n.id === id ? { ...n, folderId } : n))
+      saved = notes.find(n => n.id === id)
+      const para = recountFolders(s.para, notes, s.tasks)
+      return { notes, para }
+    })
+    scheduleGraphRebuild()
+    if (saved) saveNoteToVault(saved)
   },
 
   setNoteGlyph: (id, glyph) => {
@@ -625,14 +646,17 @@ export const useStore = create<AppState>((set, get) => ({
   setNoteCover: (id, cover) => {
     let saved: Note | undefined
     let anterior: string | undefined
+    let notesAfter: Note[] = []
     set(s => {
       anterior = s.notes.find(n => n.id === id)?.cover
       const notes = s.notes.map(n => (n.id === id ? { ...n, cover: cover || undefined } : n))
       saved = notes.find(n => n.id === id)
+      notesAfter = notes
       return { notes }
     })
-    // Trocar/limpar a capa apaga a imagem antiga: senao vira lixo orfao no disco.
-    if (anterior && anterior !== cover) removeAttachment(anterior)
+    // Trocar/limpar a capa so apaga a imagem antiga do disco quando nenhuma
+    // nota (nem esta, no corpo) ainda referencia a mesma url.
+    if (anterior && anterior !== cover && isAttachmentOrfao(anterior, notesAfter)) removeAttachment(anterior)
     if (saved) saveNoteToVault(saved)
   },
 
@@ -642,19 +666,20 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   deleteNote: (id) => {
-    // Faxina: apaga do disco as imagens que só esta nota usava.
     const note = get().notes.find(n => n.id === id)
-    if (note) {
-      const imgs = [...note.body.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map(m => m[1])
-      for (const url of imgs) removeAttachment(url)
-      if (note.cover) removeAttachment(note.cover)
-    }
+    const imgs = note ? [...note.body.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map(m => m[1]) : []
+    let notesAfter: Note[] = []
     set(s => {
       const notes = s.notes.filter(n => n.id !== id)
+      notesAfter = notes
       const para = recountFolders(s.para, notes, s.tasks)
       saveFolders(para)
-      return { notes, para, graph: graphOf(notes), tags: deriveTags(notes) }
+      return { notes, para, tags: deriveTags(notes) }
     })
+    scheduleGraphRebuild()
+    // Faxina: apaga do disco so as imagens que NENHUMA outra nota ainda usa.
+    for (const url of imgs) if (isAttachmentOrfao(url, notesAfter)) removeAttachment(url)
+    if (note?.cover && isAttachmentOrfao(note.cover, notesAfter)) removeAttachment(note.cover)
     deleteNoteFromVault(id)
   },
 
@@ -673,29 +698,63 @@ export const useStore = create<AppState>((set, get) => ({
     else set({ inbox: cards })
 
     // Tarefas: carrega do disco; no primeiro uso, semeia com os exemplos.
+    // TASK-374: quem ja usava o app pode ter o arquivo no formato antigo
+    // (grupos) - flattenLegacyTasks le os dois formatos e devolve so a
+    // lista achatada, sem perder tarefa nenhuma; migracao automatica e
+    // silenciosa (grava o formato novo so se achou o antigo).
     const savedTasks = await loadTasksFile()
-    if (savedTasks && savedTasks.length) set({ tasks: savedTasks.map(g => ({ ...g, items: g.items.map(withDeadlineFlags) })) })
-    else await saveTasksFile(get().tasks)
+    if (savedTasks && savedTasks.length) {
+      const legacy = isLegacyTaskShape(savedTasks)
+      const tasks = flattenLegacyTasks(savedTasks).map(withDeadlineFlags)
+      set({ tasks })
+      if (legacy) saveTasksFile(tasks)
+    } else {
+      await saveTasksFile(get().tasks)
+    }
 
     const loaded = await loadVault()
     if (!loaded || loaded.length === 0) {
       // Primeiro uso: grava os exemplos no vault nativo.
       for (const n of get().notes) await saveNoteToVault(n)
       const seeded = recountFolders(get().para, get().notes, get().tasks)
-      set({ para: seeded, graph: graphOf(get().notes), tags: deriveTags(get().notes) })
+      set({ para: seeded, tags: deriveTags(get().notes) })
+      scheduleGraphRebuild()
       saveFolders(seeded)
       return
     }
-    // Etiquetas vem do frontmatter; se a nota nao tiver, sai do corpo (#tag).
-    const withBl = loaded.map(n => ({
-      ...n,
-      tags: n.tags.length ? n.tags : extractTags(n.body),
-    }))
+    // Etiqueta (TASK-364): `loadVault` (notesService.ts, toNote) ja devolve
+    // `tags` como a UNIAO do corpo com o campo separado do frontmatter -
+    // nada se perde aqui, sem migrar nem reescrever arquivo nenhum.
     // Pastas e tags sao DERIVADAS das notas reais — nunca do que estava salvo,
     // senao o numero da pasta e a lista de tags envelhecem e mentem.
-    const para = recountFolders(get().para, withBl, get().tasks)
+    const para = recountFolders(get().para, loaded, get().tasks)
     // O grafo nasce aqui, do acervo REAL do usuario, sem nenhuma marcacao manual.
-    set({ notes: withBl, graph: graphOf(withBl), para, tags: deriveTags(withBl) })
+    set({ notes: loaded, para, tags: deriveTags(loaded) })
+    scheduleGraphRebuild()
     saveFolders(para)
+  },
+
+  previewExampleCleanup: () => planExampleCleanup(get().notes, get().para, get().tasks, get().inbox),
+
+  clearExamples: () => {
+    const plan = planExampleCleanup(get().notes, get().para, get().tasks, get().inbox)
+    // Reusa as acoes que ja existem — cada uma ja cuida de disco, grafo,
+    // tags e contagem de pasta sozinha. A unica coisa nova aqui e soltar as
+    // pastas de exemplo que ficaram vazias.
+    for (const id of plan.noteIds) get().deleteNote(id)
+    for (const id of plan.inboxIds) get().removeCard(id)
+    for (const id of plan.taskIds) get().deleteTask(id)
+    if (plan.folders.length) {
+      set(s => {
+        let next = s.para
+        for (const { categoryId, folderId } of plan.folders) {
+          const q = next[categoryId]
+          if (!q) continue
+          next = { ...next, [categoryId]: { ...q, folders: q.folders.filter(f => f.id !== folderId) } }
+        }
+        saveFolders(next)
+        return { para: next }
+      })
+    }
   },
 }))

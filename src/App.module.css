@@ -51,8 +51,50 @@
   /* sem transicao: propriedade de layout nao se anima */
 }
 
+/* TASK-346: coluna central = dois paineis EMPILHADOS (o painel do PARA em
+   cima, a caixa de captura embaixo), cada um com a propria moldura -
+   .centralColumn so da o pai flex-column comum + o respiro real (gap) entre
+   os dois. Mesmo valor de gap que ja separa panelLeft/central/panelRight
+   em .body (10px), pra manter a "mesa" com um grid de vaos uniforme. */
+/* TASK-380 (29/08/2026, CEO: "voce criou um container atras do PARA e do
+   box.. sem sentido, apague isso agora"). O "chao proprio" que a TASK-378
+   deu a esta classe (background: var(--surface)) era exatamente a camada
+   nova que a ordem original da TASK-378 ("sem o painel intermediario")
+   tinha mandado tirar - resolveu um problema (poco vs bloco claro) criando
+   outro (uma camada atras do PARA e da caixa). REMOVIDO. .centralColumn
+   volta a ser so layout (o pai flex-column que empilha o painel do PARA e
+   a caixa de captura, com o respiro de sempre entre os dois) - sem cor,
+   borda, raio ou mask propria, nunca foi pra ser uma FORMA.
+   `overflow` passou de `hidden` pra `visible`: sem chao proprio nao sobra
+   motivo pra esta classe clipar nada dela mesma - quem de fato precisa
+   clipar ja clipa por conta propria (`.central`, o painel do PARA, mantem
+   `overflow: hidden`; `.convoInput`, o texto da caixa, mantem
+   `overflow-y: auto`). O novo `hoverZoom` de `.convoBox`
+   (CaptureBox.module.css, TASK-380) precisa deste `overflow: visible` pra
+   nao ser cortado nas bordas esquerda/direita/baixo, onde a caixa senta
+   rente ao limite desta coluna (TASK-378 tirou o matting de proposito, sem
+   mais margem pra absorver o crescimento do hover). O `gap: 10px` desta
+   classe e o `padding` de `.body` (10px nas laterais/embaixo, acima neste
+   arquivo) dao folga de sobra pro 1,5% de `--hover-scale` (reset.css) nao
+   encostar em `.panelLeft`/`.panelRight` nem na borda da janela. */
+.centralColumn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: visible;
+}
+
+/* Painel do PARA - fecha sozinho ao redor do que hospeda em cada view
+   (board, graph, canvas, editor, task). Deixou de arrastar a caixa de
+   captura pendurada embaixo (TASK-346) - min-height:0 entra porque agora
+   e filho de um flex-column (.centralColumn), nao mais direto de .body
+   (flex-row); sem isso o painel nao encolhe e a caixa de captura e
+   empurrada pra fora da tela. */
 .central {
   flex: 1;
+  min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -64,6 +106,24 @@
   --sq-r: var(--r-shell);
   -webkit-mask-image: paint(squircle);
   mask-image: paint(squircle);
+}
+
+/* TASK-378 (29/08/2026) - REMOVIDO o painel-moldura que este seletor dava
+   a caixa de captura desde a TASK-346 (fundo --surface, borda --border,
+   raio --r-shell, mascara squircle - a "MESMA receita de .panelLeft/
+   .panelRight" que o comentario antigo descrevia). Decisao do CEO na
+   TASK-377/378, palavras literais: "1, com a cor do box do 2" - a
+   ESTRUTURA da opcao 1 e "a caixa senta direto no piso, sem o
+   painel-moldura .captureShell no meio"; ele reforcou "sem o painel
+   intermediario" na entrega. Este seletor fica so como um no de layout
+   (flex-shrink) - sem fundo, borda, raio ou mask proprios, ele nao e mais
+   uma FORMA visivel, so um `div` transparente entre .centralColumn (que
+   agora carrega o "chao proprio", ver acima) e .convoBox (CaptureBox.module.css,
+   agora o ponto escuro/poco). O comentario de App.tsx (linha ~211-217,
+   TASK-346) ainda descreve a receita antiga - fora do alcance desta
+   rodada (arquivo .tsx nao esta na lista de arquivos autorizados aqui). */
+.captureShell {
+  flex-shrink: 0;
 }
 
 .viewArea {
@@ -108,7 +168,7 @@
 }
 .dragGhostAlvo {
   margin-top: 2px;
-  font-size: 11px;
+  font-size: var(--text-3xs);
   font-weight: 600;
   letter-spacing: .02em;
   color: var(--fg3);
@@ -124,7 +184,7 @@
   color: var(--accent);
 }
 .dragGhostText {
-  font-size: 13px;
+  font-size: var(--text-xs);
   color: var(--fg);
   line-height: 1.4;
   display: -webkit-box;

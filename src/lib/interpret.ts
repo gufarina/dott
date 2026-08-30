@@ -10,6 +10,7 @@
  */
 
 import type { CardType, Note, Quadrant } from '../store'
+import { TYPE_ACCENT_FIX } from './cardTypeClass'
 
 /* ─────────────────────────── Tarefa sugerida ─────────────────────────── */
 
@@ -252,7 +253,7 @@ export function suggestFolder(
         const hits = kw.filter(w => insideWords.has(w))
         if (hits.length) {
           score += hits.length * 2
-          reasons.push(`combina com o que ja esta em ${f.name}`)
+          reasons.push(`combina com o que já está em ${f.name}`)
         }
         score += Math.min(2, inside.length * 0.2) // pasta viva
       }
@@ -260,7 +261,7 @@ export function suggestFolder(
       // Regra PARA pelo tipo do card.
       if (preferredQ === qid) {
         score += 2
-        reasons.push(`${type.toLowerCase()} costuma morar em ${q.label}`)
+        reasons.push(`${(TYPE_ACCENT_FIX[type] ?? type).toLowerCase()} costuma morar em ${q.label}`)
       }
 
       if (score <= 0) continue

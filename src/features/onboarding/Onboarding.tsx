@@ -198,7 +198,7 @@ export function Onboarding() {
                     onChange={e => setEmail(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); void sendEmail() } }}
                   />
-                  <button type="button" className="ob-btn primary" disabled={!isValidEmail(email)} onClick={() => void sendEmail()}>Avise-me</button>
+                  <button type="button" className="ob-btn primary hoverGlow" disabled={!isValidEmail(email)} onClick={() => void sendEmail()}>Avise-me</button>
                 </div>
                 <p className="ob-door-fine">Só pra isso. Sem newsletter, sem cadastro, sem senha.</p>
               </div>
@@ -218,7 +218,7 @@ export function Onboarding() {
           )}
           {!soloOnline && i > 0 && <button className="ob-btn ghost" onClick={() => go(i - 1)}>Voltar</button>}
           {!soloOnline && !last && <button className="ob-btn ghost" onClick={finish}>Pular</button>}
-          <button className="ob-btn primary" onClick={() => (soloOnline ? finish() : go(i + 1))}>
+          <button className="ob-btn primary hoverGlow" onClick={() => (soloOnline ? finish() : go(i + 1))}>
             {soloOnline ? 'Fechar' : last ? 'Começar a usar o Dott' : 'Próximo'}
           </button>
         </div>
