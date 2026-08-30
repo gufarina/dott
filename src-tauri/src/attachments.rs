@@ -38,6 +38,28 @@ pub fn attachment_remove(app: tauri::AppHandle, url: String) -> Result<(), Strin
     Ok(())
 }
 
+/// Le os bytes de um anexo (imagem) a partir da sua URL (asset:// ou
+/// http://asset.localhost/...). Mesma extracao de nome e mesma validacao de
+/// escopo do attachment_remove — nunca le fora de attachments/.
+/// MEDIDO (30/08/2026): o markerjs2 desenha o <img> alvo direto num canvas
+/// (Renderer.rasterize -> ctx.drawImage) e depois chama canvas.toDataURL()
+/// pra gerar a anotacao. Como a imagem chega ao <img> via asset protocol
+/// (origem http://asset.localhost, diferente da origem do app) e o alvo nao
+/// tem crossOrigin, o canvas fica "tainted" e toDataURL() lanca SecurityError
+/// — DENTRO de img.onload, fora da cadeia de Promise, entao o render nem
+/// rejeita: so trava mudo. Este comando deixa o frontend montar um `blob:`
+/// (mesma origem) a partir dos bytes reais, em vez de apontar o markerjs pra
+/// URL cross-origin.
+#[tauri::command]
+pub fn attachment_read(app: tauri::AppHandle, url: String) -> Result<Vec<u8>, String> {
+    let tail = url.split(['?', '#']).next().unwrap_or(&url);
+    let name = crate::path_safety::last_segment(tail);
+    let dir = attach_dir(&app);
+    let path = crate::path_safety::safe_join(&dir, name)
+        .ok_or_else(|| "nome de anexo invalido".to_string())?;
+    fs::read(&path).map_err(|e| e.to_string())
+}
+
 /// Salva bytes de imagem e devolve o caminho absoluto do arquivo.
 #[tauri::command]
 pub fn save_attachment(app: tauri::AppHandle, data: Vec<u8>, ext: String) -> Result<String, String> {

@@ -1,7 +1,7 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { MarkerArea } from 'markerjs2'
 import type { MarkerAreaRenderEvent } from 'markerjs2'
-import { saveImageFile } from '../../lib/attachments'
+import { readAttachmentBlobUrl, saveImageFile } from '../../lib/attachments'
 import { showToast } from '../../components/Toast'
 import s from './ImageViewer.module.css'
 
@@ -37,6 +37,28 @@ export function dataUrlToFile(dataUrl: string, filename: string): File {
 
 export function ImageViewer({ noteId, title, url, onSave }: Props) {
   const imgRef = useRef<HTMLImageElement>(null)
+  const [blobUrl, setBlobUrl] = useState<string | null>(null)
+
+  // Troca a origem do <img> (que o markerjs2 vai desenhar num canvas) pra um
+  // `blob:` mesma-origem assim que os bytes do anexo chegam do lado nativo.
+  // Ate isso resolver, mostra a URL original (evita flash em branco) - a
+  // troca e rapida (leitura local) bem antes de um clique humano em
+  // "Editar imagem". `cancelled`/`current` cobrem troca de nota e
+  // desmontagem no meio da leitura: nunca deixa um blob sem dono vazando.
+  useEffect(() => {
+    let cancelled = false
+    let current: string | null = null
+    setBlobUrl(null)
+    readAttachmentBlobUrl(url).then((b) => {
+      if (cancelled) { if (b) URL.revokeObjectURL(b); return }
+      current = b
+      setBlobUrl(b)
+    })
+    return () => {
+      cancelled = true
+      if (current) URL.revokeObjectURL(current)
+    }
+  }, [url])
 
   const openEditor = useCallback(() => {
     const img = imgRef.current
@@ -90,7 +112,7 @@ export function ImageViewer({ noteId, title, url, onSave }: Props) {
       <div className={s.imageContainer}>
         <img
           ref={imgRef}
-          src={url}
+          src={blobUrl ?? url}
           alt={title}
           className={s.image}
         />

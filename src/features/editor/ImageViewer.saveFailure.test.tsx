@@ -14,6 +14,9 @@ import * as Toast from '../../components/Toast'
 
 vi.mock('../../lib/attachments', () => ({
   saveImageFile: vi.fn().mockResolvedValue('vault://seria-a-nova.png'),
+  // Resolve null (sem blob) - mantem o <img> na url original neste teste e
+  // nunca chama URL.revokeObjectURL (jsdom nao implementa createObjectURL).
+  readAttachmentBlobUrl: vi.fn().mockResolvedValue(null),
 }))
 
 type RenderHandler = (event: { dataUrl: string }) => void | Promise<void>

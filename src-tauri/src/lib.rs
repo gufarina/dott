@@ -72,6 +72,7 @@ pub fn run() {
             inbox::inbox_remove,
             attachments::save_attachment,
             attachments::attachment_remove,
+            attachments::attachment_read,
             folders::folders_load,
             folders::folders_save,
             tasks::tasks_load,

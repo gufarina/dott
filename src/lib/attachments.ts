@@ -38,3 +38,35 @@ export async function saveImageFile(file: File): Promise<string | null> {
     return convertFileSrc(path)
   } catch { return null }
 }
+
+const MIME_BY_EXT: Record<string, string> = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  gif: 'image/gif',
+  webp: 'image/webp',
+  svg: 'image/svg+xml',
+}
+
+function extFromUrl(url: string): string {
+  const clean = url.split(/[?#]/)[0]
+  const dot = clean.lastIndexOf('.')
+  return dot === -1 ? '' : clean.slice(dot + 1).toLowerCase()
+}
+
+/** Le os bytes de um anexo pelo lado nativo e monta um `blob:` (mesma origem
+ *  do app) em vez de usar a URL do asset protocol (http://asset.localhost)
+ *  direto num <img>. MEDIDO (30/08/2026): o markerjs2 desenha esse <img> num
+ *  canvas e depois chama toDataURL() pra gerar a anotacao — origem cruzada
+ *  sem CORS suja o canvas e toDataURL() lanca SecurityError, mudo, antes do
+ *  nosso listener de 'render' rodar. `blob:` e mesma origem: nao ha o que
+ *  sujar. Chama-quem-usa e responsavel por `URL.revokeObjectURL` no
+ *  blob devolvido quando trocar de imagem ou desmontar. */
+export async function readAttachmentBlobUrl(url: string): Promise<string | null> {
+  try {
+    const bytes = await invoke<number[]>('attachment_read', { url })
+    const mime = MIME_BY_EXT[extFromUrl(url)] || 'image/png'
+    const blob = new Blob([new Uint8Array(bytes)], { type: mime })
+    return URL.createObjectURL(blob)
+  } catch { return null }
+}
