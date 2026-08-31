@@ -70,32 +70,35 @@
 .btnEdit:hover { opacity: .88; }
 .btnEdit:active { scale: .975; }
 
-/* ── Editor de anotacao (markerjs2) ───────────────────────────────────────
-   A biblioteca monta a UI dela sozinha, anexada direto no <body> (ver
-   ImageViewer.tsx: area.settings.displayMode = 'popup'). O coverDiv que ela
-   cria recebe sempre a classe fixa "__markerjs2_" (unica excecao sem sufixo
-   de instancia - ver markerjs2.js) e tem exatamente UM filho, o cartao que
-   ela centraliza sozinha por margem simetrica. So restam posicao (ja
-   resolvida pela biblioteca) e moldura (aqui) para deixar de parecer um
-   pedaco de terceiro colado por cima. */
-
-/* Escurece o resto do app atras do editor - mesmo padrao de
-   Modal.module.css .overlay. !important porque a biblioteca ja aplica a cor
-   dela via style inline (especificidade de inline sempre vence). */
-:global(.__markerjs2_) {
-  background: rgba(6, 6, 9, .72) !important;
+/* ── Editor de imagem (Filerobot, TASK-407) ───────────────────────────────
+   Ao contrario do markerjs2 (que montava a UI dele sozinho, anexada no
+   <body>), o Filerobot so renderiza DENTRO do container React que a gente
+   da - quem cobre a janela e desenha a moldura e este CSS. Mesma receita de
+   Modal.module.css .overlay/.card (escurece o fundo, cartao com raio
+   squircle), so que sem centralizar um cartao pequeno: aqui o editor ocupa
+   quase a janela inteira, com a MESMA margem de 32px que o markerjs2 usava
+   em popupMargin. */
+.editorOverlay {
+  position: fixed; inset: 0;
+  z-index: 300;
+  background: rgba(6, 6, 9, .72);
   backdrop-filter: blur(2px);
 }
 
-/* O cartao central: mesma moldura de Modal.module.css .card (fundo, borda,
-   raio, squircle e sombra). !important so na borda, porque a biblioteca
-   zera border:0 via inline quando displayMode e "popup". */
-:global(.__markerjs2_) > div {
+.editorCard {
+  position: absolute; inset: 32px;
   background: var(--surface);
-  border: 1px solid var(--hairline) !important;
+  border: 1px solid var(--hairline);
   border-radius: var(--r-card);
   --sq-r: var(--r-card);
   -webkit-mask-image: paint(squircle); mask-image: paint(squircle);
   box-shadow: var(--shadow);
   overflow: hidden;
+}
+
+.editorLoading {
+  height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--fg3);
+  font-size: var(--text-sm);
 }

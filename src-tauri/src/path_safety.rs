@@ -5,9 +5,49 @@
 
 use std::path::{Component, Path, PathBuf};
 
-/// Ultimo segmento de um caminho/URL, tratando tanto '/' quanto '\' como separador.
-pub fn last_segment(raw: &str) -> &str {
-    raw.rsplit(['/', '\\']).next().unwrap_or(raw)
+/// Decodifica sequencias percent-encoded (%XX) sem depender de crate externa -
+/// so bytes ASCII hex, suficiente pro que `convertFileSrc` (frontend, Windows)
+/// gera: barra, contrabarra, dois-pontos e espaco escapados.
+fn percent_decode(s: &str) -> String {
+    let bytes = s.as_bytes();
+    let mut out = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'%' && i + 2 < bytes.len() {
+            if let Ok(byte) = u8::from_str_radix(&s[i + 1..i + 3], 16) {
+                out.push(byte);
+                i += 3;
+                continue;
+            }
+        }
+        out.push(bytes[i]);
+        i += 1;
+    }
+    String::from_utf8_lossy(&out).into_owned()
+}
+
+/// Ultimo segmento de um caminho/URL, tratando tanto '/' quanto '\' como
+/// separador.
+/// REGRESSAO MEDIDA (31/08/2026, rodando o app empacotado de verdade - Tauri
+/// build --debug + WebView2 real - "Editar imagem" nao fazia nada porque o
+/// botao ficava desabilitado pra sempre): no Windows, `convertFileSrc`
+/// (frontend) devolve `http://asset.localhost/C%3A%5CUsers%5C...%5Cimg.png` -
+/// a contrabarra do caminho absoluto vira `%5C` (percent-encoded), NUNCA uma
+/// '\' literal. Decodificar so DEPOIS de separar (como era antes) nunca acha
+/// separador nenhum na string toda encoded, entao "ultimo segmento" virava a
+/// URL INTEIRA - `safe_join` nao rejeitava (sem ':' ou '\' literal pra
+/// disparar `Component::Prefix`/`has_root`), mas o arquivo juntado nunca
+/// existia, `fs::read` falhava, `attachment_read` devolvia Err, e
+/// `readAttachmentBlobUrl` (src/lib/attachments.ts) engolia o erro e devolvia
+/// `null` pra sempre. Decodificar ANTES de separar resolve os dois formatos
+/// (com ou sem encoding).
+pub fn last_segment(raw: &str) -> String {
+    let decoded = percent_decode(raw);
+    decoded
+        .rsplit(['/', '\\'])
+        .next()
+        .unwrap_or(&decoded)
+        .to_string()
 }
 
 /// Junta `base` com `candidate` so se o resultado ficar contido dentro de `base`.
@@ -70,7 +110,7 @@ mod tests {
             r"..\..\x",
         ] {
             let name = last_segment(raw);
-            let result = safe_join(&base, name);
+            let result = safe_join(&base, &name);
             assert!(
                 is_contained_or_rejected(&base, &result),
                 "escapou de base para {:?} a partir de {:?}",
@@ -86,7 +126,29 @@ mod tests {
         // que carrega prefixo de drive sem barra (Path::prefix() pega, has_root() nao).
         let base = temp_dir("drive_relative");
         let name = last_segment("C:algo.txt");
-        assert_eq!(safe_join(&base, name), None);
+        assert_eq!(safe_join(&base, &name), None);
+    }
+
+    #[test]
+    fn attachment_read_acha_arquivo_real_quando_url_e_convertfilesrc_do_windows() {
+        // REGRESSAO MEDIDA (31/08/2026): convertFileSrc no Windows devolve
+        // `http://asset.localhost/<caminho-absoluto-percent-encoded>` - toda
+        // contrabarra do caminho vira `%5C`, nunca uma '\' literal. last_segment
+        // tem que decodificar ANTES de separar, senao "ultima parte" vira a
+        // URL inteira e nunca bate um arquivo real (fs::read falhava, o botao
+        // "Editar imagem" ficava desabilitado pra sempre - ver ImageViewer.tsx).
+        let base = temp_dir("convertfilesrc_windows");
+        std::fs::write(base.join("img1788173762806.png"), b"fake-png-bytes").unwrap();
+        let base_str = base.to_string_lossy().replace('\\', "%5C").replace(':', "%3A");
+        let url = format!(
+            "http://asset.localhost/{}%5Cimg1788173762806.png",
+            base_str
+        );
+        let name = last_segment(&url);
+        assert_eq!(name, "img1788173762806.png");
+        let joined = safe_join(&base, &name);
+        assert!(joined.is_some(), "deveria achar o arquivo real, achou None");
+        assert!(joined.unwrap().exists());
     }
 
     #[test]

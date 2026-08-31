@@ -28,7 +28,7 @@ pub fn attachment_remove(app: tauri::AppHandle, url: String) -> Result<(), Strin
     let tail = url.split(['?', '#']).next().unwrap_or(&url);
     let name = crate::path_safety::last_segment(tail);
     let dir = attach_dir(&app);
-    if let Some(path) = crate::path_safety::safe_join(&dir, name) {
+    if let Some(path) = crate::path_safety::safe_join(&dir, &name) {
         if path.exists() {
             fs::remove_file(path).map_err(|e| e.to_string())?;
         }
@@ -55,7 +55,7 @@ pub fn attachment_read(app: tauri::AppHandle, url: String) -> Result<Vec<u8>, St
     let tail = url.split(['?', '#']).next().unwrap_or(&url);
     let name = crate::path_safety::last_segment(tail);
     let dir = attach_dir(&app);
-    let path = crate::path_safety::safe_join(&dir, name)
+    let path = crate::path_safety::safe_join(&dir, &name)
         .ok_or_else(|| "nome de anexo invalido".to_string())?;
     fs::read(&path).map_err(|e| e.to_string())
 }

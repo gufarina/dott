@@ -1,20 +1,22 @@
 // @vitest-environment jsdom
 /** Prova que o ImageViewer troca a origem do <img> alvo para um `blob:`
  * (mesma origem do app) assim que os bytes do anexo chegam do lado nativo -
- * ANTES de qualquer uso pelo markerjs2. MEDIDO (30/08/2026,
- * node_modules/markerjs2/../src/core/Renderer.ts): o markerjs2 desenha esse
- * mesmo <img> num <canvas> (ctx.drawImage) e depois chama canvas.toDataURL()
- * pra gerar a anotacao. Origem cruzada (http://asset.localhost, diferente da
- * origem do app) sem CORS deixa o canvas "tainted" e toDataURL() lanca
- * SecurityError - dentro de img.onload, fora da cadeia de Promise, entao o
- * render nem chega a rejeitar: so trava mudo, e nenhum try/catch no ouvinte
- * de 'render' alcanca isso.
+ * ANTES de qualquer uso pelo editor de imagem (Filerobot). MEDIDO
+ * (30/08/2026, markerjs2, o editor anterior): a biblioteca desenhava esse
+ * mesmo <img> num <canvas> (ctx.drawImage) e depois chamava
+ * canvas.toDataURL() pra gerar a anotacao. Origem cruzada
+ * (http://asset.localhost, diferente da origem do app) sem CORS deixa o
+ * canvas "tainted" e toDataURL() lanca SecurityError - o Filerobot (Konva)
+ * tem o MESMO risco ao exportar a imagem editada, entao a mitigacao
+ * continua valendo, biblioteca nova ou nao.
  *
  * jsdom nao tem <canvas> 2D real nem o modelo de "tainted canvas" do
  * navegador, entao este teste NAO reproduz o SecurityError em si - prova a
- * MITIGACAO: o <img> que o markerjs2 vai usar deixa de apontar pra URL
- * cross-origin assim que o blob chega, e o blob anterior e liberado ao
- * trocar de imagem/desmontar (sem isso vazaria memoria a cada abertura). */
+ * MITIGACAO: o <img> (e a fonte que o editor vai usar ao abrir) deixa de
+ * apontar pra URL cross-origin assim que o blob chega, e o blob anterior e
+ * liberado ao trocar de imagem/desmontar (sem isso vazaria memoria a cada
+ * abertura). O editor em si nunca chega a carregar aqui (lazy - so entra no
+ * bundle quando "Editar imagem" e clicado), entao nao precisa de mock dele. */
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -23,24 +25,16 @@ import { ImageViewer } from './ImageViewer'
 let resolveRead: ((v: string | null) => void) | null = null
 
 vi.mock('../../lib/attachments', () => ({
+  removeAttachment: vi.fn().mockResolvedValue(undefined),
   saveImageFile: vi.fn(),
   readAttachmentBlobUrl: vi.fn(
     () => new Promise<string | null>((resolve) => { resolveRead = resolve })
   ),
 }))
 
-vi.mock('markerjs2', () => ({
-  MarkerArea: class {
-    settings = {}
-    uiStyleSettings = {}
-    addEventListener() {}
-    show() {}
-  },
-}))
-
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
-describe('ImageViewer - troca a origem do <img> por blob: antes do markerjs usar', () => {
+describe('ImageViewer - troca a origem do <img> por blob: antes do editor usar', () => {
   let container: HTMLDivElement
   let root: Root
   let revokeSpy: ReturnType<typeof vi.fn>

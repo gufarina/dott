@@ -20,14 +20,17 @@ export default defineConfig(async () => ({
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
 
-  // Quebra o bundle em pedaços (editor markdown, grafo, vendor) pra não
-  // carregar 950kB num chunk só — primeira pintura mais rápida.
+  // Quebra o bundle em pedaços (motion, vendor) pra não carregar tudo num
+  // chunk só — primeira pintura mais rápida. TASK-407: o editor de imagem
+  // (Filerobot) saiu daqui - agora e' `React.lazy` em ImageViewer.tsx, o
+  // Rollup ja cria o chunk assincrono sozinho sem precisar de manualChunks
+  // (markerjs2, o editor anterior, so tinha chunk proprio mas carregava
+  // eager - nunca foi sob demanda de verdade).
   build: {
     chunkSizeWarningLimit: 700,
     rollupOptions: {
       output: {
         manualChunks: {
-          editor: ["markerjs2"],
           motion: ["framer-motion"],
           vendor: ["react", "react-dom", "zustand", "fuse.js"],
         },

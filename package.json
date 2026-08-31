@@ -1,14 +1,15 @@
 {
   "name": "tauri-app",
   "private": true,
-  "version": "0.2.20",
+  "version": "0.2.25",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "test": "vitest run"
+    "test": "vitest run",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.3",
@@ -26,9 +27,11 @@
     "@uiw/react-codemirror": "^4.25.10",
     "framer-motion": "^12.40.0",
     "fuse.js": "^7.4.2",
-    "markerjs2": "^2.32.7",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-filerobot-image-editor": "^5.0.1",
+    "react-konva": "^19.2.5",
+    "styled-components": "^5.3.11",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
@@ -37,6 +40,7 @@
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
     "jsdom": "^29.1.1",
+    "patch-package": "^8.0.1",
     "typescript": "~5.8.3",
     "vite": "^7.0.4",
     "vitest": "^4.1.11"

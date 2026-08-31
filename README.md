@@ -12,7 +12,7 @@ escreve e volta pro que estava fazendo. Onde ela vai morar você decide depois, 
 <p align="center">
   <a href="https://github.com/gufarina/dott/releases/latest"><b>Baixar o Dott</b></a>
   <br>
-  Windows 10 e 11 &middot; instalador de 2,9 MB &middot; de graça &middot; sem cadastro
+  Windows 10 e 11 &middot; instalador de 3,2 MB &middot; de graça &middot; sem cadastro
 </p>
 
 ## O problema que o Dott resolve

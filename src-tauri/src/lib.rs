@@ -14,6 +14,16 @@ use tauri::{Emitter, Manager};
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        // Uma instancia so do processo: registrado primeiro (exigencia do
+        // plugin). O plugin ja mata a instancia nova sozinho antes deste
+        // callback rodar; aqui so trazemos a janela principal existente pra
+        // frente, sem tocar na bolinha do widget (que continua onde estava).
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            if let Some(main) = app.get_webview_window("main") {
+                let _ = main.show();
+                let _ = main.set_focus();
+            }
+        }))
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
