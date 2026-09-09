@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    Icone do Dott. Mesma marca do app (DottMark.tsx), sem inventar nada novo:
+    ponto = o pensamento capturado; anel aberto = o segundo cerebro que nunca fecha.
+    Descartados: o "+" (generico) e o ponto solto na abertura (lia como rabinho).
+  -->
+  <defs>
+    <linearGradient id="fundo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c1c1e"/>
+      <stop offset="1" stop-color="#0b0b0c"/>
+    </linearGradient>
+    <linearGradient id="marca" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#f2865c"/>
+      <stop offset="0.55" stop-color="#e05a38"/>
+      <stop offset="1" stop-color="#c8402a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- placa do app -->
+  <rect x="0" y="0" width="1024" height="1024" rx="228" fill="url(#fundo)"/>
+
+  <!-- a marca, centralizada na grade de 24 escalada 40x (viewBox 24 -> 960, offset 32) -->
+  <g transform="translate(32,32) scale(40)" fill="none">
+    <!-- Anel CONCENTRICO com o ponto: as pontas do arco estao a exatamente 8.8
+         do centro (12,12). Ponta fora do raio = navegador reposiciona o centro
+         e o anel sai torto em relacao a bola. -->
+    <path d="M20.5 9.722A8.8 8.8 0 1 1 15.719 4.024"
+          stroke="url(#marca)" stroke-width="2.6" stroke-linecap="round"/>
+    <circle cx="12" cy="12" r="4.4" fill="url(#marca)"/>
+  </g>
+</svg>

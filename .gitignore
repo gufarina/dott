@@ -1,0 +1,37 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+
+# --- Superficie publica (engine/governance/public-surface.md) ---
+# No git so existe o produto publico, do jeito que o usuario final recebe.
+# Landing page, material de design, prototipo e ferramenta interna ficam em disco.
+landing/
+preview/
+graphify-out/
+.claude/
+.impeccable/
+.visual/
+# ponte MCP: entregue mas nunca publicada - decisao do CEO pendente
+mcp-bridge/

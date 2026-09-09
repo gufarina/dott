@@ -1,0 +1,97 @@
+/* Receita canonica de BOTAO (TASK-461, 07/09/2026).
+
+   De onde veio: NAO e uma receita nova. E a receita que ja existia em
+   `Modal.module.css` (.btn / .ghost / .primary / .close), promovida daqui pra
+   cima sem mudar uma declaracao - lei do reuse-first. O Modal continua com a
+   mesma aparencia porque passou a CONSUMIR estas classes em vez de ter a copia
+   dele. Todo comentario de decisao (TASK-320, TASK-334, TASK-372) foi trazido
+   junto, senao a proxima pessoa reabre a discussao ja resolvida.
+
+   Por que promover: a auditoria mediu 101 `<button>` nativos espalhados por 24
+   arquivos, com ~40 classes locais diferentes. Nao havia UM lugar pra mudar o
+   botao do app. Agora ha. */
+
+.base {
+  height: var(--btn-h-lg);
+  padding: 0 var(--space-4);
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  border-radius: var(--r-btn);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: opacity var(--dur-micro) var(--ease-out), background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+.base:disabled, .base[aria-disabled="true"] { cursor: not-allowed; opacity: .45; }
+
+/* Anel de foco de teclado em TODA variante. Antes so `.primary` tinha - as
+   outras eram invisiveis pra quem navega no teclado. `:focus-visible` so
+   aparece em foco por teclado, entao nada muda pra quem usa o mouse. */
+.base:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* TASK-320 (28/08/2026, corrige a TASK-319: preenchimento invertido virava
+   BRANCO no tema escuro, reprovado). Repouso escuro "como os vizinhos" -
+   mesma receita de FolderNotesView.module.css .btnNew (--surface3, sem
+   borda). A marca vira barra+ponto quente so no hover (classe global
+   `hoverGlow`, ver reset.css) e segue o cursor. */
+.primary {
+  border: none;
+  background: var(--surface3);
+  color: var(--fg);
+}
+.primary:hover:not(:disabled) { opacity: .88; }
+.primary:active:not(:disabled) { scale: .975; }
+/* Desabilitado nao carrega a marca: superficie neutra, igual ao resto do
+   sistema (a classe hoverGlow tambem nao acende - ver reset.css, o
+   seletor e :hover/:focus-visible do PROPRIO elemento habilitado). */
+.primary:disabled {
+  background: var(--surface3);
+  color: var(--fg3);
+  opacity: 1;
+}
+
+.ghost {
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--fg2);
+}
+.ghost:hover:not(:disabled) { background: var(--surface3); color: var(--fg); }
+
+/* Acao destrutiva. Nao existia como variante - cada tela pintava o proprio
+   vermelho (medido: 7 lugares escreviam o rgba do --danger do tema escuro a
+   mao, e por isso continuavam vermelhos-do-escuro no tema claro). Usa
+   `--danger-s`, que e color-mix sobre o --danger de CADA tema. */
+.danger {
+  border: 1px solid transparent;
+  background: var(--danger-s);
+  color: var(--danger);
+}
+.danger:hover:not(:disabled) { border-color: var(--danger); }
+
+/* TASK-334 (Fase 3, DESIGN.md secao 17.2): a mesma acao "fechar" existia em 4
+   arquivos com tamanhos que ninguem decidiu de proposito (24/24/26/26).
+   Convergido pro `--icon-btn-md` (28px), o mesmo porte que
+   `.captureIconBtn`/`.coverBtn`/`.back` ja usam pra icone-so em
+   cabecalho/toolbar - nao um numero novo. */
+.icon {
+  width: var(--icon-btn-md); height: var(--icon-btn-md); flex-shrink: 0;
+  padding: 0;
+  border: none; background: transparent; color: var(--fg3);
+  border-radius: var(--r-sm);
+}
+.icon:hover:not(:disabled) { background: var(--surface3); color: var(--fg); }
+.iconSm { width: var(--icon-btn-sm); height: var(--icon-btn-sm); }
+
+/* `bare` NAO pinta nada. Existe pra que um botao com geometria propria (o app
+   tem ~40 dessas, cada uma afinada no olho pelo CEO) possa passar pelo
+   componente canonico - ganhando os INVARIANTES (type="button", foco visivel,
+   semantica de desabilitado, a saida `as="span"` pro caso de botao dentro de
+   botao) sem que a aparencia dele mude um pixel. Nao e enfeite: e o que torna
+   a proibicao de `<button>` nativo cumprivel hoje, em vez de "algum dia". */
+.bare {
+  font-family: inherit;
+  cursor: pointer;
+}
+.bare:disabled, .bare[aria-disabled="true"] { cursor: not-allowed; }
+.bare:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }

@@ -1,0 +1,241 @@
+.wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-45);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--surface);
+}
+
+.title {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.hint {
+  font-size: var(--text-2xs);
+  color: var(--fg3);
+}
+
+/* Legenda: a linha cheia foi achada no texto, a tracejada foi inferida. */
+.legenda {
+  margin-left: auto;
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+}
+.chave {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-3xs);
+  color: var(--fg3);
+}
+.linhaAchada,
+.linhaInferida {
+  width: 20px;
+  height: 0;
+  border-top: 1.6px solid var(--accent);
+  display: inline-block;
+}
+.linhaInferida {
+  border-top: 1px dashed var(--fg3);
+}
+
+.palco {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 292px;
+  overflow: hidden;
+}
+
+.svg {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.node { cursor: pointer; }
+.node circle { transition: opacity var(--dur-base) var(--ease-out); }
+.node:hover circle { opacity: .8; }
+
+.label {
+  font-size: var(--text-2xs);
+  fill: var(--fg2);
+  pointer-events: none;
+  font-family: var(--font-body);
+}
+
+/* Painel lateral: quem explica a conexao. */
+.painel {
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  padding: var(--space-4) var(--space-4) var(--space-55);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.painelTitulo {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--fg);
+  line-height: 1.25;
+}
+
+.painelLabel {
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--fg3);
+  margin-top: var(--space-15);
+}
+
+.painelVazio,
+.dica {
+  font-size: var(--text-2xs);
+  line-height: 1.5;
+  color: var(--fg3);
+}
+.dica { margin-top: auto; padding-top: 12px; }
+
+.vazio {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg3);
+  font-size: var(--text-xs);
+}
+
+.conceitos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-15);
+}
+.conceito {
+  font-size: var(--text-2xs);
+  color: var(--fg2);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  padding: var(--space-05) var(--space-15);
+}
+
+.vizinho {
+  border: 1px solid var(--border2);
+  border-radius: var(--r-md);
+  padding: var(--space-2) var(--space-25);
+  cursor: pointer;
+  background: var(--surface2);
+  transition: border-color var(--dur-micro) var(--ease-out);
+}
+.vizinho:hover { border-color: var(--accent); }
+
+.vizinhoTopo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+.vizinhoTitulo {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--fg);
+  line-height: 1.2;
+}
+.vizinhoWhy {
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  color: var(--fg3);
+}
+
+/* Mesma pill ACHADA/INFERIDA de NoteEditor.module.css .connMark — achada
+   fora da lista medida pelo coordenador, mas e o mesmo defeito (pill fora
+   da receita), corrigida na mesma varredura. */
+.marca {
+  font-size: var(--pill-font-size);
+  font-weight: var(--pill-font-weight);
+  letter-spacing: var(--pill-letter-spacing);
+  line-height: var(--pill-line-height);
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border2);
+  border-radius: var(--r-full);
+  padding: var(--pill-padding);
+  color: var(--fg3);
+  flex: none;
+}
+.marca.achada { color: var(--accent); border-color: var(--accent); }
+
+.tema {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-25);
+  padding: var(--space-15) 0;
+}
+.bolinha {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--r-full);
+  flex: none;
+  margin-top: var(--space-1);
+}
+.temaNome {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--fg);
+  line-height: 1.25;
+}
+.temaQtd {
+  font-size: var(--text-3xs);
+  color: var(--fg3);
+}
+
+/* TASK-329 (DESIGN.md secao 17.2): era preenchimento solido --accent -
+   receita de ANTES da TASK-319/320, nunca migrada. Fill vira --surface3;
+   brilho-no-hover (hoverGlow) fica pendente de JSX (RUSTLINE). */
+.abrir {
+  margin-top: var(--space-25);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--fg);
+  background: var(--surface3);
+  border: none;
+  border-radius: var(--r-md);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  transition: opacity var(--dur-micro) var(--ease-out), scale var(--dur-instant) var(--ease-out);
+}
+.abrir:hover { opacity: .88; }
+.abrir:hover { filter: brightness(1.07); }
+
+/* TASK-334 (28/08/2026): fecha cobertura de hoverZoom nesta tela (mesmo
+   efeito de reset.css .hoverZoom, aplicado direto na classe porque esta
+   rodada nao toca .tsx) - `.abrir` e botao isolado, candidato legitimo.
+   `.node` (circulo SVG do grafo) fica de fora, de proposito: a posicao
+   dele no palco e controlada por layout/transform proprio (nao um DOM box
+   comum), escalar entraria em rota de colisao com esse transform - ja tem
+   sinal proprio (`.node:hover circle{opacity:.8}`). `.vizinho` fica de
+   fora: e linha de lista de largura total dentro do painel (cresce pra
+   ocupar o container, mesma excecao de reset.css) - ja tem borda no
+   hover. */
+@media (hover: hover) and (pointer: fine) {
+  .abrir:hover, .abrir:focus-visible {
+    scale: var(--hover-scale);
+  }
+}

@@ -1,0 +1,578 @@
+.wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.banner {
+  position: relative;
+  width: 100%;
+  height: clamp(120px, 22vw, 160px);
+  flex-shrink: 0;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+}
+.bannerImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.bannerBg {
+  width: 100%;
+  height: 100%;
+}
+.bannerScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, .55));
+  pointer-events: none;
+}
+.bannerName {
+  position: absolute;
+  left: 18px;
+  bottom: 14px;
+  right: 18px;
+  flex-shrink: 0;
+  font-size: var(--text-xl);
+  /* Desvio consciente da baseline Cursor por mandato do CEO (25/08/2026):
+     titulo em 700 — tracking negativo segura a elegancia. */
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, .5);
+}
+.coverBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* TASK-357: era --r-sm (9px) - .banner e clipado por --r-shell (18px na
+     epoca, .central) sem raio proprio; inset 10px dava teto = 8px
+     (DESIGN.md secao 22/7). --r-sm furava por 1px - fechado pra --r-xs
+     (7px) naquela rodada.
+     TASK-369: --r-shell subiu pra 20px - novo teto = 10px. --r-sm volta a
+     caber (1px de folga) - restaura o raio original. */
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(255, 255, 255, .2);
+  background: rgba(0, 0, 0, .4);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+.banner:hover .coverBtn { opacity: 1; }
+.coverBtn:hover { background: rgba(0, 0, 0, .6); }
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-25);
+  padding: var(--space-3) var(--space-45);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--surface);
+}
+
+.count { font-size: var(--text-2xs); color: var(--fg3); }
+
+/* Acao primaria (nota) e secundaria (tarefa/pasta) — uma por item, todas com
+   icone. Altura via `var(--btn-h-lg)` (tokens.css, 36px desde a TASK-372 -
+   era 44px "fixo" nao-token, ver comentario em Modal.module.css `.btn` pro
+   raciocinio completo). `.toolbar` nao tem altura fixa (cresce com o conteudo).
+
+   TASK-319 (28/08/2026, CEO virou a regra: "o gradiente so deve aparecer
+   nos botoes com hover, o botao sem hover deve estar neutro... e o
+   gradiente tem que ser animado com o mouse seguindo"). Isto substitui de
+   vez o preenchimento fixo da TASK-310/313 - ver a licao completa e o
+   contrato pro componente em `reset.css` (`.hoverGlow`).
+
+   TASK-320 (mesmo dia, CORRIGE a execucao acima): o preenchimento
+   invertido `--fg`/`--bg` virava BRANCO no tema escuro - reprovado ("o
+   botao ta branco no dark mode"). Repouso agora e escuro "como os
+   vizinhos": primario = `--surface3` (mais solido, sem borda), secundario
+   = `--surface2` + borda (mais recuado) - a MESMA familia neutra dos
+   cards do app, so um degrau de solidez diferente. Hierarquia vem dessa
+   solidez e da INTENSIDADE do que acende no hover (`--glow-intensity` em
+   `.btnNewAlt`, mais contido) - nunca de preenchimento branco. */
+.btnNew {
+  margin-left: auto;
+  height: var(--btn-h-lg);
+  padding: 0 var(--space-35);
+  border-radius: var(--r-btn);
+  background: var(--surface3);
+  /* TASK-334: borda transparente (nao "none") - mesmo box-model do
+     .btnNewAlt (que tem borda de verdade). Os dois sao box-sizing:border-
+     box (reset.css), entao 44px so bate IGUAL nos dois se ambos gastam 1px
+     de borda - senao o primario ganha 1px a mais de area de conteudo que o
+     secundario ao lado, e o rotulo/icone senta 0,5px mais alto - o
+     "desalinhamento" que o CEO viu na fileira Nova nota/Nova tarefa/Nova
+     pasta. */
+  border: 1px solid transparent;
+  color: var(--fg);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: opacity var(--dur-micro) var(--ease-out), scale var(--dur-instant) var(--ease-out);
+}
+.btnNew:hover { opacity: .88; }
+.btnNew:active { scale: .975; }
+
+/* Secundario: brasa mais CONTIDA que o primario (0.6 em vez de 1) - a
+   mesma barra e o mesmo ponto quente, so menos intensos (ver .hoverGlow
+   em reset.css, "hierarquia por intensidade"). */
+.btnNewAlt {
+  --glow-intensity: .6;
+  height: var(--btn-h-lg);
+  padding: 0 var(--space-35);
+  border-radius: var(--r-btn);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--fg2);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), scale var(--dur-instant) var(--ease-out);
+}
+.btnNewAlt:hover { background: var(--surface3); color: var(--fg); border-color: var(--fg3); }
+.btnNewAlt:active { scale: .975; }
+
+/* Exclusao: neutro em repouso, so acende vermelho (--danger) no hover -
+   mesmo tratamento do botao Excluir da nota (NoteEditor.module.css), pra
+   nao existir um segundo vocabulario de "acao destrutiva" no app. */
+.btnDelete {
+  height: var(--btn-h-lg);
+  padding: 0 var(--space-35);
+  border-radius: var(--r-btn);
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--fg3);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+.btnDelete:hover { background: var(--danger-s); color: var(--danger); border-color: var(--danger); }
+
+.avisoExclusao {
+  font-size: var(--text-3xs);
+  color: var(--fg2);
+  line-height: 1.5;
+}
+
+/* TASK-354: era 18px - quando a lista rola ate o fim, o ultimo .card
+   (--r-lg, 16px) fica so 18px de folga do --r-shell (18px) do .central
+   que envolve esta tela - espacamento igual ao raio de fora, sem margem
+   pra concentricidade (regra de aninhamento, DESIGN.md secao 7). 20px
+   (o mesmo numero que .catBody, a tela de categoria unica, ja usa) tira
+   a folga de dentro da zona de risco sem encolher o raio "identidade" do
+   card. */
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5);
+}
+.body::-webkit-scrollbar { width: 3px; }
+.body::-webkit-scrollbar-thumb { background: var(--border2); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+
+.card {
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  /* TASK-318: sombra difusa fraca separa o card no tema claro (`none` no
+     escuro - hairline-only continua valendo la, ver DESIGN.md secao 6). */
+  box-shadow: var(--elevation-card, none);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+  animation: var(--anim-brasa-entra);
+}
+.card:hover { border-color: var(--border2); transform: translateY(-1px); }
+
+.thumb {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  background: var(--surface2);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: var(--space-15);
+  padding: var(--space-2);
+  overflow: hidden;
+}
+.thumbImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Simbolo do pacote proprio, centralizado, discreto (nao compete com o titulo) */
+.thumbGlyph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg3);
+  opacity: .85;
+}
+
+/* Barra de hover: capa por imagem ou simbolo, sem sair da tela */
+.hoverBar {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: flex;
+  gap: var(--space-15);
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+}
+.card:hover .hoverBar { opacity: 1; transform: none; }
+.hoverBtn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(255, 255, 255, .18);
+  background: rgba(0, 0, 0, .55);
+  color: #fff;
+  cursor: pointer;
+  transition: background var(--dur-micro) var(--ease-out);
+}
+.hoverBtn:hover { background: rgba(0, 0, 0, .8); }
+
+/* TASK-313 (27/08/2026): "N ligadas" e ROTULO, nao link nem estado ativo -
+   por isso NUNCA e cor de marca (regra nova, DESIGN.md secao 8). Era
+   --accent (laranja) sobre --accent-s; o CEO chamou de "laranja saturado"
+   olhando o app real. Vira metadado neutro, igual --badge.back ja fazia -
+   as duas classes ficam identicas de proposito (uma delas e dedundante
+   agora; mantida so pra nao quebrar quem referencia `.back`). */
+.badge {
+  font-size: var(--text-3xs);
+  font-weight: 700;
+  padding: var(--space-05) var(--space-15);
+  border-radius: var(--r-xs);
+  background: var(--surface3);
+  color: var(--fg2);
+}
+.badge.back { background: var(--surface3); color: var(--fg2); }
+
+.cardBody { padding: var(--space-3) var(--space-35); }
+.cardTitle {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: var(--space-1);
+}
+.cardDate { font-size: var(--text-3xs); color: var(--fg3); }
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-35);
+  padding: var(--space-16) var(--space-5);
+  text-align: center;
+}
+.empty p { font-size: var(--text-sm); color: var(--fg2); }
+
+.btnNewBig {
+  /* TASK-320: escuro como os vizinhos em repouso, brasa (barra + ponto
+     quente) so no hover (classe `hoverGlow` no JSX) - ver comentario
+     grande em .btnNew. Altura via `var(--btn-h-lg)` - 36px desde a
+     TASK-372 (era 44px fixo). */
+  height: var(--btn-h-lg);
+  padding: 0 var(--space-45);
+  border-radius: var(--r-btn);
+  background: var(--surface3);
+  /* TASK-334: mesmo conserto de .btnNew - borda transparente (nao "none")
+     pra bater o mesmo box-model 1px de .btnNewBigAlt (box-sizing:border-
+     box, reset.css). Sem isso o primario ganha 1px a mais de altura de
+     conteudo que o secundario ao lado, e o par "Criar primeira nota"/
+     "Criar primeira tarefa" (estado vazio da pasta) desalinha do mesmo
+     jeito que Nova nota/Nova tarefa/Nova pasta desalinhava. */
+  border: 1px solid transparent;
+  color: var(--fg);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: opacity var(--dur-micro) var(--ease-out), scale var(--dur-instant) var(--ease-out);
+}
+.btnNewBig:hover { opacity: .88; }
+.btnNewBig:active { scale: .975; }
+
+/* ── Tela sem hover (toque) ────────────────────────────────────────────────
+   Regra do emilkowalski/skills: hover precisa de `@media (hover: hover)`.
+   Estes controles so existem no hover (opacity: 0). Num aparelho de toque nao
+   existe hover — eles ficariam INALCANCAVEIS. Aqui viram sempre visiveis.
+   Trocar capa da pasta e as acoes de capa/simbolo da nota. */
+@media (hover: none) {
+  .coverBtn { opacity: 1; }
+  .hoverBar { opacity: 1; }
+}
+
+/* ── Tarefas da pasta ──────────────────────────────────────────────────────
+   A pasta guarda nota E tarefa. Ate 25/08/2026 so a nota aparecia aqui, mesmo
+   com o card da pasta anunciando "3 tarefas" - um numero que vinha do seed e
+   nunca mudava. Agora a tarefa tem pasta de verdade, e este e o lugar dela. */
+.secaoTarefas {
+  margin-bottom: var(--space-55);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--border);
+}
+
+.secaoTitulo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-3xs);
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--fg3);
+  margin-bottom: var(--space-3);
+}
+
+/* Excecao documentada a receita de pill (ver DESIGN.md, Do's/Don'ts): e um
+   NUMERO ("3/5"), nao um rotulo — mantem mono pra legibilidade tabular, mas
+   raio e padding seguem a mesma pill do resto do app. */
+.secaoContagem {
+  font-family: var(--font-mono);
+  font-size: var(--pill-font-size);
+  line-height: var(--pill-line-height);
+  letter-spacing: 0;
+  color: var(--fg3);
+  background: var(--surface3);
+  border-radius: var(--r-full);
+  padding: var(--pill-padding);
+  display: inline-flex;
+  align-items: center;
+}
+
+.listaTarefas { display: flex; flex-direction: column; gap: var(--space-05); }
+
+.linhaTarefa {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-25);
+  padding: var(--space-25) var(--space-25);
+  border-radius: var(--r-sm);
+  transition: background var(--dur-micro) var(--ease-out);
+}
+.linhaTarefa:hover { background: var(--surface2); }
+
+.tarefaCheck {
+  width: 17px; height: 17px;
+  flex-shrink: 0;
+  margin-top: var(--space-05);
+  border-radius: var(--r-xs);
+  border: 1.5px solid var(--border-control);
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+  transition: background var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
+}
+.tarefaCheck:hover { border-color: var(--success); }
+.tarefaCheck:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tarefaFeita { background: var(--success); border-color: var(--success); }
+.tarefaFeita::after {
+  content: '';
+  position: absolute;
+  left: 4px; top: 4.5px;
+  width: 8px; height: 4.5px;
+  border-left: 2px solid var(--on-accent);
+  border-bottom: 2px solid var(--on-accent);
+  transform: rotate(-45deg);
+}
+
+.tarefaCorpo {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: var(--space-1); align-items: flex-start;
+  font-family: inherit; text-align: left;
+  background: transparent; border: none; padding: 0; cursor: pointer;
+}
+.tarefaCorpo:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--r-xs); }
+
+.tarefaTexto { font-size: var(--text-sm); color: var(--fg); line-height: 1.45; }
+.tarefaTextoFeito { color: var(--fg3); text-decoration: line-through; }
+
+.tarefaMeta { display: flex; align-items: center; gap: var(--space-15); flex-wrap: wrap; }
+/* TASK-374 (29/08/2026): `.tarefaGrupo`/`.tarefaPonto` saem daqui - o chip
+   repetia o nome do "grupo" da tarefa dentro da propria tela da Pasta, as
+   vezes com o nome ERRADO (bug: tarefa vinda do Inbox caia em `tasks[0]`,
+   um grupo que podia nao ter nada a ver). O grupo morreu; a Pasta ja e o
+   contexto (voce esta DENTRO dela), entao repetir o nome aqui era so ruido. */
+
+.tarefaPrazo {
+  display: inline-flex; align-items: center;
+  font-size: var(--pill-font-size); font-weight: var(--pill-font-weight);
+  letter-spacing: var(--pill-letter-spacing); text-transform: uppercase;
+  line-height: var(--pill-line-height);
+  color: var(--fg3); background: var(--surface3);
+  border-radius: var(--r-full); padding: var(--pill-padding);
+}
+/* TASK-329: as duas eram rgba(...) cravado (RGB de --warn/--danger do tema
+   ESCURO, errado no tema claro) - --warn-s/--danger-s acompanham o token
+   certo em cada tema. */
+.prazoHoje     { background: var(--warn-s);   color: var(--warn); }
+.prazoAtrasado { background: var(--danger-s); color: var(--danger); }
+
+/* Estado vazio com os dois caminhos, nao so o da nota. */
+.emptyAcoes { display: flex; align-items: center; gap: var(--space-25); flex-wrap: wrap; justify-content: center; }
+
+/* height via `var(--btn-h-lg)` (era 44px explicito, `.btnNewBig` ao lado
+   acompanha o mesmo token - ver TASK-372). TASK-320: neutro em repouso,
+   brasa CONTIDA so no hover (classe `hoverGlow` no JSX) - ver comentario
+   grande em .btnNew. */
+.btnNewBigAlt {
+  --glow-intensity: .6;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  height: var(--btn-h-lg);
+  font-family: inherit; font-size: var(--text-sm); font-weight: 600;
+  color: var(--fg2);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-md);
+  padding: 0 var(--space-45);
+  cursor: pointer;
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), scale var(--dur-instant) var(--ease-out);
+}
+.btnNewBigAlt:hover { background: var(--surface3); color: var(--fg); border-color: var(--fg3); }
+.btnNewBigAlt:active { scale: .975; }
+
+/* ── Prazo no modal "Nova tarefa" (TASK-320-extra, 28/08/2026) ────────────
+   JSX do RUSTLINE, acabamento do CANVAS. O CEO ja reclamou uma vez que o
+   modal nao pode virar formulario - por isso esta linha e uma fileira
+   discreta (ghost em repouso, mesma receita de `.filterToggle` do painel
+   de Tarefas - TasksPanel.module.css), nunca um campo obrigatorio a mais.
+   Icone de prazo e o MESMO `Icon name="prazo"` usado em toda parte do app
+   (TasksPanel .acaoBtn, o chip de deadline do card) - vocabulario unico,
+   nao um icone novo so pra este lugar (TASK-321). */
+.novaTarefaPrazo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-15);
+  flex-wrap: wrap;
+}
+
+/* O gatilho: pill pequena, icone + rotulo ("Prazo" -> vira a data quando
+   escolhida). `position:relative` porque o input de data real fica por
+   cima, cobrindo a pill inteira (ver .novaTarefaPrazoInput abaixo). */
+.novaTarefaPrazoBtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-15);
+  height: 26px;
+  padding: 0 var(--space-25);
+  border-radius: var(--r-sm);
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--fg2);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: .02em;
+  transition: background var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.novaTarefaPrazoBtn:hover { background: var(--surface3); color: var(--fg); border-color: var(--fg3); }
+/* Prazo definido: mesma receita de "aceso" de .acaoAtiva em
+   TasksPanel.module.css (sobreviveu a reforma do painel, ver DESIGN.md) -
+   fica lida como escolhido mesmo sem hover. */
+/* TASK-334 (Fase 4): token semantico de estado ativo, nao mais
+   --accent-s/--accent direto - ver tokens.css. */
+.novaTarefaPrazoBtnAtivo,
+.novaTarefaPrazoBtnAtivo:hover {
+  background: var(--state-active-bg);
+  border-color: var(--state-active-border);
+  color: var(--state-active-fg);
+}
+
+/* Input de data real - invisivel, cobre o gatilho inteiro. NAO e enfeite:
+   sem isto o clique nao abre o calendario nativo (mesma receita de
+   .dateInput em TasksPanel.module.css, reusada aqui). */
+.novaTarefaPrazoInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+/* Atalhos "Hoje"/"Amanha" - mesma altura do gatilho, um degrau mais
+   discreto (sem borda em repouso) porque sao acao secundaria dele. */
+.novaTarefaPrazoAtalho {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 var(--space-25);
+  border-radius: var(--r-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--fg3);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+.novaTarefaPrazoAtalho:hover { background: var(--surface3); color: var(--fg); border-color: var(--border2); }
+
+/* "x" de tirar o prazo - so existe no DOM quando ha prazo (ver JSX), entao
+   nao precisa de opacidade condicional, so o tamanho minusculo de uma
+   acao de descarte. */
+.novaTarefaPrazoLimpar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--fg3);
+  border-radius: var(--r-xs);
+  cursor: pointer;
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.novaTarefaPrazoLimpar:hover { background: var(--danger-s); color: var(--danger); }

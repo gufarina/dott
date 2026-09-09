@@ -1,0 +1,227 @@
+.app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--desk);
+}
+
+/* "Mesa": fundo escuro com respiro, onde os 3 shells flutuam separados. */
+.body {
+  flex: 1;
+  display: flex;
+  gap: var(--space-25);
+  /* Sem padding em cima: essa folga agora pertence a barra de titulo, que
+     precisa dela pra centralizar marca e icones na faixa real do topo.
+     Ver o comentario em Titlebar.module.css. */
+  padding: 0 var(--space-25) var(--space-25);
+  overflow: hidden;
+  background: var(--desk);
+}
+
+/* Shell = container proprio (canto squircle, borda, destacado da mesa). */
+.panelLeft {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-shell);
+  --sq-r: var(--r-shell);
+  -webkit-mask-image: paint(squircle);
+  mask-image: paint(squircle);
+  overflow: hidden;
+  /* sem transicao: propriedade de layout nao se anima */
+}
+
+.panelRight {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-shell);
+  --sq-r: var(--r-shell);
+  -webkit-mask-image: paint(squircle);
+  mask-image: paint(squircle);
+  overflow: hidden;
+  /* sem transicao: propriedade de layout nao se anima */
+}
+
+/* TASK-346: coluna central = dois paineis EMPILHADOS (o painel do PARA em
+   cima, a caixa de captura embaixo), cada um com a propria moldura -
+   .centralColumn so da o pai flex-column comum + o respiro real (gap) entre
+   os dois. Mesmo valor de gap que ja separa panelLeft/central/panelRight
+   em .body (10px), pra manter a "mesa" com um grid de vaos uniforme. */
+/* TASK-380 (29/08/2026, CEO: "voce criou um container atras do PARA e do
+   box.. sem sentido, apague isso agora"). O "chao proprio" que a TASK-378
+   deu a esta classe (background: var(--surface)) era exatamente a camada
+   nova que a ordem original da TASK-378 ("sem o painel intermediario")
+   tinha mandado tirar - resolveu um problema (poco vs bloco claro) criando
+   outro (uma camada atras do PARA e da caixa). REMOVIDO. .centralColumn
+   volta a ser so layout (o pai flex-column que empilha o painel do PARA e
+   a caixa de captura, com o respiro de sempre entre os dois) - sem cor,
+   borda, raio ou mask propria, nunca foi pra ser uma FORMA.
+   `overflow` passou de `hidden` pra `visible`: sem chao proprio nao sobra
+   motivo pra esta classe clipar nada dela mesma - quem de fato precisa
+   clipar ja clipa por conta propria (`.central`, o painel do PARA, mantem
+   `overflow: hidden`; `.convoInput`, o texto da caixa, mantem
+   `overflow-y: auto`). O novo `hoverZoom` de `.convoBox`
+   (CaptureBox.module.css, TASK-380) precisa deste `overflow: visible` pra
+   nao ser cortado nas bordas esquerda/direita/baixo, onde a caixa senta
+   rente ao limite desta coluna (TASK-378 tirou o matting de proposito, sem
+   mais margem pra absorver o crescimento do hover). O `gap: 10px` desta
+   classe e o `padding` de `.body` (10px nas laterais/embaixo, acima neste
+   arquivo) dao folga de sobra pro 1,5% de `--hover-scale` (reset.css) nao
+   encostar em `.panelLeft`/`.panelRight` nem na borda da janela. */
+.centralColumn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-25);
+  overflow: visible;
+}
+
+/* Painel do PARA - fecha sozinho ao redor do que hospeda em cada view
+   (board, graph, canvas, editor, task). Deixou de arrastar a caixa de
+   captura pendurada embaixo (TASK-346) - min-height:0 entra porque agora
+   e filho de um flex-column (.centralColumn), nao mais direto de .body
+   (flex-row); sem isso o painel nao encolhe e a caixa de captura e
+   empurrada pra fora da tela. */
+.central {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  position: relative;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-shell);
+  --sq-r: var(--r-shell);
+  -webkit-mask-image: paint(squircle);
+  mask-image: paint(squircle);
+}
+
+/* TASK-378 (29/08/2026) - REMOVIDO o painel-moldura que este seletor dava
+   a caixa de captura desde a TASK-346 (fundo --surface, borda --border,
+   raio --r-shell, mascara squircle - a "MESMA receita de .panelLeft/
+   .panelRight" que o comentario antigo descrevia). Decisao do CEO na
+   TASK-377/378, palavras literais: "1, com a cor do box do 2" - a
+   ESTRUTURA da opcao 1 e "a caixa senta direto no piso, sem o
+   painel-moldura .captureShell no meio"; ele reforcou "sem o painel
+   intermediario" na entrega. Este seletor fica so como um no de layout
+   (flex-shrink) - sem fundo, borda, raio ou mask proprios, ele nao e mais
+   uma FORMA visivel, so um `div` transparente entre .centralColumn (que
+   agora carrega o "chao proprio", ver acima) e .convoBox (CaptureBox.module.css,
+   agora o ponto escuro/poco). O comentario de App.tsx (linha ~211-217,
+   TASK-346) ainda descreve a receita antiga - fora do alcance desta
+   rodada (arquivo .tsx nao esta na lista de arquivos autorizados aqui). */
+.captureShell {
+  flex-shrink: 0;
+}
+
+.viewArea {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.viewMotion {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Card fantasma seguindo o cursor durante o drag — excecao registrada de
+   sombra: e superficie FLUTUANTE (solta do fluxo, acompanha o ponteiro por
+   cima de tudo), mesma categoria de modal/popover/toast. Sem a sombra ele
+   se confunde com o que esta por baixo enquanto arrasta. */
+.dragGhost {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: 240px;
+  padding: var(--space-25) var(--space-3);
+  border-radius: var(--r-shell-inset-10);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  box-shadow: 0 12px 30px rgba(0,0,0,.5);
+  cursor: grabbing;
+  transform: rotate(-1.5deg);
+  transition: border-color var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+/* Armado = tem pasta ao alcance; soltar agora funciona. */
+.dragGhostArmado {
+  border-color: var(--accent);
+  box-shadow: 0 12px 30px rgba(0,0,0,.5), 0 0 0 4px var(--accent-s);
+  transform: rotate(0deg) scale(1.02);
+}
+.dragGhostAlvo {
+  margin-top: var(--space-05);
+  font-size: var(--text-3xs);
+  font-weight: 600;
+  letter-spacing: .02em;
+  color: var(--fg3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dragGhostArmado .dragGhostAlvo { color: var(--accent); }
+.dragGhostType {
+  font-size: var(--text-3xs);
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--accent);
+}
+.dragGhostText {
+  font-size: var(--text-xs);
+  color: var(--fg);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.canvasLayout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Drop overlay — visible only while a file is dragged over the window */
+.dropOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-drag);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--scrim);
+  backdrop-filter: blur(4px);
+  border: 2px dashed var(--accent);
+  border-radius: var(--r-card);
+  pointer-events: none;
+}
+
+.dropOverlayLabel {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  padding: var(--space-4) var(--space-8);
+  background: var(--accent-s);
+  border-radius: var(--r-btn);
+  pointer-events: none;
+}

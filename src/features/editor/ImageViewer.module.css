@@ -1,0 +1,104 @@
+.wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.imageContainer {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  margin: var(--space-3) var(--space-45) 0;
+  /* TASK-354: era --r-lg (16px) - quase do tamanho do --r-shell (18px na
+     epoca) do .central que envolve esta tela, com so 12px de folga
+     (margin-top, o lado mais apertado dos dois - 18px nas laterais). Ver
+     tokens.css, --r-shell-inset-12 = --r-shell - 12px.
+     TASK-369: --r-shell subiu pra 20px - --r-shell-inset-12 recalcula
+     sozinho pra 8px (era 6px). Nada aqui precisou mudar, o numero vem do
+     token. Sem mascara squircle aqui (so border-radius + overflow:hidden,
+     ver DESIGN.md secao 22 "Mascara squircle"), entao nao ha --sq-r pra
+     sincronizar. */
+  border-radius: var(--r-shell-inset-12);
+  overflow: hidden;
+}
+
+.image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-25);
+  padding: var(--space-25) var(--space-45);
+  flex-shrink: 0;
+}
+
+/* TASK-333 item 6: fora da fronteira do CANVAS na migracao dos
+   "botoes-acidente" - neutro em repouso, a marca so acende no hover via
+   `.hoverGlow` (reset.css, classe no JSX). Geometria da tag reduzida (mesma
+   conta de .btnCapture em InboxPanel.module.css): botao de 30px, nao 44px.
+   TASK-336 (28/08/2026): `--tag-h` dobrado (3px -> 6px, so a metade de
+   cima fica visivel - visivel = 3px, igual ao total antigo) e
+   `--tag-inset-b` removida (a tag agora vaza na base do botao, centrada
+   na borda - ver reset.css .hoverGlow pro mecanismo). `--tag-r` sem
+   mudanca. */
+.btnEdit {
+  --tag-h: 6px; --tag-inset-x: 8px; --tag-r: 2px;
+  height: 30px;
+  padding: 0 var(--space-35);
+  border-radius: var(--r-md);
+  background: var(--surface3);
+  border: none;
+  color: var(--fg);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  transition: opacity var(--dur-micro) var(--ease-out), scale var(--dur-instant) var(--ease-out);
+}
+.btnEdit:hover { opacity: .88; }
+.btnEdit:active { scale: .975; }
+
+/* ── Editor de imagem (Filerobot, TASK-407) ───────────────────────────────
+   Ao contrario do markerjs2 (que montava a UI dele sozinho, anexada no
+   <body>), o Filerobot so renderiza DENTRO do container React que a gente
+   da - quem cobre a janela e desenha a moldura e este CSS. Mesma receita de
+   Modal.module.css .overlay/.card (escurece o fundo, cartao com raio
+   squircle), so que sem centralizar um cartao pequeno: aqui o editor ocupa
+   quase a janela inteira, com a MESMA margem de 32px que o markerjs2 usava
+   em popupMargin. */
+.editorOverlay {
+  position: fixed; inset: 0;
+  z-index: var(--z-modal);
+  background: var(--scrim-strong);
+  backdrop-filter: blur(2px);
+}
+
+.editorCard {
+  position: absolute; inset: 32px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-card);
+  --sq-r: var(--r-card);
+  -webkit-mask-image: paint(squircle); mask-image: paint(squircle);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.editorLoading {
+  height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--fg3);
+  font-size: var(--text-sm);
+}

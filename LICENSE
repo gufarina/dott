@@ -1,0 +1,49 @@
+Copyright (c) 2026 Studio Farina. Todos os direitos reservados.
+Copyright (c) 2026 Studio Farina. All rights reserved.
+
+PORTUGUES
+
+Este software e o seu codigo-fonte sao propriedade do Studio Farina e estao
+protegidos pelas leis de direito autoral do Brasil (Lei 9.610/1998 e Lei
+9.609/1998) e por tratados internacionais.
+
+O codigo esta publicado neste repositorio para leitura, avaliacao e
+transparencia. Publicar nao e licenciar: nenhum direito de uso, copia,
+modificacao, distribuicao, sublicenciamento, venda ou criacao de obra derivada
+e concedido, expressa ou tacitamente.
+
+E permitido:
+  - ler o codigo;
+  - baixar e usar o instalador oficial do aplicativo Dott, distribuido nas
+    releases deste repositorio, como usuario final.
+
+Nao e permitido, sem autorizacao previa e por escrito do Studio Farina:
+  - copiar, reproduzir ou redistribuir o codigo, no todo ou em parte;
+  - modificar o codigo ou criar obras derivadas;
+  - usar o codigo, ou qualquer parte dele, em outro produto ou servico;
+  - usar o codigo para treinar modelos de aprendizado de maquina.
+
+O software e fornecido "no estado em que se encontra", sem garantia de
+qualquer natureza. O Studio Farina nao se responsabiliza por qualquer dano
+decorrente do uso deste software.
+
+Para pedir autorizacao de uso: abra uma Issue neste repositorio.
+
+ENGLISH
+
+This software and its source code are the property of Studio Farina and are
+protected by Brazilian copyright law and international treaties.
+
+The source is published here for reading, evaluation and transparency.
+Publishing is not licensing: no right to use, copy, modify, distribute,
+sublicense, sell or create derivative works is granted, expressly or by
+implication.
+
+You may read the source, and you may download and use the official Dott
+installer from this repository's releases as an end user. Any other use -
+including copying, modifying, redistributing, incorporating into another
+product, or using this code to train machine learning models - requires prior
+written permission from Studio Farina.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. STUDIO FARINA
+SHALL NOT BE LIABLE FOR ANY DAMAGES ARISING FROM THE USE OF THIS SOFTWARE.

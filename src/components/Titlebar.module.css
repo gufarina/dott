@@ -1,0 +1,102 @@
+.titlebar {
+  /* A faixa do topo vai da borda da janela ate o topo dos paineis. Como a mesa
+     (.body em App.module.css) tem padding de 10px, essa faixa mede 44px, mas a
+     barra so ocupava 28px - o conteudo ficava centralizado nos 28 e sobrava a
+     folga de 10 embaixo, o que jogava marca e icones 5px acima do centro real
+     (medido: centro em 17px numa faixa cujo meio e 22px). Dai a sensacao de
+     "colado no topo".
+     A barra passa a ocupar a faixa inteira (44px) e a mesa perde o padding de
+     cima - os paineis continuam comecando exatamente no mesmo y. */
+  height: 44px;
+  flex-shrink: 0;
+  background: var(--desk);
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 var(--space-4);
+  position: relative;
+  z-index: var(--z-titlebar);
+}
+
+.drag {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  cursor: default;
+}
+
+.logo {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--fg);
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-15);
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.btn {
+  height: 26px;
+  padding: 0 var(--space-25);
+  border-radius: var(--r-sm);
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--fg2);
+  font-size: var(--text-2xs);
+  display: flex;
+  align-items: center;
+  gap: var(--space-15);
+  transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
+}
+.btn:hover { background: var(--surface3); color: var(--fg); }
+/* TASK-334 (Fase 4): token semantico de estado ativo, nao mais
+   --accent-s/--accent direto - ver tokens.css. */
+.btnActive { background: var(--state-active-bg); color: var(--state-active-fg); }
+.btnActive:hover { background: var(--state-active-bg); color: var(--state-active-fg); }
+.btn.accent { color: var(--accent); border: 1px solid var(--accent); }
+.btn.accent:hover { background: var(--accent-s); }
+
+/* Controles de janela — flush no canto, estilo Windows minimalista */
+.winctl {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  margin-left: var(--space-2);
+}
+.wbtn {
+  width: 40px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: var(--fg2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out);
+}
+.wbtn:hover { background: var(--surface3); color: var(--fg); }
+.wclose:hover { background: var(--danger); color: var(--on-accent); }
+
+/* Marca do Dott na barra de titulo */
+.mark { color: var(--accent); flex-shrink: 0; margin-right: var(--space-2); }
+
+/* Versao do build (TASK-313): discreta, so pra identificar qual build esta
+   rodando. --text-3xs = 10px de token, mas a janela principal roda com zoom
+   nativo 1.2 (main.tsx), entao o tamanho real na tela e 12px - legivel sem
+   virar badge. Mono porque e a mesma linguagem visual usada pra outros
+   metadados tecnicos no app (ex.: .path em Settings.module.css). */
+.version {
+  margin-left: var(--space-15);
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  color: var(--fg3);
+  flex-shrink: 0;
+  cursor: default;
+}

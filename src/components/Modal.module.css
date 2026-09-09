@@ -1,0 +1,74 @@
+/* Modal.module.css — vocabulario UNICO de modal do app (TASK-297).
+ * Antes: "Virar tarefa" e "Nova tarefa"/"Nova pasta" tinham cada um a sua
+ * caixa (uma feia, com icone de checkbox solto dentro do input; a outra uma
+ * barra inline espremida). Agora as duas passam por aqui — mesmo raio, mesmo
+ * espacamento, mesma hierarquia de botao. */
+
+.overlay {
+  position: fixed; inset: 0;
+  background: var(--scrim-strong);
+  backdrop-filter: blur(2px);
+  z-index: var(--z-modal);
+  display: flex; align-items: center; justify-content: center;
+  animation: var(--anim-veu-entra);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  /* Excecao unica a "zero drop shadow" da baseline: o modal esta ACIMA de
+     tudo, sobre o overlay escurecido — precisa se destacar do proprio
+     overlay, nao so da superficie de baixo. Card comum nunca leva sombra. */
+  box-shadow: var(--shadow);
+  border-radius: var(--r-card);
+  --sq-r: var(--r-card);
+  -webkit-mask-image: paint(squircle); mask-image: paint(squircle);
+  max-width: calc(100vw - var(--space-8));
+  max-height: 80vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  animation: var(--anim-brasa-entra);
+}
+
+.header {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) 0;
+}
+.title {
+  flex: 1; min-width: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-lg);
+  /* Desvio consciente da baseline Cursor por mandato do CEO (25/08/2026):
+     titulo em 700, nao 600 — ver DESIGN.md, Do's/Don'ts. A elegancia fica
+     pelo tracking negativo, nao pelo peso leve. */
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -.01em;
+  color: var(--fg);
+}
+.body {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: var(--space-4);
+}
+.hint {
+  font-size: var(--text-3xs);
+  color: var(--fg3);
+  line-height: 1.5;
+}
+
+/* ── Campo (label + controle) ─────────────────────────────────────────── */
+.field { display: flex; flex-direction: column; gap: var(--space-2); }
+.fieldLabel {
+  font-size: var(--text-3xs);
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--fg3);
+}
+
+/* ── Rodape: hierarquia clara — primario com gradiente, secundario ghost ── */
+.footer {
+  display: flex; justify-content: flex-end; gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-4);
+}

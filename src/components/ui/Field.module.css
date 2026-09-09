@@ -1,0 +1,40 @@
+/* Receita canonica de CAMPO (TASK-461, 07/09/2026).
+
+   Promovida de `Modal.module.css` (.input) sem mudar declaracao - o Modal
+   passou a consumir daqui. `--space-10` (40px) substitui o `height: 40px`
+   cravado que estava la; mesmo valor, agora com nome. */
+
+.base {
+  height: var(--space-10);
+  padding: 0 var(--space-3);
+  border-radius: var(--r-btn);
+  border: 1px solid var(--border-control);
+  background: var(--surface2);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  outline: none;
+  transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.base::placeholder { color: var(--fg3); }
+.base:focus-visible,
+.base:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-s);
+}
+.base:disabled { cursor: not-allowed; opacity: .45; }
+
+/* Campo de varias linhas: mesma pele, sem altura fixa. */
+.multi {
+  height: auto;
+  min-height: calc(var(--space-10) * 2);
+  padding: var(--space-2) var(--space-3);
+  line-height: 1.5;
+  resize: vertical;
+}
+
+/* `bare` segue a mesma logica do botao: campo que ja tem geometria propria
+   passa pelo componente canonico so pelos invariantes, sem mudar de aparencia. */
+.bare {
+  font-family: inherit;
+}

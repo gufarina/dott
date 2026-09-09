@@ -1,0 +1,65 @@
+/* GlyphPicker.tsx — Seletor do pacote de simbolos proprio do Dott.
+ *
+ * Fica no lugar do "emoji": o usuario escolhe uma MARCA do conjunto do app, que
+ * combina com o resto da interface e e igual em qualquer maquina.
+ */
+
+import { useRef } from 'react'
+import { GLYPH_ORDER, GLYPH_LABEL, NoteGlyph, type GlyphId } from './NoteGlyphs'
+import { Icon } from './Icon'
+import { ModalPortal } from './ModalPortal'
+import { useScrollEdgeFade } from '../hooks/useScrollEdgeFade'
+import { Button } from './ui'
+import s from './GlyphPicker.module.css'
+
+export function GlyphPicker({
+  atual,
+  onEscolher,
+  onFechar,
+}: {
+  atual?: GlyphId
+  onEscolher: (g: GlyphId | undefined) => void
+  onFechar: () => void
+}) {
+  /** Fade de rolagem na base (TASK-349). GLYPH_ORDER e fixo (nao muda em
+   *  runtime), entao so precisa medir uma vez no mount + resize. */
+  const gridRef = useRef<HTMLDivElement>(null)
+  useScrollEdgeFade(gridRef)
+
+  return (
+    <ModalPortal>
+    <div className={s.overlay} onClick={e => e.target === e.currentTarget && onFechar()}>
+      <div className={s.modal} role="dialog" aria-label="Escolher símbolo">
+        <div className={s.header}>
+          <span className={s.title}>Símbolo da nota</span>
+          <Button className={s.close} onClick={onFechar} title="Fechar">
+            <Icon name="fechar" size={13} />
+          </Button>
+        </div>
+
+        <p className={s.hint}>Marcas do próprio Dott, iguais em qualquer computador.</p>
+
+        <div ref={gridRef} className={`${s.grid} scrollFadeBottom`}>
+          {GLYPH_ORDER.map(g => (
+            <Button
+              key={g}
+              className={`${s.cell} ${atual === g ? s.cellAtiva : ''}`}
+              title={GLYPH_LABEL[g]}
+              onClick={() => onEscolher(g)}
+            >
+              <NoteGlyph id={g} size={26} />
+              <span className={s.cellLabel}>{GLYPH_LABEL[g]}</span>
+            </Button>
+          ))}
+        </div>
+
+        {atual && (
+          <Button className={s.limpar} onClick={() => onEscolher(undefined)}>
+            <Icon name="fechar" size={13} /> Tirar o símbolo
+          </Button>
+        )}
+      </div>
+    </div>
+    </ModalPortal>
+  )
+}
