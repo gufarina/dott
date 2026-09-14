@@ -11,7 +11,9 @@
 .toast {
   background: var(--surface2);
   border: 1px solid var(--border2);
-  border-radius: var(--r-lg);
+  /* TASK-566 F1: era --r-lg (16px) - painel flutuante pequeno (280-340px),
+     nao e modal grande nem botao; migra pro alias semantico --r-card. */
+  border-radius: var(--r-card);
   padding: var(--space-3) var(--space-4);
   box-shadow: var(--shadow);
   display: flex;

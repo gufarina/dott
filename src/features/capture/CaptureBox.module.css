@@ -142,7 +142,13 @@
 .convoSolte {
   position: absolute; inset: var(--space-2);
   display: flex; align-items: center; justify-content: center; gap: var(--space-2);
-  border: 1.5px dashed var(--accent); border-radius: var(--r-lg);
+  /* TASK-566 F1: era --r-lg (16px) - .convoBox por fora usa --r-shell
+     (20px, linha 112) e este overlay senta inset var(--space-2) (8px).
+     Regra de aninhamento (tokens.css, "raio_interno = raio_externo -
+     espacamento"): 20 - 8 = 12 = --r-card. --r-lg (16) nao era
+     concentrico; --r-card acerta a matematica e o papel (overlay
+     bordado, nao botao). */
+  border: 1.5px dashed var(--accent); border-radius: var(--r-card);
   background: color-mix(in oklab, var(--bg) 82%, transparent);
   color: var(--accent); font-size: var(--text-xs); font-weight: 600;
   pointer-events: none;

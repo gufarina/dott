@@ -200,7 +200,9 @@
 }
 
 .card {
-  border-radius: var(--r-lg);
+  /* TASK-566 F1: era --r-lg (16px) - e literalmente um card, migra pro
+     alias semantico (--r-card, 12px). */
+  border-radius: var(--r-card);
   border: 1px solid var(--border);
   background: var(--surface);
   /* TASK-318: sombra difusa fraca separa o card no tema claro (`none` no

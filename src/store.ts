@@ -31,7 +31,9 @@ export function deriveTitle(content: string): string {
 }
 
 export type View = 'board' | 'canvas' | 'editor' | 'graph' | 'task'
-export type Theme = 'dark' | 'light'
+// TASK-566 F1 (14/09/2026): 'dark-amoled' e o token/tipo; o toggle em
+// Settings e a persistencia em loadTheme() ficam pra fase seguinte.
+export type Theme = 'dark' | 'light' | 'dark-amoled'
 export type CardType = 'NOTA' | 'CODIGO' | 'SHELL' | 'URL' | 'IDEIA' | 'AUDIO' | 'VIDEO' | 'IMAGEM' | 'ARQUIVO' | 'LINK' | 'PROMPT' | 'TAREFA' | 'CONTATO'
 
 export interface InboxCard {
