@@ -51,43 +51,40 @@ function FolderCard({ folder, quadrant, categoryId, onNavigate }: { folder: Fold
 
   return (
     <div ref={setNodeRef} className={`${s.folderCard} hoverZoom ${isOver ? s.folderOver : ''}`} onClick={onNavigate}>
-      <div className={s.cover}>
-        {folder.cover
-          ? <img src={folder.cover} className={s.coverImg} alt="" />
-          : <div className={s.coverInner} style={{ background: folder.bg }} />
-        }
-        <Button
-          className={s.renameBtn}
-          onClick={e => { e.stopPropagation(); setRenomeando(true) }}
-          title={`Renomear "${folder.name}"`}
-          aria-label={`Renomear "${folder.name}"`}
-        >
-          <Icon name="lapis" size={13} />
-        </Button>
-        <Button className={s.coverBtn} onClick={pickCover} title="Definir capa da pasta">
-          <Icon name="imagem" size={13} />
-        </Button>
-      </div>
-      <div className={s.info}>
+      {/* Capa SO existe no DOM quando ha imagem real do usuario (correcao
+          TASK-566 F3: pasta sem capa era pintada com folder.bg, um banner
+          de cor solida - o bug que o CEO reprovou). Quando existe, vira
+          fundo do proprio card via CSS (position:absolute, ver .cover). */}
+      {folder.cover && (
+        <div className={s.cover}>
+          <img src={folder.cover} className={s.coverImg} alt="" />
+        </div>
+      )}
+      <Button
+        className={s.renameBtn}
+        onClick={e => { e.stopPropagation(); setRenomeando(true) }}
+        title={`Renomear "${folder.name}"`}
+        aria-label={`Renomear "${folder.name}"`}
+      >
+        <Icon name="lapis" size={13} />
+      </Button>
+      <Button className={s.coverBtn} onClick={pickCover} title="Definir capa da pasta">
+        <Icon name="imagem" size={13} />
+      </Button>
+      <div className={s.row}>
         <div className={s.name}>{folder.name}</div>
-        <div className={s.meta}>{folder.notes} notas{hasTasks ? ` · ${folder.total} tarefas` : ''}</div>
-        {/* TASK-368: o rodape so aparece quando ha tarefa - e o UNICO dado
-            que o .meta acima nao mostra sozinho (sem tarefa, .meta ja se
-            diferencia por OMISSAO do "X tarefas"). A barra de densidade que
-            existia aqui pra pasta sem tarefa foi CORTADA: comparava a pasta
-            contra o maximo de notas do PARA inteiro, uma info que so faz
-            sentido vendo TODAS as pastas lado a lado (nao decidivel a partir
-            de UM card so), e o rotulo "acervo" nao era exclusivo do
-            quadrante Arquivo - qualquer pasta sem tarefa em Projetos/Areas/
-            Recursos tambem caia nele, rotulo errado repetido, nao so
-            redundante. */}
-        {hasTasks && (
-          <div className={s.bottom}>
-            <div className={s.progressBar}><div className={s.progressFill} style={{ transform: `scaleX(${pct / 100})`, background: quadrant.color }} /></div>
-            <div className={s.progressLabel}>{pct}% concluído · {folder.total - folder.tasks} pendentes</div>
-          </div>
-        )}
+        {/* TASK-368/566: pct so existe quando ha tarefa na pasta (dado real,
+            folder.total/tasks vem de recountFolders - nao e chute). Pasta
+            sem tarefa nenhuma NAO ganha "0%" forjado - ver nota no brief
+            (DECISAO PENDENTE se deve forcar a linha mesmo assim). */}
+        {hasTasks && <div className={s.pct} style={{ color: quadrant.color }}>{pct}%</div>}
       </div>
+      {hasTasks && (
+        <div className={s.progressBar}>
+          <div className={s.progressFill} style={{ transform: `scaleX(${pct / 100})`, background: quadrant.color }} />
+        </div>
+      )}
+      <div className={s.meta}>{folder.notes} notas{hasTasks ? ` · ${folder.total - folder.tasks} pendentes` : ''}</div>
       <Input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={onFile} />
       {/* O modal sai por portal (fora deste card), entao o clique dentro dele
           nunca sobe pro onClick de navegar do card. */}

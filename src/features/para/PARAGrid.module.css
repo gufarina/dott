@@ -159,8 +159,6 @@
    O que evita o corte de texto nao e travar a largura — e a capa com teto de
    altura + o texto com altura natural (logo abaixo). Largura pode esticar. */
 .qCards {
-  /* Altura da capa: respira com a janela, mas presa entre 80 e 104. */
-  --capa-h: clamp(80px, 8.5vh, 104px);
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
   gap: var(--space-35);
@@ -183,19 +181,21 @@
 .qCards::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
 .folderCard {
-  /* TASK-566 F3: raio um degrau abaixo (era --r-xl/20px) - a mascara
-     squircle (--sq-r) TEM que acompanhar o mesmo valor do border-radius,
-     senao a curva do paint worklet diverge da curva CSS da caixa. */
+  /* TASK-566 F3 (correcao CANVAS 14/09): raio um degrau abaixo (era
+     --r-xl/20px) - a mascara squircle (--sq-r) TEM que acompanhar o mesmo
+     valor do border-radius, senao a curva do paint worklet diverge da
+     curva CSS da caixa. */
   border-radius: var(--r-xs);
   --sq-r: var(--r-xs);
   -webkit-mask-image: paint(squircle);
   mask-image: paint(squircle);
-  /* SEM overflow:hidden aqui de proposito. Ele zerava o tamanho minimo
-     automatico do item de grade, e a linha passava a ser dimensionada por
-     baixo do conteudo real — o card ficava 176 quando precisava de 202 e
-     comia a ultima linha. Quem precisa recortar e so a CAPA (por causa da
-     imagem), e ela ja tem o proprio overflow. O canto do card vem do
-     border-radius + mascara, que arredondam sem precisar cortar. */
+  position: relative;
+  /* isolation:isolate + overflow:hidden: a capa (.cover) vira FUNDO do
+     proprio card (position:absolute, inset:0, z-index:-1), nao mais um
+     bloco irmao com altura fixa acima do texto - esse bloco (pintado com
+     folder.bg quando nao havia capa) era o bug que o CEO reprovou. */
+  isolation: isolate;
+  overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--border);
   /* TASK-318: no tema claro a separacao de card e por SOMBRA difusa
@@ -204,31 +204,16 @@
   box-shadow: var(--elevation-card, none);
   cursor: pointer;
   transition: border-color var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
-  position: relative;
   display: flex;
   flex-direction: column;
-  /* O piso AMARRA na capa: capa + o pior caso de texto (nome + contagem +
-     barra + legenda). A grade nao consegue calcular isso sozinha — ela
-     dimensiona a linha pelo min-height e ignora o conteudo real do card —
-     entao o piso precisa ja vir certo. Amarrado ao token, nao chutado: mudou a
-     capa, o piso acompanha.
-     90 = pior caso hoje (TASK-368, pasta COM tarefa - a unica que ainda tem
-     rodape): padding do .info (25) + nome com margem (20.8) + contagem (15.5)
-     + rodape numa linha so (23.5) = ~85, com folga ate 90. Era 118 antes desta
-     task: o rodape empilhava barra + legenda em ATE DUAS linhas (a legenda
-     podia quebrar); agora e uma linha so com ellipsis (nunca quebra) e a
-     variante sem tarefa (mais curta ainda, ~61) foi cortada do calculo por
-     nao ser mais o pior caso. Numeros computados a partir dos tokens
-     declarados (line-height base 1.55, reset.css) - conferir com screenshot
-     do build antes de fechar a task.
-     04/09/2026: o nome subiu de --text-xs (11,5) pra --text-lg (15,5) e a
-     contagem de --text-3xs (10) pra --text-2xs (11) a pedido do CEO, entao o
-     piso acompanha: 25 + nome com margem (24+3=27) + contagem (17) + rodape
-     (23,5) = ~92,5, com a mesma folga de antes ate 98. */
-  min-height: calc(var(--capa-h) + 98px);
+  gap: var(--space-15);
+  /* Card compacto (proto 2026-09-14-proto-ui-densa-v2): padding fixo,
+     altura vem do conteudo real (3-4 linhas) - nao mais de --capa-h +
+     piso calculado a mao. */
+  padding: var(--space-25);
   animation: var(--anim-brasa-entra);
 }
-.folderCard:hover { border-color: var(--border2); transform: translateY(-1px); }
+.folderCard:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: var(--elev-2); }
 /* Pasta "armada": e nela que o card cai se voce soltar agora.
    Tem que ser OBVIO — antes o destaque era sutil demais e o usuario nao sabia
    se ia acertar, entao soltava no lugar errado e achava que estava quebrado. */
@@ -238,11 +223,14 @@
   transform: translateY(-3px) scale(1.045);
   z-index: 3;
 }
-/* Faixa "Soltar aqui" cobrindo a capa: leitura instantanea do destino. */
-.folderOver .cover::after {
+/* Faixa "Soltar aqui" cobrindo o card inteiro: leitura instantanea do
+   destino. Antes vivia em `.cover::after` (so a capa) - pasta sem capa
+   (a maioria, apos a correcao) ficava sem aviso nenhum. */
+.folderOver::after {
   content: 'Soltar aqui';
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -254,24 +242,23 @@
   animation: var(--anim-veu-entra);
 }
 
-/* Capa com ALTURA RESOLVIDA (nao proporcao).
-   A elasticidade do card e de LARGURA — a coluna 1fr preenche o painel e nao
-   deixa vao morto. A capa fica estavel de proposito, por dois motivos:
-   1. com `aspect-ratio`, o navegador NAO consegue resolver a altura da capa na
-      hora de dimensionar a linha da grade (ele usa o minimo, nao o real), e a
-      linha sai menor que o conteudo — era exatamente isso que cortava o texto;
-   2. capa de altura igual deixa a grade alinhada, que e o que a proporcao do
-      print 1 tinha de bom.
-   Ela ainda respira com o tamanho da janela, via clamp na altura. */
+/* Capa (correcao CANVAS 14/09, TASK-566): so existe no DOM quando ha
+   folder.cover real (ver FolderCard em PARAGrid.tsx). Vira FUNDO do
+   proprio card - position:absolute inset:0 atras do texto (z-index -1,
+   o card e isolation:isolate) - com gradiente pra legibilidade. Pasta
+   sem capa nao renderiza este bloco: fica um card piano (fundo --surface,
+   sem banner). */
 .cover {
-  width: 100%;
-  height: var(--capa-h);
-  flex: 0 0 auto;
-  position: relative;
-  overflow: hidden;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
 }
-
-.coverInner { width: 100%; height: 100%; }
+.cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--surface) 0%, var(--surface) 38%, var(--scrim-strong) 62%, transparent 100%);
+}
 
 .coverImg {
   width: 100%;
@@ -316,14 +303,14 @@
 .renameBtn:hover { background: var(--scrim-strong); color: #fff; }
 .folderCard:hover .renameBtn { opacity: 1; }
 
-/* `flex: 1` aqui era o bug: com flex-basis 0 o card IGNORAVA a altura real do
-   texto e so dava a sobra (80px medidos contra 102px necessarios = 22px cortados).
-   Agora a info ocupa a altura que precisa e o card cresce junto. */
-.info {
-  padding: var(--space-3) var(--space-35) var(--space-35);
+/* Linha nome + percentual (proto 2026-09-14). O padding saiu daqui pro
+   proprio .folderCard - sem .info como wrapper intermediario, a capa
+   (position:absolute inset:0 no card) cobre exatamente a mesma area do
+   texto, atras dele. */
+.row {
   display: flex;
-  flex-direction: column;
-  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--space-15);
 }
 
 /* O NOME da pasta e o dado principal do card - era --text-xs (11,5px), o
@@ -340,32 +327,27 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: var(--space-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.pct {
+  font-size: var(--text-3xs);
+  font-weight: 700;
   flex-shrink: 0;
 }
 
 .meta {
   font-size: var(--text-2xs);
   color: var(--fg3);
-  margin-bottom: auto;
 }
 
-/* TASK-368: era bloco EMPILHADO (barra numa linha, legenda embaixo, +
-   variante gemea .densityBar/.densityLabel pra pasta sem tarefa) - duas
-   linhas de altura so pra repetir em texto o que a barra ja mostra em
-   forma. Virou UMA linha so: barra + numero lado a lado. A variante sem
-   tarefa foi cortada (ver comentario no .tsx) - por isso este bloco so
-   renderiza quando ha tarefa. */
-.bottom {
-  margin-top: var(--space-2);
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
+/* Trilho de progresso (proto 2026-09-14): linha propria entre nome e meta,
+   nao mais dentro de um `.bottom` flex ao lado do texto - o numero foi pro
+   `.pct`, ao lado do nome. So renderiza quando ha tarefa na pasta (dado
+   real; ver .tsx e o [DECISAO PENDENTE] no brief TASK-566 sobre pasta sem
+   tarefa nenhuma). */
 .progressBar {
-  flex: 1 1 auto;
-  min-width: 20px;
   height: 4px;
   border-radius: 2px;
   background: var(--surface3);
@@ -379,19 +361,6 @@
   width: 100%;
   transform-origin: left center;
   transition: transform var(--dur-slow) var(--ease-out);
-}
-/* flex-shrink (nao 0): num card no piso da largura minima (158px), o texto
-   cede espaco pra barra em vez de forcar quebra de linha - white-space
-   nowrap + ellipsis garantem UMA linha sempre, nunca as duas que
-   estouravam o piso de altura do card antes desta task. */
-.progressLabel {
-  flex: 0 1 auto;
-  min-width: 0;
-  font-size: var(--text-3xs);
-  color: var(--fg3);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .folderNew {
@@ -408,9 +377,10 @@
   color: var(--fg3);
   transition: border-color var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out);
   /* Acompanha a altura da linha (que o card real define). O min-height so vale
-     pro caso de o quadrante nao ter nenhuma pasta ainda. Mesmo numero do
-     .folderCard acima (TASK-368: 118 -> 90). */
-  min-height: calc(var(--capa-h) + 90px);
+     pro caso de o quadrante nao ter nenhuma pasta ainda. Card compacto
+     (correcao TASK-566 F3, 14/09): ~84px e o card COM tarefa (nome+pct /
+     trilho / meta), o maior dos dois casos - nao depende mais de --capa-h. */
+  min-height: 84px;
   align-self: stretch;
 }
 .folderNew:hover { border-color: var(--fg3); color: var(--fg); background: var(--surface); }
@@ -614,7 +584,6 @@
 
 /* Cards maiores que no board: aqui a categoria tem a tela inteira. */
 .catCards {
-  --capa-h: clamp(88px, 10vh, 120px);
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: var(--space-35);

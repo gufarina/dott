@@ -66,8 +66,6 @@
 
 .kbd {
   flex-shrink: 0;
-  font-family: var(--font-mono);
-  font-size: var(--text-3xs);
   color: var(--fg3);
   background: var(--surface3);
   height: var(--space-4);
