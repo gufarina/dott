@@ -32,6 +32,57 @@
   color: var(--fg);
 }
 
+/* Campo de busca (TASK-566/F2): centralizado entre a marca e os icones -
+   flanqueado por DUAS regioes de arraste (.drag e .dragFill, cada uma
+   flex: 1) que dividem igualmente o espaco livre, entao o campo (largura
+   fixa) fica no meio. O campo em si NAO e drag-region: fica fora dos dois
+   `data-tauri-drag-region`, senao o clique nele arrastaria a janela em vez
+   de abrir a busca. */
+.search {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-15);
+  width: 340px;
+  height: var(--space-8);
+  padding: 0 var(--space-25);
+  background: var(--surface2);
+  border: 1px solid var(--border-control);
+  border-radius: var(--r-btn);
+  color: var(--fg3);
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+.search:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+/* Decorativo: quem responde a clique/teclado e o .search (role="button").
+   pointer-events: none pra nunca roubar foco/cursor de texto do wrapper. */
+.searchInput {
+  flex: 1;
+  color: var(--fg3);
+  pointer-events: none;
+}
+.searchInput::placeholder { color: var(--fg3); }
+
+.kbd {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-3xs);
+  color: var(--fg3);
+  background: var(--surface3);
+  height: var(--space-4);
+  padding: 0 var(--space-15);
+  border-radius: var(--r-xs);
+  display: inline-flex;
+  align-items: center;
+}
+
+.dragFill {
+  flex: 1;
+  height: 100%;
+  cursor: default;
+}
+
 .right {
   display: flex;
   align-items: center;

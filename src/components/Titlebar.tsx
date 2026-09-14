@@ -3,7 +3,7 @@ import { useStore } from '../store'
 import { flushNoteEditor } from '../features/editor/NoteEditor'
 import { Icon } from './Icon'
 import { DottMark } from './DottMark'
-import { Button } from './ui'
+import { Button, Input } from './ui'
 import s from './Titlebar.module.css'
 
 /** Caminho UNICO de fechamento da janela principal - usado pelo botao desta
@@ -35,10 +35,32 @@ export function Titlebar({ onSearch, onSettings }: { onSearch?: () => void; onSe
         <span className={s.logo}>Dott</span>
         <span className={s.version} title={`Dott v${__APP_VERSION__}`}>v{__APP_VERSION__}</span>
       </div>
+      <div
+        className={s.search}
+        role="button"
+        tabIndex={0}
+        onClick={onSearch}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSearch?.() } }}
+        aria-label="Buscar (Ctrl+K)"
+        title="Buscar (Ctrl+K)"
+      >
+        <Icon name="busca" size={14} />
+        <Input
+          variante="bare"
+          className={s.searchInput}
+          placeholder="Buscar notas, pastas, cards..."
+          value=""
+          readOnly
+          tabIndex={-1}
+          aria-hidden="true"
+          onChange={() => {}}
+        />
+        <span className={s.kbd}>Ctrl+K</span>
+      </div>
+
+      <div className={s.dragFill} data-tauri-drag-region />
+
       <div className={s.right}>
-        <Button className={s.btn} onClick={onSearch} aria-label="Buscar (Ctrl+K)" title="Buscar (Ctrl+K)">
-          <Icon name="busca" size={14} />
-        </Button>
         <Button className={`${s.btn} ${view === 'graph' ? s.btnActive : ''}`} onClick={toggleGraph} aria-label="Constelação" title="Constelação (grafo de conexões)">
           <Icon name="grafo" size={14} />
         </Button>
