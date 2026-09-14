@@ -155,12 +155,12 @@
 .q-archives .qAdd { color: var(--q-ar); background: rgba(102,102,128,.12); }
 .q-archives .qAdd:hover { background: rgba(102,102,128,.22); }
 
-/* A coluna PREENCHE a largura (1fr), entao nao sobra vao morto na direita.
-   O que evita o corte de texto nao e travar a largura — e a capa com teto de
-   altura + o texto com altura natural (logo abaixo). Largura pode esticar. */
+/* TASK-566 F3 (correcao 2, CEO reprovou o empilhamento): grade fixa de 2
+   colunas, igual ao prototipo (.quad-grid) - nao usa mais auto-fill, largura
+   do quadrante nao decide a contagem de colunas. */
 .qCards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: var(--space-35);
   /* TASK-354: laterais/base eram 16px - o .folderCard (--r-xl, 20px,
      mascara squircle) do quadrante inferior encosta direto no --r-shell
