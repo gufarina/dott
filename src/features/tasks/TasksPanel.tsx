@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useStore, type Quadrant, type TaskItem } from '../../store'
 import { Icon } from '../../components/Icon'
 import { Button, Input } from '../../components/ui'
 import { TabBar } from '../../components/TabBar'
+import { Modal, ModalField, ModalInput, ModalFooter, ModalButton } from '../../components/Modal'
 import { useScrollEdgeFade } from '../../hooks/useScrollEdgeFade'
 import s from './TasksPanel.module.css'
 
@@ -28,6 +29,19 @@ export function contarAbertas(allTasks: TaskItem[]): number {
 /** Contador da aba "PRAZO": das abertas, quantas tem prazo marcado. */
 export function contarAbertasComPrazo(allTasks: TaskItem[]): number {
   return allTasks.filter(t => !t.done && t.deadline).length
+}
+
+/** F4 (TASK-566): indicador "N concluidas" do trilho colapsado (56px) -
+ *  conta TODA a lista, independente de aba/filtro (o trilho nao tem aba). */
+export function contarConcluidas(allTasks: TaskItem[]): number {
+  return allTasks.filter(t => t.done).length
+}
+
+/** F4 (TASK-566): a bolinha+numero por grupo, no trilho - mesma semantica do
+ *  badge geral (contarAbertas): quantas tarefas ABERTAS aquela secao tem,
+ *  nunca o total (concluida nao pesa na contagem que convida a agir). */
+export function contarAbertasPorSecao(secao: SecaoTarefas): number {
+  return secao.items.filter(t => !t.done).length
 }
 
 export interface SecaoTarefas {
@@ -82,6 +96,8 @@ export function TasksPanel() {
   const setTaskDeadline = useStore(st => st.setTaskDeadline)
   const setView = useStore(st => st.setView)
   const para = useStore(st => st.para)
+  const collapsed = useStore(st => st.tasksCollapsed)
+  const toggleTasksCollapsed = useStore(st => st.toggleTasksCollapsed)
 
   /** Nome da pasta de uma tarefa, pra abrir a tarefa com o caminho certo. */
   const pastaDe = (folderId?: string) => {
@@ -104,10 +120,38 @@ export function TasksPanel() {
   const [draft, setDraft] = useState('')
   const [editing, setEditing] = useState<string | null>(null)
   const [editText, setEditText] = useState('')
+  /** F4: "+" do trilho abre este modal SEM expandir o painel (o trilho tem
+   *  56px, nao cabe linha de edicao inline). Some pra "Sem pasta" - mesma
+   *  regra de addTask(texto) sem folderId que o resto do arquivo ja usa. */
+  const [novaTarefaAberta, setNovaTarefaAberta] = useState(false)
+  const [novaTarefaTexto, setNovaTarefaTexto] = useState('')
 
   const pending = contarAbertas(tasks)
   const comPrazo = contarAbertasComPrazo(tasks)
+  const concluidas = contarConcluidas(tasks)
   const secoes = agruparPorPasta(tasks, para)
+
+  /** F4: atalho "]" alterna expandido/colapsado - de QUALQUER lugar da
+   *  janela (a mesma tecla enquanto o foco esta num campo de texto real
+   *  digitaria o caractere, entao o atalho fica mudo nesse caso: mesmo
+   *  cuidado do Ctrl+K em App.tsx, so que "]" e imprimivel e o Ctrl+K nao). */
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== ']' || e.metaKey || e.ctrlKey || e.altKey) return
+      const alvo = document.activeElement as HTMLElement | null
+      const digitando = !!alvo && (alvo.tagName === 'INPUT' || alvo.tagName === 'TEXTAREA' || alvo.isContentEditable)
+      if (digitando) return
+      toggleTasksCollapsed()
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [toggleTasksCollapsed])
+
+  const abrirNovaTarefa = () => { setNovaTarefaTexto(''); setNovaTarefaAberta(true) }
+  const submitNovaTarefa = () => {
+    if (novaTarefaTexto.trim()) addTask(novaTarefaTexto)
+    setNovaTarefaAberta(false)
+  }
 
   /** Fade de rolagem na base (TASK-349). */
   const listRef = useRef<HTMLDivElement>(null)
@@ -123,15 +167,33 @@ export function TasksPanel() {
 
   return (
     <>
-      <TabBar
-        indicatorColor="var(--dott-gradient-linear)"
-        activeKey={filterPrazo ? 'prazo' : 'afazer'}
-        onChange={key => { if (key !== (filterPrazo ? 'prazo' : 'afazer')) toggleFilter('prazo') }}
-        items={[
-          { key: 'prazo', label: 'PRAZO', icon: 'prazo', count: comPrazo, title: 'Só as tarefas com prazo' },
-          { key: 'afazer', label: 'A Fazer', icon: 'grupo', count: pending, title: 'Tarefas em aberto' },
-        ]}
-      />
+    {/* F4 (TASK-566): data-state, nunca classe .active - lei de estado do
+        Dott. `.open`/`.rail` sao as DUAS camadas que crossfadeiam em
+        opacity/scale (TasksPanel.module.css) enquanto o CONTAINER (este
+        div) so muda de tamanho por fora, em App.module.css
+        (.panelRight[data-state]), sem transicao nenhuma - a largura e
+        layout, nunca anima. */}
+    <div className={s.panel} data-state={collapsed ? 'collapsed' : 'expanded'}>
+      <div className={s.open}>
+        <TabBar
+          indicatorColor="var(--dott-gradient-linear)"
+          activeKey={filterPrazo ? 'prazo' : 'afazer'}
+          onChange={key => { if (key !== (filterPrazo ? 'prazo' : 'afazer')) toggleFilter('prazo') }}
+          items={[
+            { key: 'prazo', label: 'PRAZO', icon: 'prazo', count: comPrazo, title: 'Só as tarefas com prazo' },
+            { key: 'afazer', label: 'A Fazer', icon: 'grupo', count: pending, title: 'Tarefas em aberto' },
+          ]}
+        />
+        <Button
+          variante="icon"
+          pequeno
+          className={s.toggleOpen}
+          onClick={toggleTasksCollapsed}
+          title="Recolher tarefas (])"
+          aria-label="Recolher tarefas"
+        >
+          <Icon name="voltar" size={13} className={s.chevronRight} />
+        </Button>
 
       <div
         ref={listRef}
@@ -268,6 +330,70 @@ export function TasksPanel() {
           </>
         )}
       </div>
+      </div>
+
+      {/* F4: trilho de 56px - a "mesa" reduzida ao essencial: alternar,
+          quantas tarefas pendentes no total, um ponto por Pasta com
+          tarefa aberta, criar sem abrir, quantas ja foram concluidas. */}
+      <div className={s.rail}>
+        <Button
+          variante="icon"
+          pequeno
+          className={s.toggleRail}
+          onClick={toggleTasksCollapsed}
+          title="Expandir tarefas (])"
+          aria-label="Expandir tarefas"
+        >
+          <Icon name="voltar" size={13} />
+        </Button>
+
+        <div className={s.railIconWrap}>
+          <Icon name="grupo" size={16} />
+          {pending > 0 && <span className={s.railBadge}>{pending}</span>}
+        </div>
+
+        {secoes.length > 0 && <span className={s.railDivider} />}
+
+        {secoes.map(secao => (
+          <span key={secao.chave} className={s.railGroup} title={`${secao.nome}: ${contarAbertasPorSecao(secao)} aberta(s)`}>
+            <span className={s.railDot} style={{ background: secao.cor }} />
+            <span className={s.railCount}>{contarAbertasPorSecao(secao)}</span>
+          </span>
+        ))}
+
+        <Button
+          variante="icon"
+          pequeno
+          className={s.railAdd}
+          onClick={abrirNovaTarefa}
+          title="Nova tarefa"
+          aria-label="Nova tarefa"
+        >
+          <Icon name="mais" size={13} />
+        </Button>
+
+        {concluidas > 0 && (
+          <span className={s.railDone} title={`${concluidas} concluída(s)`}>{concluidas}</span>
+        )}
+      </div>
+    </div>
+
+    {novaTarefaAberta && (
+      <Modal title="Nova tarefa" onClose={() => setNovaTarefaAberta(false)}>
+        <ModalField label="O que precisa ser feito?">
+          <ModalInput
+            autoFocus
+            value={novaTarefaTexto}
+            onChange={e => setNovaTarefaTexto(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') submitNovaTarefa() }}
+          />
+        </ModalField>
+        <ModalFooter>
+          <ModalButton onClick={() => setNovaTarefaAberta(false)}>Cancelar</ModalButton>
+          <ModalButton variant="primary" onClick={submitNovaTarefa}>Adicionar</ModalButton>
+        </ModalFooter>
+      </Modal>
+    )}
     </>
   )
 }

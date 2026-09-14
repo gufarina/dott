@@ -7,7 +7,7 @@
  * extraidas de TasksPanel.tsx, sem store, sem DOM (mesmo padrao de
  * SearchModal.test.tsx). */
 import { describe, expect, it } from 'vitest'
-import { visibleTasks, contarAbertas, contarAbertasComPrazo, agruparPorPasta } from './TasksPanel'
+import { visibleTasks, contarAbertas, contarAbertasComPrazo, agruparPorPasta, contarConcluidas, contarAbertasPorSecao, type SecaoTarefas } from './TasksPanel'
 import type { Quadrant, TaskItem } from '../../store'
 
 const tarefa = (over: Partial<TaskItem>): TaskItem => ({
@@ -55,6 +55,32 @@ describe('contadores das abas (mesma forma do INBOX/TAGS)', () => {
   it('lista vazia: os dois contadores dao zero', () => {
     expect(contarAbertas([])).toBe(0)
     expect(contarAbertasComPrazo([])).toBe(0)
+  })
+})
+
+/** F4 (TASK-566): contadores do trilho colapsado (56px) - "18 concluidas" no
+ *  rodape e a bolinha+numero por grupo. Extraidos pra TDD, mesmo padrao das
+ *  funcoes acima: puro, sem store, sem DOM. */
+describe('contarConcluidas (indicador "N concluidas" do trilho)', () => {
+  it('conta as tarefas concluidas de TODA a lista, independente de filtro', () => {
+    expect(contarConcluidas(lista)).toBe(2)
+  })
+  it('lista vazia da zero', () => {
+    expect(contarConcluidas([])).toBe(0)
+  })
+})
+
+describe('contarAbertasPorSecao (bolinha+numero por grupo do trilho)', () => {
+  it('conta so as abertas da propria secao, nunca mistura com outra', () => {
+    const secao: SecaoTarefas = {
+      chave: 'habitos', nome: 'Hábitos', cor: '#4a8fd9', folderId: 'habitos',
+      items: [tarefa({ id: 't1', done: false }), tarefa({ id: 't2', done: true }), tarefa({ id: 't3', done: false })],
+    }
+    expect(contarAbertasPorSecao(secao)).toBe(2)
+  })
+  it('secao so com concluidas da zero', () => {
+    const secao: SecaoTarefas = { chave: 'x', nome: 'X', cor: '#000', items: [tarefa({ id: 't1', done: true })] }
+    expect(contarAbertasPorSecao(secao)).toBe(0)
   })
 })
 

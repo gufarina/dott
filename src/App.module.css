@@ -50,6 +50,17 @@
   overflow: hidden;
   /* sem transicao: propriedade de layout nao se anima */
 }
+/* F4 (TASK-566): trilho colapsado do TasksPanel. 56px medido no protótipo
+   (2026-09-14-proto-ui-densa-v2.html) - NAO ha token de espaço/largura pra
+   280 nem 56 (--space-16 é 64px, o mais próximo, mas nenhum dos dois É uma
+   distância de espaçamento; são larguras de shell, mesma categoria de
+   "280px" logo acima, que também já é literal, não token). Troca INSTANTÂNEA
+   de largura (sem transition, mesma doutrina do .panelRight base) - quem
+   cruza em opacity/scale é só o CONTEÚDO, dentro de TasksPanel.module.css
+   (.open/.rail). */
+.panelRight[data-state='collapsed'] {
+  width: 56px;
+}
 
 /* TASK-346: coluna central = dois paineis EMPILHADOS (o painel do PARA em
    cima, a caixa de captura embaixo), cada um com a propria moldura -

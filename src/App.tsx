@@ -36,6 +36,11 @@ export default function App() {
   const view = useStore(st => st.view)
   const folder = useStore(st => st.folder)
   const booting = useStore(st => st.booting)
+  // F4 (TASK-566): 280px<->56px eh troca de LARGURA (layout), nunca anima -
+  // so o CONTEUDO de dentro do TasksPanel cruza em opacity/scale. Ver
+  // App.module.css .panelRight[data-state] (sem transition) e
+  // TasksPanel.module.css .open/.rail (o crossfade).
+  const tasksCollapsed = useStore(st => st.tasksCollapsed)
   const [searchOpen, setSearchOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [dragging, setDragging] = useState<InboxCard | null>(null)
@@ -316,7 +321,7 @@ export default function App() {
             )}
           </div>
 
-          <div className={s.panelRight}>
+          <div className={s.panelRight} data-state={tasksCollapsed ? 'collapsed' : 'expanded'}>
             <TasksPanel />
           </div>
         </div>

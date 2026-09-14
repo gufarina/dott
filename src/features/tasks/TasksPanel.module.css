@@ -7,6 +7,117 @@
    TabBar virou variant="standalone" (o padrao), que ja traz seu proprio
    44px/borda/padding - chrome duplicado a menos. */
 
+/* ── F4 (TASK-566): trilho colapsavel ─────────────────────────────────────
+   `.panel` e o unico elemento que carrega `data-state` (lei do Dott: estado
+   por atributo data- ou ARIA, nunca classe tipo `.active`). `.open` (TabBar + lista,
+   como sempre existiu) e `.rail` (o trilho de 56px) sao DUAS camadas
+   absolutas empilhadas dentro dele, sempre as duas no DOM - a troca visivel
+   e so crossfade em opacity/scale (nunca width/height: a doutrina de
+   movimento do app so permite transform/opacity/filter/box-shadow). A
+   largura de VERDADE (280px<->56px) muda em App.module.css
+   (`.panelRight[data-state]`), sem transition nenhuma - layout troca
+   instantaneo, so o conteudo cruza.
+   `visibility` com delay (nunca durante o fade, so DEPOIS dele) tira a
+   camada escondida do foco por Tab e da arvore de acessibilidade - sem
+   isso, Tab alcancaria os dois botoes de alternar (um por camada) mesmo
+   com o painel colapsado. */
+.panel {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.open, .rail {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+.open {
+  opacity: 1;
+  transform: scale(1);
+  visibility: visible;
+  transition: opacity var(--dur-exit) var(--ease-out), transform var(--dur-exit) var(--ease-out), visibility 0s linear 0s;
+}
+.rail {
+  opacity: 0;
+  transform: scale(.98);
+  visibility: hidden;
+  pointer-events: none;
+  align-items: center;
+  padding: var(--space-2) 0;
+  gap: var(--space-2);
+  transition: opacity var(--dur-exit) var(--ease-out), transform var(--dur-exit) var(--ease-out), visibility 0s linear var(--dur-exit);
+}
+.panel[data-state='collapsed'] .open {
+  opacity: 0;
+  transform: scale(.98);
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--dur-medium) var(--ease-out), transform var(--dur-medium) var(--ease-out), visibility 0s linear var(--dur-medium);
+}
+.panel[data-state='collapsed'] .rail {
+  opacity: 1;
+  transform: scale(1);
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity var(--dur-medium) var(--ease-out), transform var(--dur-medium) var(--ease-out), visibility 0s linear 0s;
+}
+
+/* Botao de alternar - um em cada camada (posicoes MUITO diferentes: dentro
+   da faixa do TabBar vs. topo da coluna vertical), nunca o mesmo elemento
+   reposicionado. `.chevronRight` espelha o mesmo glifo de "voltar" (<) pra
+   virar ">" sem desenhar um icone novo - giro ESTATICO, nao anima. */
+.toggleOpen {
+  position: absolute;
+  top: var(--space-25);
+  right: var(--space-25);
+  z-index: var(--z-raised);
+}
+.chevronRight { transform: rotate(180deg); }
+.toggleRail { flex-shrink: 0; }
+
+.railIconWrap { position: relative; color: var(--fg2); display: flex; }
+.railBadge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: var(--surface3);
+  color: var(--accent);
+  font-size: var(--text-3xs);
+  font-weight: 700;
+  line-height: 1;
+  border-radius: var(--r-full);
+  padding: 0 var(--space-15);
+  height: 18px;
+  min-width: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.railDivider { width: 24px; height: 1px; background: var(--border); flex-shrink: 0; }
+.railGroup { display: flex; flex-direction: column; align-items: center; gap: var(--space-15); flex-shrink: 0; }
+.railDot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.railCount { font-size: var(--text-3xs); color: var(--fg3); }
+.railAdd { margin-top: auto; flex-shrink: 0; }
+.railDone {
+  margin-bottom: var(--space-2);
+  flex-shrink: 0;
+  background: var(--surface3);
+  color: var(--fg3);
+  font-size: var(--text-3xs);
+  font-weight: 700;
+  line-height: 1;
+  border-radius: var(--r-full);
+  padding: 0 var(--space-15);
+  height: 18px;
+  min-width: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .list {
   flex: 1;
   overflow-y: auto;
@@ -62,19 +173,18 @@
   align-items: flex-start;
   gap: var(--space-25);
   padding: var(--space-2);
-  /* TASK-357: era --r-sm (9px) - .panelRight (App.module.css) era --r-shell
-     18px; .list (acima) tem padding:10px - teto da formula era 8px
-     (DESIGN.md secao 22/7). --r-sm ficava 1px acima do teto - fechado pra
-     --r-xs (7px) naquela rodada.
-     TASK-369: --r-shell subiu pra 20px - novo teto = 20-10 = 10px. --r-sm
-     (9px) volta a caber (1px de folga) - restaura o raio original em vez
-     de deixar o valor artificialmente pequeno de quando o teto era mais
-     apertado. */
-  border-radius: var(--r-sm);
-  transition: background var(--dur-micro) var(--ease-out);
+  /* F4 (TASK-566): item vira card - receita medida no protótipo
+     (`.tp-item`, 2026-09-14-proto-ui-densa-v2.html): --surface2 de fundo,
+     --border de moldura, --r-xs (7px, nao mais o --r-sm de TASK-357/369 -
+     esta e a receita de CARD que o resto do painel ja usa depois de F1-F3,
+     nao uma conta nova de raio aninhado). */
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xs);
+  transition: background var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
   animation: var(--anim-brasa-entra);
 }
-.item:hover { background: var(--surface2); }
+.item:hover { background: var(--surface3); border-color: var(--border2); }
 
 /* TASK-322 (28/08/2026, CEO: "o item de to-do nao tem alinhamento nenhum,
    o texto ta muito mais perto da parte superior"). Causa medida: a

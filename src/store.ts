@@ -132,6 +132,9 @@ interface AppState {
   theme: Theme
   filterPrazo: boolean
   showCompleted: boolean
+  /** F4 (TASK-566): trilho de tarefas colapsado (56px) ou aberto (280px) -
+   *  global, persistido, nunca por pasta. */
+  tasksCollapsed: boolean
   leftTab: 'inbox' | 'tags'
   para: Record<string, Quadrant>
   inbox: InboxCard[]
@@ -148,6 +151,9 @@ interface AppState {
   setView: (view: View, data?: { category?: string; folder?: string; note?: string; task?: string }) => void
   navigateBack: () => void
   toggleTheme: () => void
+  /** F4 (TASK-566): alterna o trilho de tarefas (atalho "]" e o botao do
+   *  proprio painel) - persiste em localStorage, global. */
+  toggleTasksCollapsed: () => void
   toggleFilter: (type?: 'prazo' | 'completed') => void
   setLeftTab: (tab: 'inbox' | 'tags') => void
   captureCard: (content: string) => void
@@ -331,6 +337,13 @@ function loadTheme(): Theme {
   } catch { return 'dark' }
 }
 
+/** F4 (TASK-566): estado GLOBAL do trilho de tarefas (nao por pasta - decisao
+ *  ja fechada no plano). Mesma receita de loadTheme(): chave propria em
+ *  localStorage, lida uma vez no boot da store. */
+function loadTasksCollapsed(): boolean {
+  try { return localStorage.getItem('dott:tasks-collapsed') === '1' } catch { return false }
+}
+
 /** Recalcula urgent/over de uma tarefa a partir do prazo (YYYY-MM-DD). */
 function withDeadlineFlags(t: TaskItem): TaskItem {
   if (!t.deadline) return { ...t, urgent: false, over: false }
@@ -384,6 +397,7 @@ export const useStore = create<AppState>((set, get) => ({
   theme: loadTheme(),
   filterPrazo: false,
   showCompleted: false,
+  tasksCollapsed: loadTasksCollapsed(),
   leftTab: 'inbox',
   para: INITIAL_PARA,
   inbox: INITIAL_INBOX,
@@ -443,6 +457,12 @@ export const useStore = create<AppState>((set, get) => ({
     document.documentElement.dataset.theme = next
     try { localStorage.setItem('dott:theme', next) } catch {}
     return { theme: next }
+  }),
+
+  toggleTasksCollapsed: () => set(s => {
+    const next = !s.tasksCollapsed
+    try { localStorage.setItem('dott:tasks-collapsed', next ? '1' : '0') } catch {}
+    return { tasksCollapsed: next }
   }),
 
   toggleFilter: (type = 'prazo') => set(s =>
