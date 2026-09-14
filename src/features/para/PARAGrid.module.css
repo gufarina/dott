@@ -177,6 +177,21 @@
   flex: 1;
   align-content: start;
 }
+
+/* Composer expandido (CaptureBox.module.css .convoBox:hover/:focus-within,
+   152px) cresce por cima do board - .centralColumn (App.module.css) tem
+   overflow:visible de proposito pra isso. App.tsx grava data-composer-
+   expanded no .centralColumn a partir do MESMO estado que expande a
+   capsula (CaptureBox reporta via onExpandChange, nao uma segunda fonte da
+   verdade). :global() porque o atributo cruza arquivo - .centralColumn e
+   .convoBox sao classes de OUTROS CSS Modules (cada um hasheia o proprio
+   nome; :global(.centralColumn) aqui so bateria com um className literal
+   "centralColumn" no DOM, que nao existe - so o ATRIBUTO atravessa sem
+   hash). So o quadrante de baixo precisa da folga extra pra nao ficar
+   atras da capsula. */
+:global([data-composer-expanded='true']) .qCards {
+  padding-bottom: var(--composer-gap-expandido);
+}
 .qCards::-webkit-scrollbar { width: 3px; }
 .qCards::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 

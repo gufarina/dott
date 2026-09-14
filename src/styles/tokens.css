@@ -425,6 +425,13 @@
   --space-10: 40px;
   --space-16: 64px;
 
+  /* Composer de captura expandido mede 152px de altura + 18px de margem =
+     170px, TASK-566 F5 - espaco que o grid do PARA precisa reservar por
+     baixo pra nao ficar atras da capsula quando ela abre. Nao cabe na
+     escala de --space-* acima (nao e ritmo de UI, e a medida de OUTRO
+     componente + folga), por isso token proprio. */
+  --composer-gap-expandido: 170px;
+
   /* ── Escada de empilhamento (z-index) — TASK-461, 07/09/2026 ─────────────
      Nao existia. Cada tela cravava o proprio numero e o resultado era uma
      escada real, so que anonima e cheia de numero arbitrario: 120, 130, 140,
