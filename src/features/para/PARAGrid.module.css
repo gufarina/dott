@@ -155,12 +155,22 @@
 .q-archives .qAdd { color: var(--q-ar); background: rgba(102,102,128,.12); }
 .q-archives .qAdd:hover { background: rgba(102,102,128,.22); }
 
-/* TASK-566 F3 (correcao 2, CEO reprovou o empilhamento): grade fixa de 2
-   colunas, igual ao prototipo (.quad-grid) - nao usa mais auto-fill, largura
-   do quadrante nao decide a contagem de colunas. */
+/* TASK-566 F4 (bug real do CEO, 14/09: nome truncado/sobreposto em janela
+   estreita): a F3 anterior travou 2 colunas fixas mesmo quando o quadrante
+   nao tinha espaco (medido: 1000px de janela = minWidth real do app, em
+   tauri.conf.json - sobra so ~130px de largura util por quadrante depois
+   dos paineis laterais fixos de 280/320px e do padding do .qCards). Volta
+   pro auto-fit, mas com piso medido no .folderCard (nao adivinhado): 130px
+   cobre padding do card (--space-25 = 10px x2 = 20px) + .pct (--text-3xs
+   bold, ~26px pro pior caso "100%") + gap do .row (--space-15 = 6px) +
+   ~78px de sobra pro .name (--text-lg = 15,5px bold), o bastante pra um
+   nome curto legivel antes da reticencia em vez do "M..." de 1 letra. Em
+   1000px de janela o quadrante cai sozinho pra 1 coluna (card no piso,
+   ~130px); em 1440px (default do app) sobra espaco pra 2 colunas de
+   ~173px, igual ao que ja funcionava bem em 1280px. */
 .qCards {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: var(--space-35);
   /* TASK-354: laterais/base eram 16px - o .folderCard (--r-xl, 20px,
      mascara squircle) do quadrante inferior encosta direto no --r-shell
