@@ -67,7 +67,7 @@ export function Titlebar({ onSearch, onSettings }: { onSearch?: () => void; onSe
         <Button className={s.btn} onClick={onSettings} aria-label="Configurações" title="Configurações">
           <Icon name="ajustes" size={14} />
         </Button>
-        <Button className={s.btn} onClick={toggleTheme} aria-label="Trocar tema" title={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}>
+        <Button className={s.btn} onClick={toggleTheme} aria-label="Trocar tema" title={theme === 'light' ? 'Mudar para tema escuro' : 'Mudar para tema claro'}>
           <Icon name="tema" size={14} />
         </Button>
 

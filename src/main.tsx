@@ -33,9 +33,12 @@ if (paintWorklet) {
 }
 
 // Aplica o tema salvo antes do render (evita flash).
+// TASK-566 F2: 'dark-amoled' precisa sobreviver aqui tambem - sem isso o
+// boot pintava sempre 'dark' e so corrigia pro AMOLED depois do primeiro
+// toggle/setTheme (mesma colisao que loadTheme() em store.ts ja tinha).
 try {
   const saved = localStorage.getItem("dott:theme");
-  document.documentElement.dataset.theme = saved === "light" ? "light" : "dark";
+  document.documentElement.dataset.theme = saved === "light" || saved === "dark-amoled" ? saved : "dark";
 } catch {
   document.documentElement.dataset.theme = "dark";
 }

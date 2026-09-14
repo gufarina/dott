@@ -9,11 +9,22 @@
 :root[data-theme="dark"],
 :root[data-theme="dark-amoled"] {
   --bg: #0d0d10;
-  --surface: #141417;
-  --surface2: #1a1a1e;
-  --surface3: #222228;
-  --border: #26262c;
-  --border2: #2e2e36;
+  /* TASK-566 F2 (14/09/2026): CEO pediu "mais escuro" tambem no dark comum,
+     nao so no AMOLED. Reducao medida de ~10% de luminancia (fator 0.9 por
+     canal) em surface/surface2/surface3/border/border2 - mantem a MESMA
+     ordem de elevacao e a distancia perceptivel do AMOLED (que sobrescreve
+     estes 5 tokens de novo, mais abaixo, com valores proprios ja mais
+     extremos). --desk NAO mudou: ja e quase-preto (#060609) e escurecer
+     mais o aproximaria demais do #000000 do AMOLED, apagando a diferenca
+     entre os dois temas no "chao". Contraste (formula WCAG) so MELHORA
+     quando o fundo escurece e o texto continua claro - o caso mais
+     apertado que ja existia (--fg3 sobre --surface3) subiu de 4,83:1 pra
+     5,01:1, folga maior que o piso de 4,5:1, nunca menor. */
+  --surface: #121215;
+  --surface2: #17171b;
+  --surface3: #1f1f24;
+  --border: #222228;
+  --border2: #292931;
   --fg: #e8e8ec;
   --fg2: #aeaec2;
   --fg3: #8c8ca6;

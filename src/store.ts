@@ -31,8 +31,9 @@ export function deriveTitle(content: string): string {
 }
 
 export type View = 'board' | 'canvas' | 'editor' | 'graph' | 'task'
-// TASK-566 F1 (14/09/2026): 'dark-amoled' e o token/tipo; o toggle em
-// Settings e a persistencia em loadTheme() ficam pra fase seguinte.
+// TASK-566 F2 (14/09/2026): 'dark-amoled' ligado - selecao explicita em
+// Settings (setTheme), persistida na mesma chave 'dott:theme'. O toggle
+// rapido da Titlebar continua binario claro/escuro (ver toggleTheme).
 export type Theme = 'dark' | 'light' | 'dark-amoled'
 export type CardType = 'NOTA' | 'CODIGO' | 'SHELL' | 'URL' | 'IDEIA' | 'AUDIO' | 'VIDEO' | 'IMAGEM' | 'ARQUIVO' | 'LINK' | 'PROMPT' | 'TAREFA' | 'CONTATO'
 
@@ -150,7 +151,12 @@ interface AppState {
 
   setView: (view: View, data?: { category?: string; folder?: string; note?: string; task?: string }) => void
   navigateBack: () => void
+  /** Toggle rapido da Titlebar: so claro/escuro (nunca AMOLED - escolha
+   *  deliberada, so em Settings via setTheme). Qualquer tema escuro vira
+   *  claro num clique; do claro volta pro escuro comum. */
   toggleTheme: () => void
+  /** F2 (TASK-566): escolha explicita entre os 3 temas (Settings). */
+  setTheme: (theme: Theme) => void
   /** F4 (TASK-566): alterna o trilho de tarefas (atalho "]" e o botao do
    *  proprio painel) - persiste em localStorage, global. */
   toggleTasksCollapsed: () => void
@@ -333,7 +339,7 @@ const SEED_GRAPH = graphOf(SEED_NOTES_WITH_LEGACY)
 function loadTheme(): Theme {
   try {
     const t = localStorage.getItem('dott:theme')
-    return t === 'light' ? 'light' : 'dark'
+    return t === 'light' || t === 'dark-amoled' ? t : 'dark'
   } catch { return 'dark' }
 }
 
@@ -453,10 +459,16 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   toggleTheme: () => set(s => {
-    const next = s.theme === 'dark' ? 'light' : 'dark'
+    const next: Theme = s.theme === 'light' ? 'dark' : 'light'
     document.documentElement.dataset.theme = next
     try { localStorage.setItem('dott:theme', next) } catch {}
     return { theme: next }
+  }),
+
+  setTheme: (theme: Theme) => set(() => {
+    document.documentElement.dataset.theme = theme
+    try { localStorage.setItem('dott:theme', theme) } catch {}
+    return { theme }
   }),
 
   toggleTasksCollapsed: () => set(s => {

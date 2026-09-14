@@ -12,7 +12,7 @@ import s from './Settings.module.css'
 
 export function Settings({ open, onClose }: { open: boolean; onClose: () => void }) {
   const theme = useStore(st => st.theme)
-  const toggleTheme = useStore(st => st.toggleTheme)
+  const setTheme = useStore(st => st.setTheme)
   const previewExampleCleanup = useStore(st => st.previewExampleCleanup)
   const clearExamples = useStore(st => st.clearExamples)
   const [dataPath, setDataPath] = useState('')
@@ -85,10 +85,18 @@ export function Settings({ open, onClose }: { open: boolean; onClose: () => void
           <section className={s.section}>
             <div className={s.sectionTitle}>Aparência</div>
             <div className={s.row}>
-              <div><div className={s.label}>Tema</div><div className={s.hint}>Claro ou escuro</div></div>
-              <Button className={s.btn} onClick={toggleTheme}>
-                <Icon name="tema" size={13} /> {theme === 'dark' ? 'Escuro' : 'Claro'}
-              </Button>
+              <div><div className={s.label}>Tema</div><div className={s.hint}>Claro, escuro ou AMOLED (preto puro, economiza bateria em tela OLED)</div></div>
+              <div style={{ display: 'flex', gap: 'var(--space-1)' }}>
+                <Button className={`${s.btn} ${theme === 'light' ? s.primary : ''}`} onClick={() => setTheme('light')}>
+                  <Icon name="tema" size={13} /> Claro
+                </Button>
+                <Button className={`${s.btn} ${theme === 'dark' ? s.primary : ''}`} onClick={() => setTheme('dark')}>
+                  <Icon name="tema" size={13} /> Escuro
+                </Button>
+                <Button className={`${s.btn} ${theme === 'dark-amoled' ? s.primary : ''}`} onClick={() => setTheme('dark-amoled')}>
+                  <Icon name="tema" size={13} /> AMOLED
+                </Button>
+              </div>
             </div>
           </section>
 
