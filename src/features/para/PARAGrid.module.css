@@ -183,8 +183,11 @@
 .qCards::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
 .folderCard {
-  border-radius: var(--r-xl);
-  --sq-r: var(--r-xl);
+  /* TASK-566 F3: raio um degrau abaixo (era --r-xl/20px) - a mascara
+     squircle (--sq-r) TEM que acompanhar o mesmo valor do border-radius,
+     senao a curva do paint worklet diverge da curva CSS da caixa. */
+  border-radius: var(--r-xs);
+  --sq-r: var(--r-xs);
   -webkit-mask-image: paint(squircle);
   mask-image: paint(squircle);
   /* SEM overflow:hidden aqui de proposito. Ele zerava o tamanho minimo
@@ -286,7 +289,11 @@
   height: 24px;
   border-radius: var(--r-md);
   border: none;
-  background: rgba(0,0,0,.55);
+  /* TASK-566 F3: era rgba(0,0,0,.55/.8) cravado - o veu que protege o
+     icone sobre a capa (imagem do usuario) e exatamente o que --scrim/
+     --scrim-strong ja modelam (tokens.css: "sobreposicao comum" e "apaga
+     mais forte"), so nao estava tokenizado. */
+  background: var(--scrim);
   color: rgba(255,255,255,.85);
   display: flex;
   align-items: center;
@@ -297,7 +304,7 @@
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
-.coverBtn:hover { background: rgba(0,0,0,.8); color: #fff; }
+.coverBtn:hover { background: var(--scrim-strong); color: #fff; }
 .folderCard:hover .coverBtn { opacity: 1; }
 
 /* Renomear a pasta — irmao do botao de capa, mesma gramatica, a esquerda
@@ -306,7 +313,7 @@
   composes: coverBtn;
   right: 34px;
 }
-.renameBtn:hover { background: rgba(0,0,0,.8); color: #fff; }
+.renameBtn:hover { background: var(--scrim-strong); color: #fff; }
 .folderCard:hover .renameBtn { opacity: 1; }
 
 /* `flex: 1` aqui era o bug: com flex-basis 0 o card IGNORAVA a altura real do
@@ -388,7 +395,9 @@
 }
 
 .folderNew {
-  border-radius: var(--r-xl);
+  /* TASK-566 F3: acompanha o mesmo degrau do .folderCard (mesma fileira,
+     mesma familia de card - raio precisa casar). */
+  border-radius: var(--r-xs);
   border: 1.5px dashed var(--border2);
   cursor: pointer;
   display: flex;
