@@ -104,6 +104,7 @@ export function CaptureBox() {
 
         <Textarea
           ref={taRef}
+          variante="conjunto"
           className={s.convoInput}
           placeholder={isFull ? 'Inbox cheio. Processe alguns cards' : 'O que está na sua mente?'}
           rows={1}

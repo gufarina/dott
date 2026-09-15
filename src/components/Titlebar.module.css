@@ -48,7 +48,11 @@
   gap: var(--space-15);
   width: 340px;
   height: var(--space-8);
-  padding: 0 var(--space-25);
+  /* TASK-566 (reprovado pelo CEO: "sem padding nenhum, texto colado sem
+     respiro"): era --space-25 (10px), so a busca respirava diferente de
+     qualquer outro campo do app. Alinhado com a receita canonica de campo
+     (Field.module.css .base, --space-3/12px) - consistencia, nao gosto. */
+  padding: 0 var(--space-3);
   background: var(--surface2);
   border: 1px solid var(--border-control);
   border-radius: var(--r-btn);
@@ -65,8 +69,14 @@
   color: var(--fg);
   background: transparent;
   border: none;
-  outline: none;
 }
+/* CAUSA RAIZ do bug de foco duplo (TASK-566): faltava aqui a copia local que
+   .convoInput (CaptureBox) e .addInput (TasksPanel) ja tinham - so um
+   `outline: none` na base, sem `:focus-visible`, empata em especificidade
+   com o `:focus-visible` global (reset.css) e perde a ordem do bundle: dois
+   aneis acesos, o de dentro colado no texto. Consertado na fonte: `Input
+   variante="conjunto"` (Titlebar.tsx) resolve pelo componente canonico -
+   ver contrato em Field.module.css. Nenhuma copia local aqui de novo. */
 .searchInput::placeholder { color: var(--fg3); }
 
 /* Painel de resultados (TASK-566): ancorado logo abaixo do campo, largura

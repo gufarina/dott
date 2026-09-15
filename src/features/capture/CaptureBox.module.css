@@ -213,14 +213,16 @@
 .convoInput::-webkit-scrollbar { width: 3px; }
 .convoInput::-webkit-scrollbar-thumb { background: var(--border2); }
 /* TASK-347 (CEO: "bizarrice visual" - dois aneis laranja acesos ao mesmo
-   tempo, um no painel e outro no campo). Mesma causa raiz da TASK-308/339:
-   o `outline: none` normal do bloco acima perde pra `:focus-visible`
-   (reset.css) quando as duas regras tem a MESMA especificidade e a ordem de
-   carga no bundle favorece o reset - o campo acendia o proprio anel global
-   em cima do anel do .convoBox (acima). O campo nao duplica o anel do
-   conjunto - quem avisa foco e o CONJUNTO (.convoBox:focus-within, acima),
-   um sinal so. Ver regra "um foco por conjunto" no DESIGN.md, secao Input. */
-.convoInput:focus-visible { outline: none; }
+   tempo, um no painel e outro no campo). Mesma causa raiz da TASK-308/339 e
+   do bug de foco duplo da TASK-566 (`.searchInput`, Titlebar): o `outline:
+   none` local empata em especificidade com o `:focus-visible` global
+   (reset.css) e a ordem do bundle decide - o campo podia acender o proprio
+   anel global em cima do anel do .convoBox (acima). O campo nao duplica o
+   anel do conjunto - quem avisa foco e o CONJUNTO (.convoBox:focus-within,
+   acima), um sinal so ("um foco por conjunto", DESIGN.md secao Input).
+   Consertado na fonte (TASK-566): `Textarea variante="conjunto"`
+   (CaptureBox.tsx) resolve pelo componente canonico - ver contrato em
+   Field.module.css. Copia local removida daqui, nao recriar. */
 
 /* Palpite de destino — copia fiel de .capturePalpite (InboxPanel.module.css),
    so renomeado; mesma mecanica, nao redesenhada. */

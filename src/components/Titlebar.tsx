@@ -130,7 +130,7 @@ export function Titlebar({
         <Icon name="busca" size={14} />
         <Input
           ref={inputRef}
-          variante="bare"
+          variante="conjunto"
           className={s.searchInput}
           placeholder="Buscar notas, pastas, cards..."
           value={query}

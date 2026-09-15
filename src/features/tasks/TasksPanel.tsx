@@ -296,6 +296,7 @@ export function TasksPanel() {
                     <div className={s.addRow}>
                       <span className={s.addMais} aria-hidden="true"><Icon name="mais" size={13} /></span>
                       <Input
+                        variante="conjunto"
                         className={s.addInput}
                         placeholder="O que precisa ser feito?"
                         value={draft}

@@ -503,8 +503,10 @@
 .addInput::placeholder { color: var(--fg3); }
 /* O campo nao duplica o anel do conjunto - mesma correcao da TASK-308
    (.captureInput:focus-visible, InboxPanel.module.css): a LINHA (.addRow
-   acima) ja avisa foco sozinha. */
-.addInput:focus-visible { outline: none; }
+   acima) ja avisa foco sozinha. Consertado na fonte (TASK-566): `Input
+   variante="conjunto"` (TasksPanel.tsx) resolve pelo componente canonico -
+   ver contrato em Field.module.css. Copia local removida daqui, nao
+   recriar (era a mesma causa raiz do bug de foco duplo em .searchInput). */
 /* Dica de tecla discreta - o mesmo padrao que a captura rapida ja usa
    (.captureDica, InboxPanel.module.css): texto simples, sem borda, sem
    fundo, sem raio proprio. Era um chip cinza com borda e raio cravados -

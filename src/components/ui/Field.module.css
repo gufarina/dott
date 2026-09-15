@@ -38,3 +38,42 @@
 .bare {
   font-family: inherit;
 }
+
+/* CONTRATO DE FOCO (TASK-566, 15/09/2026). Guia de qual variante usar - nunca
+   mais escrever `outline: none` na mao num consumidor:
+
+   - `campo` (pele oficial): o campo TEM pele propria e desenha o proprio anel
+     (receita completa em `.base:focus-visible` acima). Use quando o campo
+     esta solto, sem um wrapper que ja avisa foco por ele.
+   - `bare` (geometria propria, anel proprio): o campo tem CSS local com pele
+     propria e sua PROPRIA regra `<classe-local>:focus-visible`, igual
+     `.base` faz aqui (ex.: `.tagInput`, `.dataInput`, `.select` em
+     NoteEditor/TaskDetail). `bare` so entrega os invariantes (font-family,
+     aria-label), nunca mexe no anel - quem decide o anel e o CSS do
+     consumidor.
+   - `conjunto` (o WRAPPER avisa foco pelo campo): o campo mora dentro de um
+     container que pinta o proprio anel via `:focus-within` (ex.: `.search`
+     em Titlebar, `.convoBox` em CaptureBox, `.addRow` em TasksPanel). Regra
+     "um foco por conjunto" (DESIGN.md, secao Input): so UM anel acende, o do
+     conjunto - o campo em si nunca pinta um segundo. Antes disso exigia
+     copiar `<classe-local>:focus-visible { outline: none }` em cada
+     consumidor (a causa de TASK-347/308/339 e do bug de TASK-566: a copia
+     faltou em `.searchInput`, empatando em especificidade com o
+     `:focus-visible` global de reset.css e perdendo a ordem do bundle - dois
+     aneis acesos, um colado no texto). Agora e so `variante="conjunto"`.
+
+   Nenhuma das tres variantes exige `outline: none` escrito a mao no
+   consumidor - CAMPO/BARE fecham a propria receita, CONJUNTO fecha aqui. */
+.conjunto {
+  font-family: inherit;
+}
+/* Especificidade 0-2-0 (classe + pseudo-classe) bate SEMPRE o `:focus-visible`
+   global de reset.css (0-1-0, so pseudo-classe) - vitoria deterministica, sem
+   depender de ordem de carga no bundle. Por isso NAO e seguro fazer `.bare`
+   sozinho matar o anel: `bare` tambem cobre `.tagInput`/`.dataInput`/`.select`,
+   que TEM anel proprio na mesma especificidade 0-2-0 - aplicar aqui empataria
+   com a regra deles de novo (o mesmo bug, so que causado por nos). `conjunto`
+   e variante separada, so para quem optou por ela. */
+.conjunto:focus-visible {
+  outline: none;
+}
