@@ -14,7 +14,6 @@ import { getCurrentWindow } from '@tauri-apps/api/window'
 import { Titlebar, closeMainWindow } from './components/Titlebar'
 import { BootLoader } from './components/BootLoader'
 import { ToastArea } from './components/Toast'
-import { SearchModal } from './components/SearchModal'
 import { Settings } from './components/Settings'
 import { Breadcrumb } from './components/Breadcrumb'
 import { InboxPanel } from './features/inbox/InboxPanel'
@@ -41,7 +40,7 @@ export default function App() {
   // App.module.css .panelRight[data-state] (sem transition) e
   // TasksPanel.module.css .open/.rail (o crossfade).
   const tasksCollapsed = useStore(st => st.tasksCollapsed)
-  const [searchOpen, setSearchOpen] = useState(false)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [dragging, setDragging] = useState<InboxCard | null>(null)
   /** Nome da pasta que vai receber o card se voce soltar agora (feedback do ima). */
@@ -213,9 +212,11 @@ export default function App() {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      // TASK-566: Ctrl+K deixou de abrir modal - a busca ja vive na
+      // titlebar, entao o atalho so leva o foco ate o campo real.
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
-        setSearchOpen(v => !v)
+        searchInputRef.current?.focus()
       }
     }
     window.addEventListener('keydown', handler)
@@ -267,7 +268,7 @@ export default function App() {
       onDrop={onWindowDrop}
     >
       {dropActive && <div className={s.dropOverlay}><span className={s.dropOverlayLabel}>Solte a imagem aqui</span></div>}
-      <Titlebar onSearch={() => setSearchOpen(true)} onSettings={() => setSettingsOpen(true)} />
+      <Titlebar searchInputRef={searchInputRef} onSettings={() => setSettingsOpen(true)} />
 
       <DndContext
         sensors={sensors}
@@ -341,7 +342,6 @@ export default function App() {
       </DndContext>
 
       <ToastArea />
-      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
       <Settings open={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
       <AnimatePresence>

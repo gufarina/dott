@@ -12,10 +12,18 @@
   flex: 1;
   display: flex;
   gap: var(--space-25);
-  /* Sem padding em cima: essa folga agora pertence a barra de titulo, que
-     precisa dela pra centralizar marca e icones na faixa real do topo.
-     Ver o comentario em Titlebar.module.css. */
-  padding: 0 var(--space-25) var(--space-25);
+  /* AJUSTE 15/09/2026 (CEO: "na top ta sem respiro, precisa de uma
+     distancia do topo do shell ate o topo"). Medido: o padding-top era 0
+     desde a TASK-566/F2 - a folga tinha migrado inteira pra dentro da
+     barra de titulo (44px, ver Titlebar.module.css), na aposta de que a
+     propria altura da barra ja leria como respiro. Na captura do CEO os
+     paineis nascem colados na borda de baixo da barra - a aposta nao
+     segurou. Volta o padding-top igual aos outros 3 lados (--space-25,
+     mesmo grid de vaos que ja une .body/.centralColumn) em vez de um
+     valor so-do-topo inventado: restaura o respiro sem quebrar a
+     consistencia dos 4 lados nem a centralizacao de marca/icones dentro
+     da barra (que continua intacta, ver Titlebar.module.css). */
+  padding: var(--space-25);
   overflow: hidden;
   background: var(--desk);
 }

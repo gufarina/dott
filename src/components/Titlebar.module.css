@@ -32,13 +32,16 @@
   color: var(--fg);
 }
 
-/* Campo de busca (TASK-566/F2): centralizado entre a marca e os icones -
+/* Campo de busca (TASK-566): centralizado entre a marca e os icones -
    flanqueado por DUAS regioes de arraste (.drag e .dragFill, cada uma
    flex: 1) que dividem igualmente o espaco livre, entao o campo (largura
    fixa) fica no meio. O campo em si NAO e drag-region: fica fora dos dois
    `data-tauri-drag-region`, senao o clique nele arrastaria a janela em vez
-   de abrir a busca. */
+   de deixar digitar. `position: relative` ancora o painel de resultados
+   (.panel) logo abaixo, sem overlay nem modal centralizado (o campo E a
+   busca - forma segue funcao). */
 .search {
+  position: relative;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -51,21 +54,78 @@
   border-radius: var(--r-btn);
   color: var(--fg3);
   font-size: var(--text-xs);
-  cursor: pointer;
+  cursor: text;
 }
-.search:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.search:focus-within { outline: 2px solid var(--focus); outline-offset: 1px; }
 
-/* Decorativo: quem responde a clique/teclado e o .search (role="button").
-   pointer-events: none pra nunca roubar foco/cursor de texto do wrapper. */
+/* Campo real (TASK-566): digitou, busca. Nada de readOnly/pointer-events:none -
+   isso era o "enfeite" que o CEO reprovou. */
 .searchInput {
   flex: 1;
-  color: var(--fg3);
-  pointer-events: none;
+  color: var(--fg);
   background: transparent;
   border: none;
   outline: none;
 }
 .searchInput::placeholder { color: var(--fg3); }
+
+/* Painel de resultados (TASK-566): ancorado logo abaixo do campo, largura
+   do campo, altura maxima com rolagem interna (fade de saida reusado de
+   useScrollEdgeFade). Doutrina de movimento: so transform/opacity,
+   --ease-out, duracao curta de dropdown (--dur-base) - nunca o tratamento
+   de gaveta. `prefers-reduced-motion` ja e coberto pelo reset global
+   (tokens.css) que encurta toda transition-duration. */
+.panel {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  width: 100%;
+  max-height: 360px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow);
+  z-index: 1;
+  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+}
+.panelEnter { opacity: 1; transform: translateY(0); }
+.panelExit { opacity: 0; transform: translateY(-4px); }
+
+.groupLabel {
+  padding: var(--space-25) var(--space-3) var(--space-15);
+  font-size: var(--text-3xs); font-weight: 600; color: var(--fg3);
+  letter-spacing: .06em; text-transform: uppercase;
+}
+
+.result {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-25) var(--space-3); cursor: pointer;
+  transition: background var(--dur-micro) var(--ease-out);
+}
+.result:hover, .result[aria-selected="true"] { background: var(--surface2); }
+
+.icon {
+  width: 26px; height: 26px; border-radius: var(--r-sm);
+  background: var(--surface3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--text-sm); flex-shrink: 0;
+}
+
+.info { flex: 1; min-width: 0; }
+.name {
+  font-size: var(--text-xs); font-weight: 500; color: var(--fg); margin-bottom: var(--space-05);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.meta { font-size: var(--text-2xs); color: var(--fg3); }
+
+.badge {
+  font-size: var(--text-3xs); padding: var(--space-05) var(--space-2); border-radius: var(--r-xs);
+  background: var(--surface3); color: var(--fg2);
+  flex-shrink: 0; font-weight: 600;
+}
+
+.empty { padding: var(--space-5) var(--space-4); text-align: center; color: var(--fg2); font-size: var(--text-xs); }
 
 .kbd {
   flex-shrink: 0;

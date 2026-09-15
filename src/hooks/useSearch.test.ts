@@ -1,9 +1,11 @@
-/** SearchModal.test.tsx — TDD (Kent Beck: teste antes do codigo).
+/** useSearch.test.ts — TDD (Kent Beck: teste antes do codigo).
  * Cobre so a decisao pura de `editorTargetFor` (TASK-333 item 2: clicar numa
  * Nota sem folderId/categoria resolvivel no Ctrl+K fechava o modal e nao
- * fazia nada, em silencio). Sem store, sem DOM. */
+ * fazia nada, em silencio). Sem store, sem DOM.
+ * Movido de SearchModal.test.tsx (TASK-566): a busca deixou de ser modal e
+ * virou hook de dados (useSearch.ts) consumido pela Titlebar. */
 import { describe, expect, it } from 'vitest'
-import { editorTargetFor } from './SearchModal'
+import { editorTargetFor } from './useSearch'
 
 describe('editorTargetFor (Ctrl+K -> abrir Nota)', () => {
   it('categoria e pasta resolvidas: navega com os tres campos (Voltar funciona)', () => {
