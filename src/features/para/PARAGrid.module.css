@@ -117,7 +117,11 @@
 .qTitle {
   /* 17px, nao 15: o nome da pasta dentro do quadrante virou 15,5px
      (04/09/2026) e empatava com o cabecalho da propria gaveta - o titulo da
-     secao tem que continuar por cima na hierarquia. */
+     secao tem que continuar por cima na hierarquia.
+     EXCECAO CONSCIENTE (TASK-566, 15/09): sem token que sirva sem quebrar
+     essa hierarquia - --text-lg (15,5px) colide com o cabecalho de pasta,
+     --text-xl (20px) estufa demais. Valor proprio intencional, nao mexer
+     sem medir a colisao de novo. */
   font-size: 17px;
   font-weight: 700;
   color: var(--fg);
@@ -143,6 +147,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* EXCECAO CONSCIENTE (TASK-566, 15/09): sem token que sirva sem quebrar
+     a hierarquia do quadrante - --text-lg (15,5px) colide com o cabecalho
+     de pasta, --text-xl (20px) estufa demais. Valor proprio intencional,
+     nao mexer sem medir a colisao de novo. */
   font-size: 18px;
   font-weight: 300;
   flex-shrink: 0;
@@ -246,6 +254,10 @@
    se ia acertar, entao soltava no lugar errado e achava que estava quebrado. */
 .folderOver {
   border-color: var(--accent) !important;
+  /* 3a camada e o mesmo preto-50% de --shadow/--elev-4, mas com
+     offset/blur proprios (14px/34px vs 4px/24px do token): camada de halo
+     TUNADA pra geometria do destaque de "soltar aqui" (TASK-566, 15/09),
+     nao um token de sombra generico - nao trocar pelo token sem medir. */
   box-shadow: 0 0 0 3px var(--accent), 0 0 0 9px var(--accent-s), 0 14px 34px rgba(0,0,0,.5);
   transform: translateY(-3px) scale(1.045);
   z-index: 3;
@@ -414,6 +426,8 @@
    tarefa nenhuma). */
 .progressBar {
   height: 4px;
+  /* 2px = metade da altura (4px): proporcao correta pra ponta arredondada
+     de trilho fino, sem token na escala pra esse porte (TASK-566, 15/09). */
   border-radius: 2px;
   background: var(--surface3);
   overflow: hidden;
@@ -696,7 +710,10 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-35);
-  padding: 72px var(--space-5);
+  /* var(--space-16) = 64px, degrau mais proximo da escala pro 72px cravado
+     anterior (TASK-566, 15/09): 8px a menos de respiro vertical num
+     empty-state que nao muda nada perceptivel. */
+  padding: var(--space-16) var(--space-5);
   text-align: center;
 }
 .catEmpty p { font-size: var(--text-sm); color: var(--fg2); }
