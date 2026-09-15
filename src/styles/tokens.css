@@ -394,6 +394,26 @@
   --space-10: 40px;
   --space-16: 64px;
 
+  /* ── Altura do card de pasta (.folderCard/.folderNew) — TASK-566, 15/09 ──
+     Fonte UNICA da altura: antes vivia calculada em DOIS lugares (implicita
+     no .folderCard, pelo conteudo; explicita no calc() do .folderNew) e ja
+     desalinhou 2 vezes quando alguem mexeu em fonte/gap sem atualizar a
+     outra ponta. Os fatores 1.55 (line-box de .name e .meta) vieram de
+     MEDICAO REAL no navegador (getBoundingClientRect), nao de estimativa de
+     CSS. Este token e a fonte UNICA da altura do card de pasta: quem mudar
+     fonte/gap do card (--text-sm, --text-2xs, --space-25, --space-05) NAO
+     precisa mexer aqui, a formula acompanha sozinha. Quem mudar a
+     ESTRUTURA do card (adicionar/remover uma linha, ex. mais uma meta)
+     precisa atualizar a formula abaixo. */
+  --folder-card-h: calc(
+    (var(--space-25) * 2) +      /* padding topo+base do card */
+    (var(--text-sm) * 1.55) +    /* line-box real do nome (medido no navegador) */
+    (var(--space-05) * 2) +      /* 2 gaps internos (row/progressBar/meta) */
+    4px +                        /* altura do trilho de progresso */
+    (var(--text-2xs) * 1.55) +   /* line-box real da contagem de notas */
+    2px                          /* borda 1px de cada lado */
+  );
+
   /* ── Escada de empilhamento (z-index) — TASK-461, 07/09/2026 ─────────────
      Nao existia. Cada tela cravava o proprio numero e o resultado era uma
      escada real, so que anonima e cheia de numero arbitrario: 120, 130, 140,

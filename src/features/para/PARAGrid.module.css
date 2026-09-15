@@ -187,6 +187,12 @@
 .qCards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  /* TASK-566 (16/09): sem isto, as linhas implicitas do grid (auto por
+     padrao) comprimiam junto quando o .qCards (flex:1; min-height:0)
+     tinha pouca altura sobrando - min-content trava cada linha no tamanho
+     natural do conteudo, entao falta de espaco vira SCROLL (ja tem
+     overflow-y:auto abaixo), nunca card espremido. */
+  grid-auto-rows: min-content;
   gap: var(--space-35);
   /* TASK-354: laterais/base eram 16px - o .folderCard (--r-xl, 20px,
      mascara squircle) do quadrante inferior encosta direto no --r-shell
@@ -246,6 +252,14 @@
      altura vem do conteudo real (3-4 linhas) - nao mais de --capa-h +
      piso calculado a mao. */
   padding: var(--space-25);
+  /* TASK-566 (16/09): sem piso, o .qCards (flex:1; min-height:0) podia
+     encolher o card abaixo do que o conteudo pede - com overflow:hidden
+     aqui, o min-height:auto automatico do card vira 0 (a protecao nativa
+     contra encolher so vale com overflow visivel), entao o .meta ("0
+     notas") ficava escondido dentro de uma caixa espremida. --folder-card-h
+     e a MESMA formula que .folderNew usa (tokens.css) - as duas alturas
+     nunca mais divergem. */
+  min-height: var(--folder-card-h);
   animation: var(--anim-brasa-entra);
 }
 .folderCard:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: var(--elev-2); }
@@ -460,9 +474,10 @@
      TASK-566 (15/09): 84px era um numero MEDIDO A MAO contra o card antes da
      reducao de fonte/espaco (--text-lg->--text-sm no .name, --space-15->
      --space-1 no gap) - ninguem atualizou o numero quando o card ficou mais
-     baixo, e os dois desalinharam. Correcao: min-height vira formula, somando
-     a MESMA receita de tokens que .folderCard usa no caso "com tarefa"
-     (o mais alto dos dois - row+pct / trilho / meta), pra nunca mais destoar
+     baixo, e os dois desalinharam. Correcao (16/09): a formula saiu daqui e
+     virou o token --folder-card-h em tokens.css - a MESMA receita de tokens
+     que .folderCard usa no caso "com tarefa" (o mais alto dos dois - row+pct
+     / trilho / meta), agora por REFERENCIA, nao por copia, pra nunca mais destoar
      quando um token de fonte/espaco mudar.
      TASK-566 (15/09, RUSTLINE): 1.3 era estimativa a olho pro multiplicador
      de altura de linha - RUSTLINE MEDIU de verdade no navegador (getBoundingClientRect/
@@ -472,29 +487,10 @@
      .folderCard (2px, 1px de cada lado, border:1px solid var(--border)) - o
      .folderNew tem border propria (1.5px dashed) mas o calc nunca contabilizava
      essa diferenca real medida contra o card. Card COM tarefa (o caso mais
-     alto, mesma logica original) mede 70.42px de verdade; a formula abaixo bate
-     nisso. A casa continua sem token de line-height por tamanho - 1.55 e
-     estimativa, so que agora CALIBRADA contra o navegador real, nao chutada.
-     Quem mexer de novo: confira 19.375px (.row) e 17.05px (.meta) no navegador
-     antes de trocar o fator.
-       - var(--space-25) * 2   -> padding topo+base do .folderCard (10px x2)
-       - var(--text-sm)  * 1.55 -> altura da linha do .name (12.5px de fonte;
-         medido: 19.375px reais)
-       - var(--space-05) * 2   -> os 2 gaps do .folderCard entre os 3 filhos
-         (row / progressBar / meta), 2px cada (TASK-566, 15/09: gap desceu de
-         --space-1 pra --space-05 - atualizado aqui pra nao desalinhar de novo)
-       - 4px                    -> altura fixa do .progressBar
-       - var(--text-2xs) * 1.55 -> altura da linha do .meta (11px de fonte;
-         medido: 17.046875px reais)
-       - 2px                    -> borda do .folderCard (1px solid de cada lado) */
-  min-height: calc(
-    (var(--space-25) * 2) +
-    (var(--text-sm) * 1.55) +
-    (var(--space-05) * 2) +
-    4px +
-    (var(--text-2xs) * 1.55) +
-    2px
-  );
+     alto, mesma logica original) mede 70.42px de verdade; o token bate nisso.
+     A formula em si (fatores 1.55, gaps, borda) vive comentada em
+     tokens.css junto de --folder-card-h - nao duplicar aqui de novo. */
+  min-height: var(--folder-card-h);
   align-self: stretch;
 }
 .folderNew:hover { border-color: var(--fg3); color: var(--fg); background: var(--surface); }
