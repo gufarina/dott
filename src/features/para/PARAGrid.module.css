@@ -241,7 +241,10 @@
   transition: border-color var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
   display: flex;
   flex-direction: column;
-  gap: var(--space-15);
+  /* Era --space-15 (6px) - o CEO leu como espaco grande demais entre a
+     linha do nome e a linha de "X notas" em captura real (14/09/2026,
+     TASK-566). Desce pra --space-1 (4px). */
+  gap: var(--space-1);
   /* Card compacto (proto 2026-09-14-proto-ui-densa-v2): padding fixo,
      altura vem do conteudo real (3-4 linhas) - nao mais de --capa-h +
      piso calculado a mao. */
@@ -350,12 +353,13 @@
 
 /* O NOME da pasta e o dado principal do card - era --text-xs (11,5px), o
    mesmo degrau de rotulo secundario, e o CEO leu como "pequeno e ridiculo"
-   (04/09/2026). Sobe pra --text-lg (15,5px): fica claramente maior que a
-   contagem de notas embaixo e abaixo do titulo da categoria (20px na tela
-   de categoria, 17px no cabecalho do quadrante do board) - hierarquia
-   preservada nos dois lugares onde o card aparece. */
+   (04/09/2026). Subiu pra --text-lg (15,5px) - mas no card compacto o CEO
+   leu como grande demais de novo, em captura real (14/09/2026, TASK-566).
+   Desce pra --text-sm (12,5px): dois degraus abaixo de --text-lg, ainda
+   bem maior que .meta (--text-2xs, 11px), entao o nome continua lendo
+   como dado principal sem dominar o card. */
 .name {
-  font-size: var(--text-lg);
+  font-size: var(--text-sm);
   font-weight: 700;
   letter-spacing: -.01em;
   color: var(--fg);
