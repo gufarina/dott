@@ -33,6 +33,29 @@ function FolderCard({ folder, quadrant, categoryId, onNavigate }: { folder: Fold
   const setFolderCover = useStore(st => st.setFolderCover)
   const fileRef = useRef<HTMLInputElement>(null)
   const [renomeando, setRenomeando] = useState(false)
+  const nameRef = useRef<HTMLDivElement>(null)
+  const [marquee, setMarquee] = useState<{ dist: number; dur: number } | null>(null)
+
+  // TASK-566: letreiro so quando o nome REALMENTE nao cabe (scrollWidth >
+  // clientWidth) - CSS puro nao sabe distinguir "cortado de verdade" de
+  // "ellipsis de seguranca". Remedido a cada hover no card (nome pode mudar
+  // apos renomear), nunca no mount.
+  const checkOverflow = () => {
+    const el = nameRef.current
+    if (!el) return
+    const dist = el.scrollWidth - el.clientWidth
+    if (dist > 1) {
+      // Duracao proporcional ao quanto falta revelar - letreiro curto lido
+      // rapido soa robotico, um nome bem maior que o card precisa de mais
+      // tempo. 2 a 4s, clampado (ver [DECISAO PENDENTE] no brief: nao ha
+      // token de duracao da casa nessa faixa - tokens.css para em --dur-slow/
+      // --dur-long, 300ms, "teto da UI").
+      const dur = Math.min(4, Math.max(2, dist / 60 + 1.4))
+      setMarquee({ dist, dur })
+    } else if (marquee) {
+      setMarquee(null)
+    }
+  }
 
   const pickCover = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -50,7 +73,7 @@ function FolderCard({ folder, quadrant, categoryId, onNavigate }: { folder: Fold
   }
 
   return (
-    <div ref={setNodeRef} className={`${s.folderCard} hoverZoom ${isOver ? s.folderOver : ''}`} onClick={onNavigate}>
+    <div ref={setNodeRef} className={`${s.folderCard} hoverZoom ${isOver ? s.folderOver : ''}`} onClick={onNavigate} onMouseEnter={checkOverflow}>
       {/* Capa SO existe no DOM quando ha imagem real do usuario (correcao
           TASK-566 F3: pasta sem capa era pintada com folder.bg, um banner
           de cor solida - o bug que o CEO reprovou). Quando existe, vira
@@ -72,7 +95,14 @@ function FolderCard({ folder, quadrant, categoryId, onNavigate }: { folder: Fold
         <Icon name="imagem" size={13} />
       </Button>
       <div className={s.row}>
-        <div className={s.name}>{folder.name}</div>
+        <div className={s.name} ref={nameRef} data-marquee={marquee ? 'true' : undefined}>
+          <span
+            className={s.nameText}
+            style={marquee ? { '--marquee-dist': `${marquee.dist}px`, '--marquee-dur': `${marquee.dur}s` } as React.CSSProperties : undefined}
+          >
+            {folder.name}
+          </span>
+        </div>
         {/* TASK-368/566: pct so existe quando ha tarefa na pasta (dado real,
             folder.total/tasks vem de recountFolders - nao e chute). Pasta
             sem tarefa nenhuma NAO ganha "0%" forjado - ver nota no brief

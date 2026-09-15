@@ -31,6 +31,23 @@
    tamanho e instantanea por design, so box-shadow/background animam. Isso
    e o mesmo remedio que o F4 usou no trilho: nunca por `width`/`height`
    numa `transition`. */
+/* TASK-566 bug (CEO, captura real no WebView2): vidro expandido saia
+   "lavado"/ghosting - o backdrop-filter nao compunha direito no
+   Chromium/driver do WebView2 do CEO (custo de GPU documentado no F5
+   original, secao de riscos) e sobrava so o tingimento de --glass-bg-strong
+   (8% de alfa) por cima do texto dos folder-cards de tras, quase sem
+   embacar. Dois consertos defensivos: (1) tirou `saturate(1.6)` do
+   backdrop-filter - enfeite, nao parte do efeito vidro, e empilhado com
+   blur() custa mais composicao. (2) `isolation: isolate` abaixo - os
+   folder-cards de tras (.folderCard, PARAGrid.module.css) ja sao
+   isolation:isolate + mask-image:paint(squircle) (CSS Paint Worklet) +
+   transform no hover; cada um vira seu proprio contexto de empilhamento/
+   camada de composicao, e e conhecido o Chromium falhar em amostrar
+   corretamente o backdrop atras de camadas assim quando o driver de GPU
+   nao compoe tudo no mesmo passo - a MESMA ausencia de contexto proprio no
+   .convoBox pode ter contribuido pro backdrop-filter ler um snapshot
+   errado/parado (o "ghosting"). Isolar o .convoBox tambem da o proprio
+   contexto, pratica recomendada quando backdrop-filter mostra artefato. */
 .convoBox {
   position: absolute;
   left: 50%;
@@ -40,13 +57,29 @@
   height: var(--space-10);
   border-radius: var(--r-full);
   overflow: hidden;
+  isolation: isolate;
   background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.6);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   box-shadow: inset 0 1px 0 var(--glass-highlight), var(--elev-4);
   transition: box-shadow var(--dur-exit) var(--ease-out), background var(--dur-exit) var(--ease-out);
 }
+/* [DECISAO PENDENTE, TASK-566] Fallback de robustez cogitado: se o blur
+   falhar no WebView2, sobra so a tinta - subir a opacidade de
+   --glass-bg-strong (hoje 8%, ver tokens.css linhas 141/335) deixaria o
+   painel mais "solido" mesmo sem blur. NAO apliquei numero novo: medi
+   (formula WCAG) e dobrar pra ~16% PIORA o contraste do texto, nos dois
+   temas, em vez de melhorar - no escuro o tingimento e BRANCO sobre texto
+   CLARO (--fg3), entao mais alfa aproxima o fundo do texto (contraste caiu
+   de ~4,37:1 pra ~3,36:1 nas minhas contas); no claro o tingimento e
+   ESCURO sobre texto ESCURO, mesmo efeito ao contrario (~4,20:1 pra
+   ~3,54:1). So --glass-bg (6/5%) e --glass-bg-strong (8%) existem hoje;
+   nao ha um terceiro degrau "mais forte" no tokens.css. Subir a opacidade
+   como rede de seguranca exige OU trocar o texto pra --fg2 (mais folga,
+   ja e a recomendacao do proprio tokens.css pro par glass-bg-strong +
+   --surface2) OU medir de novo com a formula acima antes de cravar
+   qualquer valor - decisao do CEO/CANVAS, nao resolvida aqui. */
 .convoBox:hover,
 .convoBox:focus-within {
   width: calc(100% - var(--space-3) * 2);

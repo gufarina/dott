@@ -370,6 +370,43 @@
   min-width: 0;
 }
 
+/* TASK-566: letreiro do nome cortado. O JS mede overflow real (scrollWidth
+   > clientWidth) e so entao grava data-marquee + as duas custom properties
+   (--marquee-dist, --marquee-dur) no proprio span - CSS puro nao sabe
+   distinguir ellipsis "de seguranca" de corte de verdade. Gatilho e o CARD
+   inteiro (.folderCard:hover), nao o texto, pra nao exigir mira cirurgica. */
+.nameText {
+  display: inline-block;
+}
+
+.folderCard:hover .name[data-marquee] {
+  /* revela o fim do nome deslizando por baixo - a reticencia estatica por
+     cima do texto em movimento ficaria feia, entao some so durante o hover */
+  text-overflow: clip;
+}
+
+.folderCard:hover .name[data-marquee] .nameText {
+  animation: paraNomeMarquee var(--marquee-dur, 3s) var(--ease-inout) infinite;
+}
+
+@keyframes paraNomeMarquee {
+  0%, 10%   { transform: translateX(0); }
+  45%, 65%  { transform: translateX(calc(-1 * var(--marquee-dist, 0px))); }
+  95%, 100% { transform: translateX(0); }
+}
+
+/* Marquee e movimento continuo - exatamente o que esta preferencia existe
+   pra evitar. Sob reduced-motion, o nome so mostra cortado com reticencias
+   (comportamento atual, sem letreiro). */
+@media (prefers-reduced-motion: reduce) {
+  .folderCard:hover .name[data-marquee] {
+    text-overflow: ellipsis;
+  }
+  .folderCard:hover .name[data-marquee] .nameText {
+    animation: none;
+  }
+}
+
 .pct {
   font-size: var(--text-3xs);
   font-weight: 700;
