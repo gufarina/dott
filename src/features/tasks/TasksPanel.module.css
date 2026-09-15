@@ -34,15 +34,23 @@
   display: flex;
   flex-direction: column;
 }
+/* TASK-566 (CEO reprovou: "bruto, sem easing, sem charme"). Troca de
+   scale(.98) (2%, imperceptivel - o olho lia "apagou", nao "moveu") por
+   translateX: o painel recolhe pra DIREITA, entao as duas camadas se
+   deslocam na mesma direcao (consistencia espacial). Timing assimetrico
+   nos dois sentidos: quem SAI usa --dur-exit (120ms) sem atraso; quem
+   ENTRA usa --dur-base (170ms) com delay --dur-exit (so comeca depois que
+   a outra limpou - sem isso as duas ficam meio-visiveis ao mesmo tempo e
+   borra o meio da transicao). Total ~290ms, dentro do teto de 300ms. */
 .open {
   opacity: 1;
-  transform: scale(1);
+  transform: translateX(0);
   visibility: visible;
-  transition: opacity var(--dur-exit) var(--ease-out), transform var(--dur-exit) var(--ease-out), visibility 0s linear 0s;
+  transition: opacity var(--dur-base) var(--ease-out) var(--dur-exit), transform var(--dur-base) var(--ease-out) var(--dur-exit), visibility 0s linear 0s;
 }
 .rail {
   opacity: 0;
-  transform: scale(.98);
+  transform: translateX(-20%);
   visibility: hidden;
   pointer-events: none;
   align-items: center;
@@ -52,17 +60,56 @@
 }
 .panel[data-state='collapsed'] .open {
   opacity: 0;
-  transform: scale(.98);
+  transform: translateX(12%);
   visibility: hidden;
   pointer-events: none;
-  transition: opacity var(--dur-medium) var(--ease-out), transform var(--dur-medium) var(--ease-out), visibility 0s linear var(--dur-medium);
+  transition: opacity var(--dur-exit) var(--ease-out), transform var(--dur-exit) var(--ease-out), visibility 0s linear var(--dur-exit);
 }
 .panel[data-state='collapsed'] .rail {
   opacity: 1;
-  transform: scale(1);
+  transform: translateX(0);
   visibility: visible;
   pointer-events: auto;
-  transition: opacity var(--dur-medium) var(--ease-out), transform var(--dur-medium) var(--ease-out), visibility 0s linear 0s;
+  transition: opacity var(--dur-base) var(--ease-out) var(--dur-exit), transform var(--dur-base) var(--ease-out) var(--dur-exit), visibility 0s linear 0s;
+}
+
+/* Escalonamento do trilho (o charme que faltava): os filhos diretos do
+   `.rail` entram com atraso crescente em multiplos de --stagger (40ms),
+   somado ao atraso base da camada (--dur-exit). Teto de 5 passos (nth-
+   child 1 a 4 + "n+5" pega o resto no mesmo atraso do 5o) - escalonar
+   toda a lista de Pastas (`.railGroup`, quantidade variavel) ficaria
+   lento. Ao COLAPSAR (.rail some), os filhos saem JUNTOS - so a ENTRADA
+   ganha o escalonamento, senao a resposta ao clique parece atrasada. */
+.rail > * {
+  opacity: 0;
+  transition: opacity var(--dur-exit) var(--ease-out);
+}
+.panel[data-state='collapsed'] .rail > * {
+  opacity: 1;
+  transition: opacity var(--dur-base) var(--ease-out);
+  transition-delay: var(--dur-exit);
+}
+.panel[data-state='collapsed'] .rail > *:nth-child(2) { transition-delay: calc(var(--dur-exit) + var(--stagger) * 1); }
+.panel[data-state='collapsed'] .rail > *:nth-child(3) { transition-delay: calc(var(--dur-exit) + var(--stagger) * 2); }
+.panel[data-state='collapsed'] .rail > *:nth-child(4) { transition-delay: calc(var(--dur-exit) + var(--stagger) * 3); }
+.panel[data-state='collapsed'] .rail > *:nth-child(n+5) { transition-delay: calc(var(--dur-exit) + var(--stagger) * 4); }
+
+/* Reduced motion: mantem o crossfade de opacity (ajuda a entender a
+   troca), zera translateX e todo o atraso de escalonamento - "menos e
+   mais suave", nunca "sem nada". A duracao ja cai globalmente
+   (tokens.css, transition-duration: 80ms !important). */
+@media (prefers-reduced-motion: reduce) {
+  .open,
+  .rail,
+  .panel[data-state='collapsed'] .open,
+  .panel[data-state='collapsed'] .rail {
+    transform: none;
+    transition-delay: 0s;
+  }
+  .rail > *,
+  .panel[data-state='collapsed'] .rail > * {
+    transition-delay: 0s;
+  }
 }
 
 /* Botao de alternar - um em cada camada (posicoes MUITO diferentes: dentro
