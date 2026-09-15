@@ -185,6 +185,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   flex: 1;
+  min-height: 0;
   align-content: start;
 }
 
@@ -603,7 +604,7 @@
 .catAdd:hover { background: var(--surface3); color: var(--fg); border-color: var(--fg3); }
 .catAdd:active { scale: .975; }
 
-.catBody { flex: 1; overflow-y: auto; padding: var(--space-5); }
+.catBody { flex: 1; min-height: 0; overflow-y: auto; padding: var(--space-5); }
 .catBody::-webkit-scrollbar { width: 3px; }
 .catBody::-webkit-scrollbar-thumb { background: var(--border2); }
 
