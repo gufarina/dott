@@ -229,8 +229,9 @@
   flex-direction: column;
   /* Era --space-15 (6px) - o CEO leu como espaco grande demais entre a
      linha do nome e a linha de "X notas" em captura real (14/09/2026,
-     TASK-566). Desce pra --space-1 (4px). */
-  gap: var(--space-1);
+     TASK-566). Desceu pra --space-1 (4px); CEO pediu AINDA menor
+     (15/09/2026) - --space-05 (2px) e o ultimo degrau real da escala. */
+  gap: var(--space-05);
   /* Card compacto (proto 2026-09-14-proto-ui-densa-v2): padding fixo,
      altura vem do conteudo real (3-4 linhas) - nao mais de --capa-h +
      piso calculado a mao. */
@@ -463,8 +464,9 @@
        - var(--space-25) * 2   -> padding topo+base do .folderCard (10px x2)
        - var(--text-sm)  * 1.55 -> altura da linha do .name (12.5px de fonte;
          medido: 19.375px reais)
-       - var(--space-1) * 2    -> os 2 gaps do .folderCard entre os 3 filhos
-         (row / progressBar / meta), 4px cada
+       - var(--space-05) * 2   -> os 2 gaps do .folderCard entre os 3 filhos
+         (row / progressBar / meta), 2px cada (TASK-566, 15/09: gap desceu de
+         --space-1 pra --space-05 - atualizado aqui pra nao desalinhar de novo)
        - 4px                    -> altura fixa do .progressBar
        - var(--text-2xs) * 1.55 -> altura da linha do .meta (11px de fonte;
          medido: 17.046875px reais)
@@ -472,7 +474,7 @@
   min-height: calc(
     (var(--space-25) * 2) +
     (var(--text-sm) * 1.55) +
-    (var(--space-1) * 2) +
+    (var(--space-05) * 2) +
     4px +
     (var(--text-2xs) * 1.55) +
     2px
