@@ -47,7 +47,6 @@ export default function App() {
   /** Nome da pasta que vai receber o card se voce soltar agora (feedback do ima). */
   const [alvo, setAlvo] = useState<string | null>(null)
   const [dropActive, setDropActive] = useState(false)
-  const [composerExpandido, setComposerExpandido] = useState(false)
   const dragDepth = useRef(0)
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
@@ -290,7 +289,7 @@ export default function App() {
               dar aos dois painel o mesmo pai flex-column com respiro real
               (gap) entre eles - .central volta a fechar sozinho ao redor do
               que ela hospeda em cada view. */}
-          <div className={s.centralColumn} data-composer-expanded={composerExpandido || undefined}>
+          <div className={s.centralColumn}>
             <div className={s.central}>
               {view !== 'board' && view !== 'graph' && <Breadcrumb />}
 
@@ -317,7 +316,7 @@ export default function App() {
 
             {view === 'board' && (
               <div className={s.captureShell}>
-                <CaptureBox onExpandChange={setComposerExpandido} />
+                <CaptureBox />
               </div>
             )}
           </div>

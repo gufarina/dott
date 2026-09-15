@@ -125,26 +125,6 @@
   --scrim: rgba(6, 6, 9, .55);
   --scrim-strong: rgba(6, 6, 9, .72);
 
-  /* ── Vidro (glassmorphism), TASK-566 F1, 14/09/2026 ────────────────────
-     No escuro o vidro CLAREIA (tinta branca translucida por cima da
-     superficie, leitura classica de acrilico/frosted glass). Medido
-     (formula WCAG, --fg2/--fg3 sobre a MISTURA resultante, nao sobre o
-     token puro): --glass-bg (branco a 6%) sobre --surface da #222225 -
-     --fg2 = 7,27:1, --fg3 = 4,84:1 (os dois acima do piso de 4,5:1).
-     --glass-bg-strong (branco a 8%) sobre --surface da #27272a - --fg2 =
-     6,85:1, --fg3 = 4,56:1 (ainda acima do piso, com pouca folga). Contra
-     --surface2 (superficie mais clara, caso mais dificil): --fg3 sobre
-     --glass-bg cai pra 4,50:1 (no fio) e sobre --glass-bg-strong cai pra
-     4,23:1 (ABAIXO do piso) - nesse caso usar --fg2, nao --fg3, em texto
-     sobre vidro "forte" pousado em --surface2. */
-  --glass-bg: rgba(255, 255, 255, .06);
-  --glass-bg-strong: rgba(255, 255, 255, .08);
-  --glass-border: rgba(255, 255, 255, .14);
-  /* Friso de luz no topo do vidro (borda que pega luz) - mesma familia do
-     --elev inset, alfa mais alta porque aqui e o proprio MATERIAL, nao um
-     recurso discreto de elevacao. */
-  --glass-highlight: rgba(255, 255, 255, .3);
-
   /* Texto/icone POR CIMA de preenchimento de marca ou de estado (botao
      primario, badge de perigo, botao de fechar janela em hover). Era `#fff`
      cravado em 9 lugares. Continua branco no escuro - o que muda e existir
@@ -318,28 +298,6 @@
   --scrim: rgba(20, 20, 35, .28);
   --scrim-strong: rgba(20, 20, 35, .40);
 
-  /* ── Vidro (glassmorphism), TASK-566 F1, 14/09/2026 ────────────────────
-     No claro o vidro ESCURECE em vez de clarear (pedido do plano, medido
-     aqui): tinta branca sobre um fundo ja quase branco (--surface
-     #fbfbfc) e invisivel - nao lê como material. Reusa o MESMO "ink"
-     rgb(20,20,35) que --border/--shadow/--scrim ja usam neste tema, so em
-     alfa bem baixa. Medido (formula WCAG, --fg2/--fg3 sobre a MISTURA):
-     --glass-bg (ink a 5%) sobre --surface da #efeff1 - --fg2 = 6,44:1,
-     --fg3 = 4,83:1. --glass-bg-strong (ink a 8%) sobre --surface da
-     #e9e9eb - --fg2 = 6,05:1, --fg3 = 4,53:1 (acima do piso, pouca
-     folga). Contra --surface2 (caso mais dificil): --fg3 sobre
-     --glass-bg cai pra 4,50:1 (no fio) e sobre --glass-bg-strong cai pra
-     4,23:1 (ABAIXO do piso) - mesma ressalva do par escuro: usar --fg2
-     nesse caso. */
-  --glass-bg: rgba(20, 20, 35, .05);
-  --glass-bg-strong: rgba(20, 20, 35, .08);
-  --glass-border: rgba(20, 20, 35, .14);
-  /* Sem friso de luz aqui (convencao ja registrada pro tema claro nas
-     linhas 244-249: "a sombra FAZ o trabalho", nunca friso de luz por
-     cima). O "highlight" do vidro claro e um rebaixo fino do mesmo ink,
-     nao um brilho branco - senao contradiz a propria regra do tema. */
-  --glass-highlight: rgba(20, 20, 35, .06);
-
   /* Texto/icone sobre preenchimento de marca - continua branco tambem no
      claro: o preenchimento de marca (o unico lugar onde o acento preenche
      no tema claro, ver secao 8) e escuro o bastante pra pedir texto branco. */
@@ -436,13 +394,6 @@
   --space-10: 40px;
   --space-16: 64px;
 
-  /* Composer de captura expandido mede 152px de altura + 18px de margem =
-     170px, TASK-566 F5 - espaco que o grid do PARA precisa reservar por
-     baixo pra nao ficar atras da capsula quando ela abre. Nao cabe na
-     escala de --space-* acima (nao e ritmo de UI, e a medida de OUTRO
-     componente + folga), por isso token proprio. */
-  --composer-gap-expandido: 170px;
-
   /* ── Escada de empilhamento (z-index) — TASK-461, 07/09/2026 ─────────────
      Nao existia. Cada tela cravava o proprio numero e o resultado era uma
      escada real, so que anonima e cheia de numero arbitrario: 120, 130, 140,
@@ -472,14 +423,6 @@
      passe) usam --r-btn/--r-card. */
   --r-btn: 8px;
   --r-card: 12px;
-
-  /* Vidro (glassmorphism), TASK-566 F1 - blur nao tem cor, nao varia por
-     tema (so --glass-bg/--glass-border/--glass-highlight variam). 20px:
-     frost suficiente pra ler como material sem exagerar o custo de
-     `backdrop-filter: blur()` (GPU) - primeiro consumidor da casa, sem
-     medicao de perf ainda pra justificar valor maior. F5 (composer
-     expandido) pode ajustar localmente se a receita pedir mais. */
-  --glass-blur: 20px;
 
   /* Receita unica de pill/badge (baseline "caption-uppercase" do Cursor,
      REDUZIDA em 25/08/2026 - CEO com foto na mao: "a pilula ta mt grande

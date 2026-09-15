@@ -3,147 +3,138 @@
    de conversa (preview/captura-conversacional.html, aprovado pelo CEO). Todo
    token abaixo ja existia em tokens.css - nenhum numero novo foi inventado. */
 
-/* TASK-566 F5: ancora de tamanho FIXO (nunca cresce) pra o composer-capsula
-   virar overlay absoluto por cima do que estiver acima dela na coluna, sem
-   empurrar .central (App.module.css) quando expande - mesma ideia do
-   `.panel.para` do prototipo (2026-09-14-proto-ui-densa-v2.html, bloco
-   ".capture"), so ancorada num container menor porque .captureShell/
-   App.tsx/PARAGrid.module.css ficam fora do escopo de arquivo autorizado
-   desta tarefa (ver nota de gap no fim do arquivo). */
+/* TASK-378 (29/08/2026): o padding que dava respiro INTERNO ao painel
+   .captureShell (TASK-346) foi pra zero - aquele painel nao existe mais
+   (ver App.module.css, comentario em .captureShell). .convoBox agora
+   senta rente as bordas de .centralColumn, do mesmo jeito que .central (o
+   painel do PARA) ja senta - os dois viram irmaos de verdade, sem um
+   segundo respiro encaixado entre eles. Isso tambem evita esquina viva:
+   se sobrasse matting aqui, o retangulo reto de .centralColumn (ela nao
+   tem raio - ver comentario la) apareceria com canto QUADRADO contra a
+   mesa, quebrando a linguagem squircle do app inteiro. Rente, a unica
+   fresta que aparece e nos 4 cantos arredondados de .convoBox (poucos px,
+   onde a curva do poco corta o retangulo reto de .centralColumn por
+   baixo) - detalhe aceito, nao bug: le como o chao aparecendo pela
+   dobradica do poco, coerente com a metafora. */
 .convoWrap {
-  position: relative;
-  height: var(--space-10);
   flex-shrink: 0;
 }
 
-/* TASK-566 F5: a caixa deixa de ser "poco"/painel solido (historico das
-   TASK-346/375/377/378/380 removido - descrevia background/border/
-   box-shadow/mask/padding que nao existem mais) e vira a CAPSULA DE VIDRO
-   do prototipo (2026-09-14-proto-ui-densa-v2.html, comentario "Caixa de
-   captura - preview .capture-box, ampliada", linhas 311-330). Valores
-   copiados 1:1 do prototipo e conferidos token a token em tokens.css:
-   --glass-bg/--glass-bg-strong/--glass-border/--glass-highlight/--glass-blur
-   (linhas 129-135/464), --r-full (695), --r-lg (671), --space-10 (425,
-   40px), --space-3 (398, 12px), --elev-4/--elev-5 (100-101), --dur-exit
-   (741, 120ms), --dur-medium (736, 240ms), --ease-out (768).
-   Geometria (384x40 -> 100%-24px x 152px): width/height NAO entram na
-   lista de `transition` (nem aqui nem no hover abaixo) - a troca de
-   tamanho e instantanea por design, so box-shadow/background animam. Isso
-   e o mesmo remedio que o F4 usou no trilho: nunca por `width`/`height`
-   numa `transition`. */
-/* TASK-566 bug (CEO, captura real no WebView2): vidro expandido saia
-   "lavado"/ghosting - o backdrop-filter nao compunha direito no
-   Chromium/driver do WebView2 do CEO (custo de GPU documentado no F5
-   original, secao de riscos) e sobrava so o tingimento de --glass-bg-strong
-   (8% de alfa) por cima do texto dos folder-cards de tras, quase sem
-   embacar. Dois consertos defensivos: (1) tirou `saturate(1.6)` do
-   backdrop-filter - enfeite, nao parte do efeito vidro, e empilhado com
-   blur() custa mais composicao. (2) `isolation: isolate` abaixo - os
-   folder-cards de tras (.folderCard, PARAGrid.module.css) ja sao
-   isolation:isolate + mask-image:paint(squircle) (CSS Paint Worklet) +
-   transform no hover; cada um vira seu proprio contexto de empilhamento/
-   camada de composicao, e e conhecido o Chromium falhar em amostrar
-   corretamente o backdrop atras de camadas assim quando o driver de GPU
-   nao compoe tudo no mesmo passo - a MESMA ausencia de contexto proprio no
-   .convoBox pode ter contribuido pro backdrop-filter ler um snapshot
-   errado/parado (o "ghosting"). Isolar o .convoBox tambem da o proprio
-   contexto, pratica recomendada quando backdrop-filter mostra artefato. */
+/* TASK-346: fundo sobe de --surface pra --surface2 - o painel que envolve
+   esta caixa (.captureShell) agora e --surface (mesma receita de
+   panelLeft/panelRight), entao a caixa precisa de UM degrau de contraste
+   pra continuar se destacando do painel (a mesma logica de --surface2 nos
+   inputs dentro de InboxPanel/TasksPanel - ver .addRow em
+   TasksPanel.module.css, DESIGN.md secao "Input"). Raio/borda continuam os
+   mesmos da proposta aprovada. */
 .convoBox {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  width: 384px;
-  height: var(--space-10);
-  border-radius: var(--r-full);
-  overflow: hidden;
-  isolation: isolate;
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--glass-border);
-  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--elev-4);
-  transition: box-shadow var(--dur-exit) var(--ease-out), background var(--dur-exit) var(--ease-out);
+  position: relative;
+  /* HISTORICO (TASK-375/378, ver comentario completo em DESIGN.md secao
+     "campo protagonista"): a caixa passou de --surface2 pra --bg pra
+     --desk, cada rodada tentando fazer a caixa ler como POCO (mais escura
+     que o entorno). --desk (TASK-378) era o ponto mais escuro possivel -
+     e so funcionava porque o entorno (.centralColumn) tinha um "chao
+     proprio" em --surface por baixo.
+
+     CORRECAO (TASK-380, 29/08/2026 - CEO: "voce criou um container atras
+     do PARA e do box.. sem sentido, apague isso agora"): o "chao proprio"
+     de .centralColumn ERA a camada nova que a ordem original da TASK-378
+     ("sem o painel intermediario") tinha mandado tirar. Removido
+     (App.module.css). Isso REABRE o conflito que a TASK-378 tinha
+     resolvido: sem chao proprio, o entorno de .convoBox volta a ser o
+     PISO REAL do app (.body, --desk) - o MESMO token que a caixa ja
+     usava. Duas superficies no mesmo tom = a caixa some (o defeito que o
+     CEO apontou).
+
+     RESOLVIDO subindo a caixa um degrau, pra --surface (a MESMA receita
+     ja usada por .panelLeft/.panelRight/.central sentados direto em
+     --desk): nao ha token mais escuro que --desk pra puxar (e o piso de
+     verdade do sistema - secao 2 do DESIGN.md), entao a UNICA saida
+     honesta pra continuar visivel sem inventar container e a caixa ficar
+     um degrau ACIMA do piso - mais clara que o chao, nao mais o ponto
+     mais escuro da tela (perde a metafora de "poco", registrado sem
+     maquiagem). --bg (o degrau entre --desk e --surface) foi descartado:
+     a diferenca contra --desk seria de so ~2,0 L* no escuro - MENOR que
+     os ~2,7 L* que ja foram reprovados tres vezes por insuficientes (ver
+     historico da TASK-377/378). --surface reusa um tom que ja prova
+     funcionar nesta MESMA relacao com --desk (os outros tres paineis) e
+     entrega a MESMA magnitude que a TASK-378 ja validou como suficiente.
+     Medido (formula WCAG, relative luminance -> L*):
+       Escuro: --surface (caixa) `#141417` L*≈6,4 vs --desk (piso, agora o
+       entorno de verdade) `#060609` L*≈1,7 - diferenca ≈4,7 L*.
+       Claro: --surface `#fbfbfc` L*≈98,6 vs --desk `#dde0e4` L*≈89,0 -
+       diferenca ≈9,6 L*. Os dois batem a MESMA magnitude ja aprovada na
+       TASK-378 (4,7/9,6) - so a DIRECAO inverteu: a caixa e a mais CLARA
+       agora, nao a mais escura. */
+  background: var(--surface);
+  /* Borda: MESMA receita de sempre (nenhuma cor nova) - so o fundo atras
+     dela mudou de novo, pra --surface (TASK-380). Recalculado:
+       Escuro: borda rgb(132,132,139) contra --surface rgb(20,20,23) =
+       ~4,95:1 (era ~5,45:1 contra --desk - cai um pouco porque o fundo
+       ficou mais claro e mais perto do cinza da propria borda, mas segue
+       bem acima do piso, folga de +65%). Claro: borda ~rgb(105,109,120)
+       contra --surface `#fbfbfc` = ~5,0:1 (era ~3,91:1 contra --desk -
+       MELHOROU, o fundo mais claro da mais espaco pra borda escura se
+       destacar). Piso de controle nao-textual e 3:1 (DESIGN.md secao 2) -
+       os dois cruzam com folga grande nos dois temas. */
+  border: 1.5px solid color-mix(in srgb, var(--border-control) 75%, var(--fg) 25%);
+  /* Sombra de recesso (TASK-380): o token --recess-shadow (tokens.css)
+     nasceu na TASK-378 pra um caso especifico - a caixa sentando em
+     --desk, sem token de superficie mais escuro abaixo pra reciclar como
+     base. Esse caso nao existe mais (--surface tem --bg e --desk mais
+     escuros abaixo dela), mas a receita (cor final ja com alfa) nao
+     depende de qual token esta por baixo - continua funcionando, medido
+     de novo, nao assumido:
+       Escuro: `rgba(0,0,0,.45)` misturado com --surface (L*≈6,4) derruba
+       o topo da caixa pra ≈L*3,1 - queda de ≈3,3 L*, MAIOR que a queda de
+       ≈0,84 L* que a mesma receita dava contra --desk (a caixa antes ja
+       estava quase preta, sobrava pouco L* pra cair) - o recesso fica
+       MAIS legivel agora, nao menos, e a area afetada continua sendo so a
+       faixa de 1-3px do inset, nao estoura.
+       Claro: `rgba(20,20,35,.14)` misturado com --surface claro (L*≈98,6)
+       derruba pra ≈L*87,3 - queda de ≈11,3 L*, mesma ordem de grandeza da
+       queda que a receita ja dava contra --desk (≈10,2 L*).
+     Veredito: nenhuma recalibracao necessaria - o token sobrevive a troca
+     de fundo sem sumir nem estourar. */
+  box-shadow: inset 0 1px 3px var(--recess-shadow);
+  /* Raio: TASK-378 - .captureShell (o "de fora" da formula de raio
+     aninhado, secao 22.3 do DESIGN.md) nao tem mais raio nem mask proprios
+     (App.module.css) - o par aninhado ".captureShell -> .convoBox" que
+     motivava --r-shell-inset-12 (8px) deixou de existir, nao ha mais curva
+     de fora pra ficar concentrica. RECALCULADO (restricao da propria
+     TASK-378 pedia isso se um par aninhado fosse afetado): a caixa vira um
+     PAINEL de primeiro nivel agora (irma de .central/.panelLeft/
+     .panelRight, sentada direto no piso) - usa o raio de PORTE que esses
+     tres ja usam, --r-shell (20px), em vez do raio de aninhamento antigo.
+     --r-shell-inset-12 fica sem este consumidor (o outro consumidor,
+     .imageContainer do ImageViewer, continua igual - token nao fica
+     orfao). */
+  border-radius: var(--r-shell);
+  --sq-r: var(--r-shell);
+  -webkit-mask-image: paint(squircle);
+  mask-image: paint(squircle);
+  padding: var(--space-4) var(--space-5) var(--space-3);
+  transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
 }
-/* [DECISAO PENDENTE, TASK-566] Fallback de robustez cogitado: se o blur
-   falhar no WebView2, sobra so a tinta - subir a opacidade de
-   --glass-bg-strong (hoje 8%, ver tokens.css linhas 141/335) deixaria o
-   painel mais "solido" mesmo sem blur. NAO apliquei numero novo: medi
-   (formula WCAG) e dobrar pra ~16% PIORA o contraste do texto, nos dois
-   temas, em vez de melhorar - no escuro o tingimento e BRANCO sobre texto
-   CLARO (--fg3), entao mais alfa aproxima o fundo do texto (contraste caiu
-   de ~4,37:1 pra ~3,36:1 nas minhas contas); no claro o tingimento e
-   ESCURO sobre texto ESCURO, mesmo efeito ao contrario (~4,20:1 pra
-   ~3,54:1). So --glass-bg (6/5%) e --glass-bg-strong (8%) existem hoje;
-   nao ha um terceiro degrau "mais forte" no tokens.css. Subir a opacidade
-   como rede de seguranca exige OU trocar o texto pra --fg2 (mais folga,
-   ja e a recomendacao do proprio tokens.css pro par glass-bg-strong +
-   --surface2) OU medir de novo com a formula acima antes de cravar
-   qualquer valor - decisao do CEO/CANVAS, nao resolvida aqui. */
-.convoBox:hover,
+/* Mesmo sinal de foco unico do InboxPanel de origem (.captureCaixa:focus-within) -
+   a CAIXA avisa foco sozinha, o textarea nao duplica outro contorno.
+   TASK-369: o anel era box-shadow PRA FORA (0 0 0 3px) - com mask-image
+   aplicado acima, sombra/anel que nasce FORA da border-box do elemento
+   mascarado corre risco de ser cortado pelo worklet (o canvas da mascara
+   so cobre o tamanho do proprio elemento, geom.width/height em
+   squircle.js). Trocado por INSET: nasce DENTRO da border-box, nunca sai
+   da area que a mascara ja revela - nao ha corte pra acontecer. A borda
+   (border-color: var(--accent), 1px, sempre esteve DENTRO da mascara)
+   continua sendo o sinal primario; o anel inset reforca.
+   TASK-375 (2a rodada): box-shadow agora e uma LISTA de duas sombras, nao
+   uma so - o anel de foco (--accent-s) e a sombra de recesso do repouso
+   (ver comentario em .convoBox acima) precisam coexistir, senao o foco
+   apaga a leitura de "campo rebaixado" que acabou de ser criada. */
 .convoBox:focus-within {
-  width: calc(100% - var(--space-3) * 2);
-  height: 152px;
-  border-radius: var(--r-lg) !important;
-  background: var(--glass-bg-strong);
-  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--elev-5);
-  transition-duration: var(--dur-medium);
-}
-/* As duas camadas do crossfade (repouso <-> vidro expandido), mesma
-   receita do prototipo (.cap-rest/.cap-full): so opacity/transform/
-   pointer-events mudam, nunca layout. */
-.capRest,
-.capFull {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  transition: opacity var(--dur-exit) var(--ease-out), transform var(--dur-exit) var(--ease-out);
-}
-.convoBox:hover .capRest,
-.convoBox:hover .capFull,
-.convoBox:focus-within .capRest,
-.convoBox:focus-within .capFull {
-  transition-duration: var(--dur-medium);
-}
-.capRest {
-  padding: 0 var(--space-3);
-  gap: var(--space-15);
-  opacity: 1;
-  transform: scale(1);
-}
-.capRest svg { color: var(--accent); flex-shrink: 0; }
-.capRestPlaceholder {
-  color: var(--fg2);
-  font-size: var(--text-sm);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.capFull {
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: center;
-  padding: var(--space-2) var(--space-3);
-  opacity: 0;
-  transform: scale(.94);
-  pointer-events: none;
-}
-.convoBox:hover .capFull,
-.convoBox:focus-within .capFull {
-  opacity: 1;
-  transform: scale(1);
-  pointer-events: auto;
-}
-.convoBox:hover .capRest,
-.convoBox:focus-within .capRest {
-  opacity: 0;
-  transform: scale(.96);
-  pointer-events: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .convoBox, .capRest, .capFull { transition-duration: var(--stagger); }
-  .capRest, .capFull { transform: none !important; }
+  border-color: var(--accent);
+  /* Mesmo token de sombra do repouso (--recess-shadow, tokens.css), so
+     lado a lado com o anel de foco - ver comentario em .convoBox. */
+  box-shadow: inset 0 0 0 2px var(--accent-s), inset 0 1px 3px var(--recess-shadow);
 }
 /* Arrastando arquivo por cima: o alvo inteiro se acende (mesma receita de
    .captureSoltando em InboxPanel.module.css). */
@@ -212,16 +203,7 @@
   line-height: 1.55;
   resize: none;
   outline: none;
-  /* TASK-566 F5: era min-height/max-height fixos (40/150px), pensados pra
-     um .convoBox sem teto de altura. Agora .capFull tem teto RIGIDO de
-     152px (valor do prototipo) - min-height:0 + flex deixa o flexbox
-     ENCOLHER o textarea de verdade (nao so truncar via overflow) pra
-     caber ao lado de .convoMeta/.convoFooter, e o JS de auto-grow acima
-     (useEffect, ainda ate 150px) continua intacto: o navegador respeita a
-     altura inline que ele seta como base e so a reduz se nao houver
-     espaco - nenhuma logica de captura mudou. */
-  flex: 0 1 auto;
-  min-height: 0;
+  min-height: 40px;
   max-height: 150px;
   overflow-y: auto;
   font-family: inherit;
