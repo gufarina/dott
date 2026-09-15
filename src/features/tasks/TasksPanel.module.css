@@ -427,6 +427,8 @@
 .addInput {
   flex: 1; min-width: 0;
   font-family: inherit; font-size: var(--text-xs); color: var(--fg);
+  /* 1px tecnico = ajuste fino de alinhamento vertical do texto na linha
+     (input sem borda propria), nao entra na escala de --space. */
   background: transparent; border: none; padding: 1px 0; outline: none;
 }
 .addInput::placeholder { color: var(--fg3); }
